@@ -135,7 +135,7 @@ public class PlanetInfoPanel extends JPanel {
                 BorderFactory.createLineBorder(Color.GRAY),
                 BorderFactory.createEmptyBorder(8, 10, 8, 10)
         ));
-        popManagement.setMaximumSize(new Dimension(500, 300));
+        popManagement.setMaximumSize(new Dimension(500, 250));
 
         // Żywność
         popManagement.add(createPopulationControl(
@@ -167,12 +167,12 @@ public class PlanetInfoPanel extends JPanel {
 
         popManagement.add(Box.createVerticalStrut(8));
 
-        // Bezrobotni
-        int unemployed = planet.getUnassignedPopulation();
-        JLabel unemployedLabel = new JLabel("💼 Bezrobotni (generują kredyty): " + unemployed);
-        unemployedLabel.setForeground(unemployed > 0 ? new Color(255, 150, 0) : new Color(255, 215, 0));
-        unemployedLabel.setFont(unemployedLabel.getFont().deriveFont(Font.BOLD, 11f));
-        popManagement.add(unemployedLabel);
+        // Info o kredytach
+        int totalPop = planet.getTotalPopulation();
+        JLabel creditsInfo = new JLabel("💰 Wszystkie osoby płacą podatki (+" + totalPop + " kredytów)");
+        creditsInfo.setForeground(new Color(255, 215, 0));
+        creditsInfo.setFont(creditsInfo.getFont().deriveFont(Font.BOLD, 11f));
+        popManagement.add(creditsInfo);
 
         add(popManagement);
 
@@ -225,7 +225,7 @@ public class PlanetInfoPanel extends JPanel {
             int currentValue = 0;
             if (label.contains("żywność")) {
                 currentValue = planet.getPopulationOnFood();
-            } else if (label.contains("Produkcja")) {
+            } else if (label.contains("Budowa")) {
                 currentValue = planet.getPopulationOnProduction();
             } else if (label.contains("Badania")) {
                 currentValue = planet.getPopulationOnResearch();
@@ -258,7 +258,7 @@ public class PlanetInfoPanel extends JPanel {
     }
 
     // =============================
-    // KOLEJKA BUDOWY - Z WYŚWIETLANIEM TUR I RUSH BUY
+    // KOLEJKA BUDOWY - Z WYŚWIETLANIEM TUR
     // =============================
     private void renderBuildQueueContent() {
 
@@ -297,7 +297,7 @@ public class PlanetInfoPanel extends JPanel {
                 gbc.weightx = 1.0;
                 row.add(nameLabel, gbc);
 
-                // ===== PANEL PRZYCISKÓW =====
+                // ===== PANEL PRZYCISKÓW (STAŁA SZEROKOŚĆ) =====
                 JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT, BUTTON_GAP, 4));
 
                 int rushBuyButtonWidth = 80; // Szerszy przycisk dla "Rush"

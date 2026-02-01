@@ -1,6 +1,7 @@
 package view;
 
 import model.Game;
+import model.OrbitSlot;
 import model.Planet;
 import model.StarSystem;
 
@@ -122,17 +123,15 @@ public class MainWindow extends JFrame {
 
                 if (result == JOptionPane.YES_OPTION) {
                     // Sprawdź co jest problemem i otwórz odpowiedni panel
-                    if (reason.contains("nie ma kolejki budowy") || reason.contains("nieprzypisanych")) {
+                    if (reason.contains("nie ma kolejki budowy")) {
                         // Znajdź planetę z problemem
                         for (StarSystem system : game.getGalaxy().getSystems()) {
-                            for (model.OrbitSlot orbit : system.getOrbits()) {
+                            for (OrbitSlot orbit : system.getOrbits()) {
                                 if (orbit.getObject() instanceof Planet planet) {
-                                    if (planet.isColonized()) {
-                                        if (planet.getBuildQueue().isEmpty() || !planet.isPopulationFullyAssigned()) {
-                                            // Otwórz panel tej planety
-                                            showPlanet(planet, system);
-                                            return;
-                                        }
+                                    if (planet.isColonized() && planet.getBuildQueue().isEmpty()) {
+                                        // Otwórz panel tej planety
+                                        showPlanet(planet, system);
+                                        return;
                                     }
                                 }
                             }

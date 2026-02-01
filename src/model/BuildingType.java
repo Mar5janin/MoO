@@ -14,7 +14,7 @@ public enum BuildingType {
             1,      // foodPerCapita (+1 za każdego pracownika)
             0, 0,   // production
             0, 0,   // research
-            0, 0, 0 // credits
+            0, 0    // credits
     ),
 
     FABRYKA(
@@ -27,7 +27,7 @@ public enum BuildingType {
             1,      // productionBonus (pasywny)
             1,      // productionPerCapita (+1 za każdego pracownika)
             0, 0,   // research
-            0, 0, 0 // credits
+            0, 0    // credits
     ),
 
     LABORATORIUM(
@@ -40,7 +40,7 @@ public enum BuildingType {
             0, 0,   // production
             1,      // researchBonus (pasywny)
             1,      // researchPerCapita (+1 za każdego pracownika)
-            0, 0, 0 // credits
+            0, 0    // credits
     ),
 
     // ========== BUDYNKI WYMAGAJĄCE BADAŃ ==========
@@ -56,7 +56,7 @@ public enum BuildingType {
             1,      // productionPerCapita
             0, 0,   // research
             3,      // creditsBonus (pasywny)
-            0, 0    // creditsPerCapita, creditsPerTotal
+            0       // creditsPerTotalPopulation
     ),
 
     ZAAWANSOWANA_FARMA(
@@ -69,7 +69,7 @@ public enum BuildingType {
             2,      // foodPerCapita (+2 za każdego pracownika)
             0, 0,   // production
             0, 0,   // research
-            0, 0, 0 // credits
+            0, 0    // credits
     ),
 
     CENTRUM_BADAWCZE(
@@ -82,7 +82,7 @@ public enum BuildingType {
             0, 0,   // production
             3,      // researchBonus (pasywny)
             2,      // researchPerCapita (+2 za każdego pracownika)
-            0, 0, 0 // credits
+            0, 0    // credits
     ),
 
     FABRYKA_KOSMICZNA(
@@ -95,7 +95,7 @@ public enum BuildingType {
             3,      // productionBonus (pasywny)
             2,      // productionPerCapita (+2 za każdego pracownika)
             0, 0,   // research
-            0, 0, 0 // credits
+            0, 0    // credits
     ),
 
     POSTERUNEK_BOJOWY(
@@ -107,7 +107,7 @@ public enum BuildingType {
             0, 0,   // food
             0, 0,   // production
             0, 0,   // research
-            0, 0, 0 // credits (obrona, póki co bez efektu)
+            0, 0    // credits (obrona, póki co bez efektu)
     ),
 
     // ========== NOWE BUDYNKI: EKONOMIA ==========
@@ -122,7 +122,6 @@ public enum BuildingType {
             0, 0,   // production
             0, 0,   // research
             5,      // creditsBonus (pasywny)
-            0,      // creditsPerCapita
             1       // creditsPerTotalPopulation (podatki: +1 za każdego na planecie)
     ),
 
@@ -135,7 +134,7 @@ public enum BuildingType {
             0, 0,   // food
             0, 0,   // production
             0, 0,   // research
-            0, 0, 0 // credits
+            0, 0    // credits
     );
 
     private final String displayName;
@@ -156,7 +155,6 @@ public enum BuildingType {
     private final int researchPerCapita;            // Bonus za każdego pracownika na research
 
     private final int creditsBonus;                 // Pasywny bonus do kredytów
-    private final int creditsPerCapita;             // Bonus za każdego BEZROBOTNEGO
     private final int creditsPerTotalPopulation;    // Podatki - za każdego na planecie
 
     BuildingType(
@@ -172,7 +170,6 @@ public enum BuildingType {
             int researchBonus,
             int researchPerCapita,
             int creditsBonus,
-            int creditsPerCapita,
             int creditsPerTotalPopulation
     ) {
         this.displayName = displayName;
@@ -187,7 +184,6 @@ public enum BuildingType {
         this.researchBonus = researchBonus;
         this.researchPerCapita = researchPerCapita;
         this.creditsBonus = creditsBonus;
-        this.creditsPerCapita = creditsPerCapita;
         this.creditsPerTotalPopulation = creditsPerTotalPopulation;
     }
 
@@ -208,7 +204,6 @@ public enum BuildingType {
     public int getResearchPerCapita() { return researchPerCapita; }
 
     public int getCreditsBonus() { return creditsBonus; }
-    public int getCreditsPerCapita() { return creditsPerCapita; }
     public int getCreditsPerTotalPopulation() { return creditsPerTotalPopulation; }
 
     public boolean isAvailable(ResearchManager researchManager) {
@@ -249,9 +244,6 @@ public enum BuildingType {
 
         if (creditsBonus > 0) {
             sb.append("Kredyty +").append(creditsBonus).append(" | ");
-        }
-        if (creditsPerCapita > 0) {
-            sb.append("Kredyty +").append(creditsPerCapita).append("/bezrob. | ");
         }
         if (creditsPerTotalPopulation > 0) {
             sb.append("Kredyty +").append(creditsPerTotalPopulation).append("/osoba | ");

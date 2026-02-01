@@ -29,7 +29,6 @@ public class Planet implements OrbitObject {
     private int populationOnFood = 0;
     private int populationOnProduction = 0;
     private int populationOnResearch = 0;
-    // Reszta populacji = bezrobotni (generują kredyty)
 
     // Akumulacja żywności
     private int foodAccumulated = 0;
@@ -43,19 +42,6 @@ public class Planet implements OrbitObject {
         this.habitable = type.isHabitable();
         this.colonized = false;
         this.hasMoon = habitable && Math.random() < 0.55;
-
-        // Ustaw max populację w zależności od typu
-        this.maxPopulation = calculateMaxPopulation();
-    }
-
-    private int calculateMaxPopulation() {
-        return switch (type) {
-            case TERRAN, OCEAN -> 12;
-            case DESERT, TUNDRA -> 10;
-            case BARREN, TOXIC, RADIATED -> 6;
-            case VOLCANIC -> 5;
-            case ICE -> 4;
-        };
     }
 
     @Override
@@ -86,11 +72,22 @@ public class Planet implements OrbitObject {
     public void colonizeHomePlanet(){
         colonized = true;
         totalPopulation = 5;
-        maxPopulation = 12;
+        maxPopulation = calculateMaxPopulation();
         // Początkowe przypisanie
         populationOnFood = 2;
         populationOnProduction = 2;
         populationOnResearch = 1;
+    }
+
+    private int calculateMaxPopulation() {
+        int base = switch (type) {
+            case TERRAN, OCEAN -> 12;
+            case DESERT, TUNDRA -> 10;
+            case BARREN, TOXIC, RADIATED -> 6;
+            case VOLCANIC -> 5;
+            case ICE -> 4;
+        };
+        return base;
     }
 
     // === KOLONIZACJA ===
@@ -233,23 +230,20 @@ public class Planet implements OrbitObject {
     }
 
     /**
-     * Kredyty = pasywna + (bezrobotna populacja × (1 + bonus per capita)) + (całkowita populacja × podatki)
+     * Kredyty = pasywna + (całkowita populacja × (1 + podatki per capita))
+     * ZMIANA: Teraz wszystkie osoby płacą podatki, nie tylko bezrobotni
      */
     public int getCredits() {
         int passive = 0;
-        int perCapita = 0;
-        int perTotalPopulation = 0;
+        int perTotalPopulation = 1; // Bazowy podatek od każdej osoby
 
         for (Building b : buildings) {
             passive += b.getType().getCreditsBonus();
-            perCapita += b.getType().getCreditsPerCapita();
             perTotalPopulation += b.getType().getCreditsPerTotalPopulation();
         }
 
-        int unemployed = getUnassignedPopulation();
-
-        // Bezrobotni produkują 1 kredyt bazowo + bonusy
-        return passive + unemployed + (unemployed * perCapita) + (totalPopulation * perTotalPopulation);
+        // Wszystkie osoby płacą podatki
+        return passive + (totalPopulation * perTotalPopulation);
     }
 
     // Stara metoda dla kompatybilności
@@ -283,6 +277,7 @@ public class Planet implements OrbitObject {
                 .filter(o -> o.getProductionType() == ProductionType.SHIP)
                 .anyMatch(o -> o.getShipType() == type);
     }
+
 
     public boolean canBuild(BuildingType type, ResearchManager researchManager) {
         if (!colonized) return false;
@@ -419,7 +414,7 @@ public class Planet implements OrbitObject {
         if (foodAccumulated >= foodNeeded && totalPopulation < getMaxPopulation()) {
             foodAccumulated -= foodNeeded;
             totalPopulation++;
-            // Nowa populacja jest początkowo bezrobotna
+            // Nowa populacja jest początkowo nieprzypisana
         }
 
         // 2. Produkcja budynków/statków
