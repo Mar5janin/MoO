@@ -1,16 +1,10 @@
-package model;
+package controller;
 
+import model.StarSystem;
 import java.util.*;
 
 public class Pathfinder {
 
-    /**
-     * Znajduje najkrótszą ścieżkę między dwoma systemami używając algorytmu BFS
-     *
-     * @param start System startowy
-     * @param destination System docelowy
-     * @return Lista systemów tworzących ścieżkę (włącznie ze startem i celem), lub null jeśli nie ma połączenia
-     */
     public static List<StarSystem> findPath(StarSystem start, StarSystem destination) {
         if (start == null || destination == null) {
             return null;
@@ -20,7 +14,6 @@ public class Pathfinder {
             return List.of(start);
         }
 
-        // BFS do znajdowania najkrótszej ścieżki
         Queue<StarSystem> queue = new LinkedList<>();
         Map<StarSystem, StarSystem> parentMap = new HashMap<>();
         Set<StarSystem> visited = new HashSet<>();
@@ -33,7 +26,6 @@ public class Pathfinder {
             StarSystem current = queue.poll();
 
             if (current == destination) {
-                // Znaleziono - odtwórz ścieżkę
                 return reconstructPath(parentMap, destination);
             }
 
@@ -46,7 +38,6 @@ public class Pathfinder {
             }
         }
 
-        // Nie znaleziono ścieżki
         return null;
     }
 
@@ -63,13 +54,10 @@ public class Pathfinder {
         return path;
     }
 
-    /**
-     * Oblicza całkowitą odległość ścieżki
-     */
     public static int calculatePathLength(List<StarSystem> path) {
         if (path == null || path.size() <= 1) {
             return 0;
         }
-        return path.size() - 1; // Liczba przeskoków
+        return path.size() - 1;
     }
 }

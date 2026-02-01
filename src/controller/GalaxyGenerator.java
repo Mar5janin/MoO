@@ -1,5 +1,8 @@
-package model;
+package controller;
+
+import model.*;
 import java.util.*;
+
 public class GalaxyGenerator {
     private static int galaxyWidth;
     private static int galaxyHeight;

@@ -1,5 +1,7 @@
 package view;
 
+import controller.GalaxyGenerator;
+import controller.Game;
 import model.*;
 import ui.Camera;
 

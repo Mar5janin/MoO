@@ -1,5 +1,7 @@
 package model;
 
+import controller.Pathfinder;
+
 import java.util.ArrayList;
 import java.util.List;
 

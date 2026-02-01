@@ -1,6 +1,6 @@
 package view;
 
-import model.Game;
+import controller.Game;
 import model.OrbitSlot;
 import model.Planet;
 import model.StarSystem;

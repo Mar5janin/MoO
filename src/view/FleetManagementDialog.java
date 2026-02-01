@@ -1,5 +1,7 @@
 package view;
 
+import controller.Game;
+import controller.Pathfinder;
 import model.*;
 
 import javax.swing.*;
