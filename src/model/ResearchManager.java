@@ -1,12 +1,17 @@
 package model;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class ResearchManager {
     private final Set<Technology> researchedTechs = new HashSet<>();
     private Technology currentResearch = null;
     private int currentProgress = 0;
+
+    // Mapa pamiętająca postęp w poszczególnych badaniach
+    private final Map<Technology, Integer> savedProgress = new HashMap<>();
 
     // Bonusy z technologii
     private int shipAttackBonus = 0;
@@ -17,6 +22,11 @@ public class ResearchManager {
     private int populationBonusPercent = 0;
 
     public void setCurrentResearch(Technology tech) {
+        // Zapisz postęp obecnego badania przed zmianą
+        if (currentResearch != null && currentProgress > 0) {
+            savedProgress.put(currentResearch, currentProgress);
+        }
+
         if (tech == null) {
             this.currentResearch = null;
             this.currentProgress = 0;
@@ -28,7 +38,8 @@ public class ResearchManager {
         }
 
         this.currentResearch = tech;
-        this.currentProgress = 0;
+        // Przywróć zapisany postęp jeśli istnieje
+        this.currentProgress = savedProgress.getOrDefault(tech, 0);
     }
 
     public void addResearchPoints(int points) {
@@ -52,6 +63,9 @@ public class ResearchManager {
 
         researchedTechs.add(currentResearch);
         applyTechEffects(currentResearch);
+
+        // Usuń zapisany postęp po ukończeniu
+        savedProgress.remove(currentResearch);
 
         currentResearch = null;
         currentProgress = 0;

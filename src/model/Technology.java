@@ -4,54 +4,48 @@ import java.util.ArrayList;
 import java.util.List;
 
 public enum Technology {
-    // Podstawowe technologie startowe
-    BASIC_FARMING(
-            "Podstawowe rolnictwo",
-            "Umożliwia budowę farm produkujących żywność",
-            50,
-            null,
-            List.of(new TechEffect(TechEffectType.UNLOCK_BUILDING, "FARMA"))
-    ),
-
-    BASIC_INDUSTRY(
-            "Podstawowy przemysł",
-            "Umożliwia budowę fabryk zwiększających produkcję",
-            50,
-            null,
-            List.of(new TechEffect(TechEffectType.UNLOCK_BUILDING, "FABRYKA"))
-    ),
-
-    BASIC_RESEARCH(
-            "Podstawowe badania",
-            "Umożliwia budowę laboratoriów",
-            50,
-            null,
-            List.of(new TechEffect(TechEffectType.UNLOCK_BUILDING, "LABORATORIUM"))
-    ),
-
     // Technologie wymagające prerequisite
     ADVANCED_MINING(
             "Zaawansowane górnictwo",
             "Umożliwia budowę kopalń księżycowych",
-            100,
-            List.of(BASIC_INDUSTRY),
+            80,
+            null,
             List.of(new TechEffect(TechEffectType.UNLOCK_BUILDING, "KOPALNIA_KSIĘŻYCOWA"))
+    ),
+
+    IMPROVED_FARMING(
+            "Ulepszone rolnictwo",
+            "Umożliwia budowę zaawansowanych farm",
+            100,
+            null,
+            List.of(new TechEffect(TechEffectType.UNLOCK_BUILDING, "ZAAWANSOWANA_FARMA"))
+    ),
+
+    ADVANCED_RESEARCH(
+            "Zaawansowane badania",
+            "Umożliwia budowę centrów badawczych i zwiększa szybkość badań o 15%",
+            120,
+            null,
+            List.of(
+                    new TechEffect(TechEffectType.UNLOCK_BUILDING, "CENTRUM_BADAWCZE"),
+                    new TechEffect(TechEffectType.RESEARCH_BONUS, 15)
+            )
     ),
 
     IMPROVED_PRODUCTION(
             "Ulepszona produkcja",
             "Zwiększa produkcję na wszystkich planetach o 10%",
-            120,
-            List.of(BASIC_INDUSTRY),
+            100,
+            null,
             List.of(new TechEffect(TechEffectType.PRODUCTION_BONUS, 10))
     ),
 
-    ADVANCED_RESEARCH(
-            "Zaawansowane badania",
-            "Zwiększa szybkość badań o 15%",
+    SPACE_CONSTRUCTION(
+            "Konstrukcje kosmiczne",
+            "Umożliwia budowę fabryk kosmicznych",
             150,
-            List.of(BASIC_RESEARCH),
-            List.of(new TechEffect(TechEffectType.RESEARCH_BONUS, 15))
+            List.of(IMPROVED_PRODUCTION),
+            List.of(new TechEffect(TechEffectType.UNLOCK_BUILDING, "FABRYKA_KOSMICZNA"))
     ),
 
     // Technologie wojskowe
@@ -87,6 +81,14 @@ public enum Technology {
             List.of(new TechEffect(TechEffectType.UNLOCK_SHIP, "CRUISER"))
     ),
 
+    DEFENSIVE_PLATFORMS(
+            "Platformy obronne",
+            "Umożliwia budowę posterunków bojowych",
+            130,
+            List.of(BASIC_WEAPONS),
+            List.of(new TechEffect(TechEffectType.UNLOCK_BUILDING, "POSTERUNEK_BOJOWY"))
+    ),
+
     // Technologie ekonomiczne
     TRADE_NETWORKS(
             "Sieci handlowe",
@@ -100,7 +102,7 @@ public enum Technology {
             "Wzrost populacji",
             "Zwiększa przyrost populacji o 25%",
             130,
-            List.of(BASIC_FARMING),
+            List.of(IMPROVED_FARMING),
             List.of(new TechEffect(TechEffectType.POPULATION_BONUS, 25))
     );
 

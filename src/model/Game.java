@@ -61,4 +61,44 @@ public class Game {
     public ResearchManager getResearchManager() {
         return researchManager;
     }
+
+    public boolean canEndTurn() {
+        // Sprawdź czy wszystkie skolonizowane planety mają kolejkę budowy
+        for (StarSystem system : galaxy.getSystems()) {
+            for (OrbitSlot orbit : system.getOrbits()) {
+                if (orbit.getObject() instanceof Planet planet) {
+                    if (planet.isColonized() && planet.getBuildQueue().isEmpty()) {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        // Sprawdź czy są włączone badania
+        if (researchManager.getCurrentResearch() == null) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public String getEndTurnBlockReason() {
+        // Sprawdź planety bez kolejki
+        for (StarSystem system : galaxy.getSystems()) {
+            for (OrbitSlot orbit : system.getOrbits()) {
+                if (orbit.getObject() instanceof Planet planet) {
+                    if (planet.isColonized() && planet.getBuildQueue().isEmpty()) {
+                        return "Planeta w systemie " + system.getName() + " nie ma kolejki budowy!";
+                    }
+                }
+            }
+        }
+
+        // Sprawdź badania
+        if (researchManager.getCurrentResearch() == null) {
+            return "Nie wybrano projektu badawczego!";
+        }
+
+        return null;
+    }
 }

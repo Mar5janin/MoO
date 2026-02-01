@@ -94,6 +94,18 @@ public class MainWindow extends JFrame {
         endTurnButton.addActionListener(e -> {
             if (game == null) return;
 
+            // Sprawdź czy można zakończyć turę
+            if (!game.canEndTurn()) {
+                String reason = game.getEndTurnBlockReason();
+                JOptionPane.showMessageDialog(
+                        this,
+                        reason,
+                        "Nie można zakończyć tury",
+                        JOptionPane.WARNING_MESSAGE
+                );
+                return;
+            }
+
             // Zamknij panele
             sidePanel.removeAll();
             sidePanel.setVisible(false);

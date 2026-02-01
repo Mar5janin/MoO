@@ -1,7 +1,9 @@
 package model;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Planet implements OrbitObject {
 
@@ -14,6 +16,9 @@ public class Planet implements OrbitObject {
 
     private static final int MAX_QUEUE = 5;
     private final List<BuildOrder> buildQueue = new ArrayList<>();
+
+    // Mapa pamiętająca postęp w budynkach
+    private final Map<BuildingType, Integer> savedProgress = new HashMap<>();
 
     private int basePopulation;
     private int baseProduction;
@@ -136,11 +141,21 @@ public class Planet implements OrbitObject {
             buildQueue.remove(buildQueue.size() - 1);
         }
 
-        buildQueue.add(new BuildOrder(type));
+        // Przywróć zapisany postęp jeśli istnieje
+        int savedCost = savedProgress.getOrDefault(type, type.getCost());
+        BuildOrder order = new BuildOrder(type);
+        order.setRemainingCost(savedCost);
+
+        buildQueue.add(order);
     }
 
     public void removeFromQueue(int index) {
         if (index >= 0 && index < buildQueue.size()) {
+            BuildOrder order = buildQueue.get(index);
+            // Zapisz postęp przed usunięciem
+            if (order.getRemainingCost() < order.getType().getCost()) {
+                savedProgress.put(order.getType(), order.getRemainingCost());
+            }
             buildQueue.remove(index);
         }
     }
@@ -171,6 +186,8 @@ public class Planet implements OrbitObject {
 
         if (current.isFinished()) {
             buildings.add(new Building(current.getType()));
+            // Usuń zapisany postęp po ukończeniu
+            savedProgress.remove(current.getType());
             buildQueue.remove(0);
         }
     }

@@ -2,10 +2,17 @@ package model;
 
 public enum BuildingType {
 
-    FARMA("Farma", 20, false, "FARMA", 1, 0, 0, 0),
-    FABRYKA("Fabryka", 30, false, "FABRYKA", 0, 2, 0, 0),
-    LABORATORIUM("Laboratorium", 25, false, "LABORATORIUM", 0, 0, 2, 0),
-    KOPALNIA_KSIĘŻYCOWA("Kopalnia Księżycowa", 35, true, "KOPALNIA_KSIĘŻYCOWA", 0, 1, 0, 3);
+    // Podstawowe budynki - dostępne od początku
+    FARMA("Farma", 20, false, null, 1, 0, 0, 0),
+    FABRYKA("Fabryka", 30, false, null, 0, 2, 0, 0),
+    LABORATORIUM("Laboratorium", 25, false, null, 0, 0, 2, 0),
+
+    // Budynki wymagające badań
+    KOPALNIA_KSIĘŻYCOWA("Kopalnia Księżycowa", 35, true, "KOPALNIA_KSIĘŻYCOWA", 0, 1, 0, 3),
+    ZAAWANSOWANA_FARMA("Zaawansowana Farma", 40, false, "ZAAWANSOWANA_FARMA", 2, 0, 0, 0),
+    CENTRUM_BADAWCZE("Centrum Badawcze", 50, false, "CENTRUM_BADAWCZE", 0, 0, 4, 0),
+    FABRYKA_KOSMICZNA("Fabryka Kosmiczna", 80, false, "FABRYKA_KOSMICZNA", 0, 5, 0, 0),
+    POSTERUNEK_BOJOWY("Posterunek Bojowy", 60, false, "POSTERUNEK_BOJOWY", 0, 0, 0, 0);
 
     private final String displayName;
     private final int cost;

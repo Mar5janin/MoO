@@ -18,6 +18,10 @@ public class BuildOrder {
         return remainingCost;
     }
 
+    public void setRemainingCost(int cost) {
+        this.remainingCost = cost;
+    }
+
     public void progress(int production) {
         remainingCost -= production;
     }

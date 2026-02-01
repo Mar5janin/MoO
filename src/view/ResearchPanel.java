@@ -73,18 +73,17 @@ public class ResearchPanel extends JDialog {
         ResearchManager rm = game.getResearchManager();
 
         // Grupuj technologie według kategorii
-        addCategorySection("Podstawowe technologie",
-                Technology.BASIC_FARMING, Technology.BASIC_INDUSTRY,
-                Technology.BASIC_RESEARCH, Technology.BASIC_WEAPONS);
-
         addCategorySection("Przemysł i produkcja",
-                Technology.ADVANCED_MINING, Technology.IMPROVED_PRODUCTION);
+                Technology.IMPROVED_PRODUCTION, Technology.IMPROVED_FARMING,
+                Technology.SPACE_CONSTRUCTION, Technology.ADVANCED_MINING);
 
         addCategorySection("Badania i rozwój",
                 Technology.ADVANCED_RESEARCH, Technology.POPULATION_GROWTH);
 
         addCategorySection("Technologie wojskowe",
-                Technology.IMPROVED_WEAPONS, Technology.IMPROVED_ARMOR, Technology.HEAVY_SHIPS);
+                Technology.BASIC_WEAPONS, Technology.IMPROVED_WEAPONS,
+                Technology.IMPROVED_ARMOR, Technology.HEAVY_SHIPS,
+                Technology.DEFENSIVE_PLATFORMS);
 
         addCategorySection("Ekonomia",
                 Technology.TRADE_NETWORKS);
