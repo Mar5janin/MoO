@@ -20,8 +20,6 @@ public class GalaxyPanel extends JPanel {
     private final GalaxyBackground background;
 
     private Point lastMouse;
-
-    private Rectangle endTurnButtonBounds;
     private Game game;
 
     public GalaxyPanel(MainWindow mainWindow) {
@@ -55,15 +53,6 @@ public class GalaxyPanel extends JPanel {
             @Override
             public void mouseReleased(MouseEvent e) {
                 handleClick(e.getX(), e.getY());
-
-                if (endTurnButtonBounds != null &&
-                        endTurnButtonBounds.contains(e.getPoint())) {
-
-                    game.nextTurn();
-                    repaint();
-                    return;
-                }
-
             }
         });
 
@@ -137,25 +126,6 @@ public class GalaxyPanel extends JPanel {
         repaint();
     }
 
-    private void drawTurnHud(Graphics2D g2) {
-
-        int x = 20;
-        int y = getHeight() - 70;
-        int width = 160;
-        int height = 36;
-
-        endTurnButtonBounds = new Rectangle(x, y, width, height);
-
-        g2.setColor(new Color(30, 30, 30, 220));
-        g2.fillRoundRect(x, y, width, height, 12, 12);
-
-        g2.setColor(Color.WHITE);
-        g2.drawRoundRect(x, y, width, height, 12, 12);
-
-        g2.drawString("Tura: " + game.getTurn(), x, y - 8);
-        g2.drawString("Zakończ turę", x + 24, y + 22);
-    }
-
 
     @Override
     protected void paintComponent(Graphics g) {
@@ -177,8 +147,8 @@ public class GalaxyPanel extends JPanel {
                 BasicStroke.JOIN_ROUND
         ));
 
-        Color mainLine = new Color(120, 170, 255, 140);   // główna linia
-        Color glowLine = new Color(120, 170, 255, 60);    // delikatny glow
+        Color mainLine = new Color(120, 170, 255, 140);
+        Color glowLine = new Color(120, 170, 255, 60);
 
         for (StarSystem system : galaxy.getSystems()) {
             for (StarSystem neighbor : system.getNeighbors()) {
@@ -212,8 +182,5 @@ public class GalaxyPanel extends JPanel {
             g2.fillOval(x, y, size, size);
             g2.drawString(system.getName(), x + size + 4, y + size);
         }
-
-        drawTurnHud(g2);
-
     }
 }

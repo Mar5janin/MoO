@@ -112,7 +112,7 @@ public class PlanetInfoPanel extends JPanel {
     }
 
     // =============================
-    // KOLEJKA BUDOWY - NAPRAWIONA WERSJA
+    // KOLEJKA BUDOWY - Z WYŚWIETLANIEM TUR
     // =============================
     private void renderBuildQueueContent() {
 
@@ -126,9 +126,14 @@ public class PlanetInfoPanel extends JPanel {
                 BuildOrder order = planet.getBuildQueue().get(i);
                 BuildingType type = order.getType();
 
+                // Oblicz ilość tur
+                int turnsRemaining = calculateTurnsRemaining(order, i);
+                String turnsText = turnsRemaining + (turnsRemaining == 1 ? " tura" :
+                        turnsRemaining < 5 ? " tury" : " tur");
+
                 String fullText = (i + 1) + ". " +
                         type.getDisplayName() +
-                        " (" + order.getRemainingCost() + " t)";
+                        " (" + turnsText + ")";
 
                 JPanel row = new JPanel(new GridBagLayout());
                 row.setMaximumSize(new Dimension(Integer.MAX_VALUE, ROW_HEIGHT));
@@ -186,7 +191,6 @@ public class PlanetInfoPanel extends JPanel {
                 buttons.add(down);
                 buttons.add(remove);
 
-                // KLUCZOWA ZMIANA: anchor ustawiony na EAST i fill na NONE
                 gbc.gridx = 1;
                 gbc.weightx = 0;
                 gbc.fill = GridBagConstraints.NONE;
@@ -198,7 +202,6 @@ public class PlanetInfoPanel extends JPanel {
                     @Override
                     public void componentResized(ComponentEvent e) {
                         FontMetrics fm = nameLabel.getFontMetrics(nameLabel.getFont());
-                        // Obliczam dostępną szerokość dla tekstu
                         int availableWidth = row.getWidth() - buttonsPanelWidth - 20;
                         if (availableWidth > 0) {
                             nameLabel.setText(
@@ -225,6 +228,22 @@ public class PlanetInfoPanel extends JPanel {
                 ).setVisible(true)
         );
         add(addButton);
+    }
+
+    // =============================
+    // OBLICZANIE TUR
+    // =============================
+    private int calculateTurnsRemaining(BuildOrder order, int queueIndex) {
+        int production = planet.getProduction();
+        if (production <= 0) return 999; // Zabezpieczenie
+
+        // Jeśli to pierwszy element w kolejce, używamy jego aktualnego pozostałego kosztu
+        if (queueIndex == 0) {
+            return (int) Math.ceil((double) order.getRemainingCost() / production);
+        }
+
+        // Dla kolejnych elementów używamy pełnego kosztu
+        return (int) Math.ceil((double) order.getType().getCost() / production);
     }
 
     // =============================
