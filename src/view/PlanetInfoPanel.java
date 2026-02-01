@@ -12,6 +12,7 @@ public class PlanetInfoPanel extends JPanel {
     private final Planet planet;
     private final StarSystem system;
     private final MainWindow mainWindow;
+    private final Game game;
     private JPanel queuePanel;
 
     private static final int QUEUE_WIDTH = 550;
@@ -23,11 +24,13 @@ public class PlanetInfoPanel extends JPanel {
     public PlanetInfoPanel(
             Planet planet,
             StarSystem system,
-            MainWindow mainWindow
+            MainWindow mainWindow,
+            Game game
     ) {
         this.planet = planet;
         this.system = system;
         this.mainWindow = mainWindow;
+        this.game = game;
 
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -224,6 +227,7 @@ public class PlanetInfoPanel extends JPanel {
                 new BuildDialog(
                         mainWindow,
                         planet,
+                        game,
                         () -> mainWindow.showPlanet(planet, system)
                 ).setVisible(true)
         );

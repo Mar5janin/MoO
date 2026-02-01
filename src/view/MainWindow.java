@@ -78,6 +78,16 @@ public class MainWindow extends JFrame {
         // Separator
         topPanel.add(createSeparator());
 
+        // Przycisk badań
+        JButton researchButton = new JButton("Badania");
+        researchButton.setFocusPainted(false);
+        researchButton.addActionListener(e -> {
+            if (game != null) {
+                new ResearchPanel(this, game).setVisible(true);
+            }
+        });
+        topPanel.add(researchButton);
+
         // Przycisk zakończenia tury
         endTurnButton = new JButton("Zakończ turę");
         endTurnButton.setFocusPainted(false);
@@ -134,7 +144,7 @@ public class MainWindow extends JFrame {
         sidePanel.removeAll();
         sidePanel.setVisible(true);
         sidePanel.setLayout(new BorderLayout());
-        sidePanel.add(new PlanetInfoPanel(planet, system, this), BorderLayout.NORTH);
+        sidePanel.add(new PlanetInfoPanel(planet, system, this, game), BorderLayout.NORTH);
         sidePanel.revalidate();
         sidePanel.repaint();
     }

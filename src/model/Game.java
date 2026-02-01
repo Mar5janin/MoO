@@ -9,6 +9,9 @@ public class Game {
     private int totalCredits = 500;
     private int totalResearch = 0;
 
+    // System badań
+    private final ResearchManager researchManager = new ResearchManager();
+
     public Game(Galaxy galaxy) {
         this.galaxy = galaxy;
     }
@@ -34,6 +37,9 @@ public class Game {
 
         totalCredits += creditsThisTurn;
         totalResearch += researchThisTurn;
+
+        // Dodaj punkty badań do aktualnego projektu
+        researchManager.addResearchPoints(researchThisTurn);
     }
 
     public int getTurn() {
@@ -50,5 +56,9 @@ public class Game {
 
     public Galaxy getGalaxy() {
         return galaxy;
+    }
+
+    public ResearchManager getResearchManager() {
+        return researchManager;
     }
 }

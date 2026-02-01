@@ -118,16 +118,17 @@ public class Planet implements OrbitObject {
     }
 
 
-    public boolean canBuild(BuildingType type) {
+    public boolean canBuild(BuildingType type, ResearchManager researchManager) {
         if (!colonized) return false;
         if (type.requiresMoon() && !hasMoon) return false;
+        if (!type.isAvailable(researchManager)) return false;
         return true;
     }
 
     // === KOLEJKA ===
-    public void addToQueue(BuildingType type) {
+    public void addToQueue(BuildingType type, ResearchManager researchManager) {
 
-        if (!canBuild(type)) return;
+        if (!canBuild(type, researchManager)) return;
         if (hasBuilding(type)) return;
         if (isInQueue(type)) return;
 
