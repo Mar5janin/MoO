@@ -358,11 +358,6 @@ public class Planet implements OrbitObject {
         }
     }
 
-    /**
-     * Rush buy - natychmiast kończy obecną produkcję za kredyty
-     * @param game Obiekt gry (potrzebny do pobrania/odjęcia kredytów)
-     * @return true jeśli się udało
-     */
     public boolean rushBuy(Game game) {
         if (productionQueue.isEmpty()) return false;
 

@@ -195,14 +195,14 @@ public class PlanetInfoPanel extends JPanel {
     }
 
     // =============================
-    // KONTROLA POPULACJI Z PRZYCISKAMI +/-
+    // KONTROLA POPULACJI Z PRZYCISKAMI +/- (NAPRAWIONA WERSJA)
     // =============================
     private JPanel createPopulationControl(String label, int current, int max, java.util.function.Consumer<Integer> onChange) {
         JPanel panel = new JPanel(new BorderLayout(10, 5));
         panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
 
-        // Lewa część - label z wartością
-        JLabel titleLabel = new JLabel(label + ": " + current);
+        // Lewa część - label z wartością (będzie aktualizowany)
+        JLabel titleLabel = new JLabel();
         titleLabel.setFont(titleLabel.getFont().deriveFont(Font.BOLD, 11f));
         panel.add(titleLabel, BorderLayout.WEST);
 
@@ -216,12 +216,9 @@ public class PlanetInfoPanel extends JPanel {
         minusButton.setPreferredSize(btnSize);
         plusButton.setPreferredSize(btnSize);
 
-        // Aktualizuj stan przycisków
-        Runnable updateButtons = () -> {
-            int val = planet.getPopulationOnFood() + planet.getPopulationOnProduction() + planet.getPopulationOnResearch();
-            int available = planet.getTotalPopulation() - val;
-
-            // Sprawdź aktualną wartość dla tego kontrolera
+        // Metoda do aktualizacji wyświetlania i stanów przycisków
+        Runnable updateUI = () -> {
+            // Pobierz aktualną wartość z planety
             int currentValue = 0;
             if (label.contains("żywność")) {
                 currentValue = planet.getPopulationOnFood();
@@ -231,24 +228,53 @@ public class PlanetInfoPanel extends JPanel {
                 currentValue = planet.getPopulationOnResearch();
             }
 
+            // Oblicz dostępną populację
+            int assigned = planet.getPopulationOnFood() +
+                    planet.getPopulationOnProduction() +
+                    planet.getPopulationOnResearch();
+            int available = planet.getTotalPopulation() - assigned;
+
+            // Aktualizuj tekst
+            titleLabel.setText(label + ": " + currentValue);
+
+            // Aktualizuj stan przycisków
             minusButton.setEnabled(currentValue > 0);
             plusButton.setEnabled(available > 0);
-            titleLabel.setText(label + ": " + currentValue);
         };
 
         minusButton.addActionListener(e -> {
-            int newValue = Math.max(0, current - 1);
+            // Pobierz aktualną wartość
+            int currentValue = 0;
+            if (label.contains("żywność")) {
+                currentValue = planet.getPopulationOnFood();
+            } else if (label.contains("Budowa")) {
+                currentValue = planet.getPopulationOnProduction();
+            } else if (label.contains("Badania")) {
+                currentValue = planet.getPopulationOnResearch();
+            }
+
+            int newValue = Math.max(0, currentValue - 1);
             onChange.accept(newValue);
             mainWindow.showPlanet(planet, system);
         });
 
         plusButton.addActionListener(e -> {
-            int newValue = Math.min(max, current + 1);
+            // Pobierz aktualną wartość
+            int currentValue = 0;
+            if (label.contains("żywność")) {
+                currentValue = planet.getPopulationOnFood();
+            } else if (label.contains("Budowa")) {
+                currentValue = planet.getPopulationOnProduction();
+            } else if (label.contains("Badania")) {
+                currentValue = planet.getPopulationOnResearch();
+            }
+
+            int newValue = Math.min(planet.getTotalPopulation(), currentValue + 1);
             onChange.accept(newValue);
             mainWindow.showPlanet(planet, system);
         });
 
-        updateButtons.run();
+        updateUI.run();
 
         buttonsPanel.add(minusButton);
         buttonsPanel.add(plusButton);

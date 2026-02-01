@@ -123,20 +123,25 @@ public class MainWindow extends JFrame {
 
                 if (result == JOptionPane.YES_OPTION) {
                     // Sprawdź co jest problemem i otwórz odpowiedni panel
-                    if (reason.contains("nie ma kolejki budowy")) {
+                    if (reason.contains("nie ma kolejki budowy") || reason.contains("nieprzypisanych")) {
                         // Znajdź planetę z problemem
                         for (StarSystem system : game.getGalaxy().getSystems()) {
                             for (OrbitSlot orbit : system.getOrbits()) {
                                 if (orbit.getObject() instanceof Planet planet) {
-                                    if (planet.isColonized() && planet.getBuildQueue().isEmpty()) {
-                                        // Otwórz panel tej planety
-                                        showPlanet(planet, system);
-                                        return;
+                                    if (planet.isColonized()) {
+                                        // Sprawdź czy to ta planeta z problemem
+                                        if (planet.getBuildQueue().isEmpty() || !planet.isPopulationFullyAssigned()) {
+                                            // Najpierw przejdź do systemu
+                                            onSystemSelected(system);
+                                            // Potem otwórz panel planety
+                                            showPlanet(planet, system);
+                                            return;
+                                        }
                                     }
                                 }
                             }
                         }
-                    } else if (reason.contains("projekt badawczy")) {
+                    } else if (reason.contains("projektu badawczego")) {
                         // Otwórz panel badań
                         ResearchPanel researchPanel = new ResearchPanel(this, game);
                         researchPanel.setVisible(true);
