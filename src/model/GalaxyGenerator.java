@@ -364,7 +364,7 @@ public class GalaxyGenerator {
         if (home == null) return;
 
         Planet startPlanet = new Planet(PlanetType.TERRAN);
-        startPlanet.colonize();
+        startPlanet.colonizeHomePlanet();
         startPlanet.setMoon(startPlanet);
 
         if (home.getOrbits().isEmpty()) {

@@ -88,6 +88,16 @@ public class MainWindow extends JFrame {
         });
         topPanel.add(researchButton);
 
+        // Przycisk flot
+        JButton fleetsButton = new JButton("Floty");
+        fleetsButton.setFocusPainted(false);
+        fleetsButton.addActionListener(e -> {
+            if (game != null) {
+                new AllFleetsPanel(this, game).setVisible(true);
+            }
+        });
+        topPanel.add(fleetsButton);
+
         // Przycisk zakończenia tury
         endTurnButton = new JButton("Zakończ turę");
         endTurnButton.setFocusPainted(false);

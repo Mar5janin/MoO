@@ -73,13 +73,22 @@ public class PlanetInfoPanel extends JPanel {
         if (planet.isHabitable()) {
             add(Box.createVerticalStrut(10));
 
-            JButton colonizeButton = new JButton("Skolonizuj planetę");
-            colonizeButton.addActionListener(e -> {
-                planet.colonize();
-                mainWindow.showPlanet(planet, system);
-            });
+            // Sprawdź czy w systemie jest statek kolonizacyjny
+            Fleet fleet = system.getPlayerFleet();
+            boolean hasColonyShip = fleet != null && fleet.countShipType(ShipType.COLONY_SHIP) > 0;
 
-            add(colonizeButton);
+            if (hasColonyShip) {
+                JButton colonizeButton = new JButton("Skolonizuj planetę (użyje statku kolonizacyjnego)");
+                colonizeButton.addActionListener(e -> {
+                    planet.colonize(fleet);
+                    mainWindow.showPlanet(planet, system);
+                });
+                add(colonizeButton);
+            } else {
+                JLabel needShip = new JLabel("Potrzebujesz statku kolonizacyjnego aby skolonizować tę planetę");
+                needShip.setForeground(Color.GRAY);
+                add(needShip);
+            }
         }
     }
 

@@ -52,6 +52,10 @@ public class Fleet {
         if (isMoving()) {
             turnsToDestination--;
             if (turnsToDestination <= 0) {
+                // Przenieś flotę do nowego systemu
+                location.removeFleet(this);
+                destination.addFleet(this);
+
                 location = destination;
                 destination = null;
             }

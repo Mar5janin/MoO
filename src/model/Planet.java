@@ -58,9 +58,35 @@ public class Planet implements OrbitObject {
         planet.hasMoon = true;
     }
 
+    public void colonizeHomePlanet(){
+        colonized = true;
+        basePopulation = 10;
+        baseProduction = 5;
+        baseResearch = 3;
+        baseCredits = 4;
+    }
+
     // === KOLONIZACJA ===
-    public void colonize() {
-        if (!habitable || colonized) return;
+    public boolean canColonize(Fleet fleet) {
+        if (!habitable || colonized) return false;
+        if (fleet == null) return false;
+
+        // Sprawdź czy flota ma statek kolonizacyjny
+        return fleet.countShipType(ShipType.COLONY_SHIP) > 0;
+    }
+
+    public void colonize(Fleet fleet) {
+        if (!canColonize(fleet)) return;
+
+        // Usuń statek kolonizacyjny z floty
+        Ship colonyShip = fleet.getShips().stream()
+                .filter(s -> s.getType() == ShipType.COLONY_SHIP)
+                .findFirst()
+                .orElse(null);
+
+        if (colonyShip != null) {
+            fleet.removeShip(colonyShip);
+        }
 
         colonized = true;
         basePopulation = 1;
