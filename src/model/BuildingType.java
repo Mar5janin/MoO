@@ -10,8 +10,8 @@ public enum BuildingType {
             false,
             null,
             0,      // populationCapacity
-            3,      // foodBonus (pasywny)
-            2,      // foodPerCapita (+2 za każdego pracownika)
+            2,      // foodBonus (pasywny)
+            1,      // foodPerCapita (+1 za każdego pracownika)
             0, 0,   // production
             0, 0,   // research
             0, 0, 0 // credits
@@ -24,8 +24,8 @@ public enum BuildingType {
             null,
             0,      // populationCapacity
             0, 0,   // food
-            2,      // productionBonus (pasywny - bez tego 0 produkcji!)
-            2,      // productionPerCapita (+2 za każdego pracownika)
+            1,      // productionBonus (pasywny)
+            1,      // productionPerCapita (+1 za każdego pracownika)
             0, 0,   // research
             0, 0, 0 // credits
     ),
@@ -39,7 +39,7 @@ public enum BuildingType {
             0, 0,   // food
             0, 0,   // production
             1,      // researchBonus (pasywny)
-            2,      // researchPerCapita (+2 za każdego pracownika)
+            1,      // researchPerCapita (+1 za każdego pracownika)
             0, 0, 0 // credits
     ),
 
@@ -65,8 +65,8 @@ public enum BuildingType {
             false,
             "ZAAWANSOWANA_FARMA",
             2,      // populationCapacity (+2 max populacji)
-            5,      // foodBonus (pasywny)
-            3,      // foodPerCapita (+3 za każdego pracownika)
+            3,      // foodBonus (pasywny)
+            2,      // foodPerCapita (+2 za każdego pracownika)
             0, 0,   // production
             0, 0,   // research
             0, 0, 0 // credits
@@ -80,8 +80,8 @@ public enum BuildingType {
             0,      // populationCapacity
             0, 0,   // food
             0, 0,   // production
-            4,      // researchBonus (pasywny)
-            3,      // researchPerCapita (+3 za każdego pracownika)
+            3,      // researchBonus (pasywny)
+            2,      // researchPerCapita (+2 za każdego pracownika)
             0, 0, 0 // credits
     ),
 
@@ -92,8 +92,8 @@ public enum BuildingType {
             "FABRYKA_KOSMICZNA",
             0,      // populationCapacity
             0, 0,   // food
-            5,      // productionBonus (pasywny)
-            3,      // productionPerCapita (+3 za każdego pracownika)
+            3,      // productionBonus (pasywny)
+            2,      // productionPerCapita (+2 za każdego pracownika)
             0, 0,   // research
             0, 0, 0 // credits
     ),

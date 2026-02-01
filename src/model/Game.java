@@ -127,8 +127,14 @@ public class Game {
         for (StarSystem system : galaxy.getSystems()) {
             for (OrbitSlot orbit : system.getOrbits()) {
                 if (orbit.getObject() instanceof Planet planet) {
-                    if (planet.isColonized() && planet.getBuildQueue().isEmpty()) {
-                        return false;
+                    if (planet.isColonized()) {
+                        if (planet.getBuildQueue().isEmpty()) {
+                            return false;
+                        }
+                        // Sprawdź czy cała populacja jest przypisana
+                        if (!planet.isPopulationFullyAssigned()) {
+                            return false;
+                        }
                     }
                 }
             }
@@ -147,8 +153,16 @@ public class Game {
         for (StarSystem system : galaxy.getSystems()) {
             for (OrbitSlot orbit : system.getOrbits()) {
                 if (orbit.getObject() instanceof Planet planet) {
-                    if (planet.isColonized() && planet.getBuildQueue().isEmpty()) {
-                        return "Planeta w systemie " + system.getName() + " nie ma kolejki budowy!";
+                    if (planet.isColonized()) {
+                        if (planet.getBuildQueue().isEmpty()) {
+                            return "Planeta w systemie " + system.getName() + " nie ma kolejki budowy!";
+                        }
+                        // Sprawdź populację
+                        if (!planet.isPopulationFullyAssigned()) {
+                            int unassigned = planet.getUnassignedPopulation();
+                            return "Planeta w systemie " + system.getName() + " ma " + unassigned +
+                                    " nieprzypisanych " + (unassigned == 1 ? "pracownika" : "pracowników") + "!";
+                        }
                     }
                 }
             }

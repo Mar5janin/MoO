@@ -135,43 +135,34 @@ public class PlanetInfoPanel extends JPanel {
                 BorderFactory.createLineBorder(Color.GRAY),
                 BorderFactory.createEmptyBorder(8, 10, 8, 10)
         ));
-        popManagement.setMaximumSize(new Dimension(500, 200));
+        popManagement.setMaximumSize(new Dimension(500, 300));
 
         // Żywność
-        popManagement.add(createPopulationSlider(
+        popManagement.add(createPopulationControl(
                 "🌾 Produkcja żywności",
                 planet.getPopulationOnFood(),
                 planet.getTotalPopulation(),
-                value -> {
-                    planet.setPopulationOnFood(value);
-                    mainWindow.showPlanet(planet, system);
-                }
+                planet::setPopulationOnFood
         ));
 
         popManagement.add(Box.createVerticalStrut(8));
 
         // Produkcja
-        popManagement.add(createPopulationSlider(
-                "🏭 Produkcja budynków/statków",
+        popManagement.add(createPopulationControl(
+                "🏭 Budowa",
                 planet.getPopulationOnProduction(),
                 planet.getTotalPopulation(),
-                value -> {
-                    planet.setPopulationOnProduction(value);
-                    mainWindow.showPlanet(planet, system);
-                }
+                planet::setPopulationOnProduction
         ));
 
         popManagement.add(Box.createVerticalStrut(8));
 
         // Badania
-        popManagement.add(createPopulationSlider(
+        popManagement.add(createPopulationControl(
                 "🔬 Badania",
                 planet.getPopulationOnResearch(),
                 planet.getTotalPopulation(),
-                value -> {
-                    planet.setPopulationOnResearch(value);
-                    mainWindow.showPlanet(planet, system);
-                }
+                planet::setPopulationOnResearch
         ));
 
         popManagement.add(Box.createVerticalStrut(8));
@@ -179,7 +170,8 @@ public class PlanetInfoPanel extends JPanel {
         // Bezrobotni
         int unemployed = planet.getUnassignedPopulation();
         JLabel unemployedLabel = new JLabel("💼 Bezrobotni (generują kredyty): " + unemployed);
-        unemployedLabel.setForeground(new Color(255, 215, 0));
+        unemployedLabel.setForeground(unemployed > 0 ? new Color(255, 150, 0) : new Color(255, 215, 0));
+        unemployedLabel.setFont(unemployedLabel.getFont().deriveFont(Font.BOLD, 11f));
         popManagement.add(unemployedLabel);
 
         add(popManagement);
@@ -203,30 +195,64 @@ public class PlanetInfoPanel extends JPanel {
     }
 
     // =============================
-    // SLIDER DO ZARZĄDZANIA POPULACJĄ
+    // KONTROLA POPULACJI Z PRZYCISKAMI +/-
     // =============================
-    private JPanel createPopulationSlider(String label, int current, int max, java.util.function.Consumer<Integer> onChange) {
-        JPanel panel = new JPanel(new BorderLayout(10, 0));
+    private JPanel createPopulationControl(String label, int current, int max, java.util.function.Consumer<Integer> onChange) {
+        JPanel panel = new JPanel(new BorderLayout(10, 5));
+        panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
 
+        // Lewa część - label z wartością
         JLabel titleLabel = new JLabel(label + ": " + current);
         titleLabel.setFont(titleLabel.getFont().deriveFont(Font.BOLD, 11f));
-        panel.add(titleLabel, BorderLayout.NORTH);
+        panel.add(titleLabel, BorderLayout.WEST);
 
-        JSlider slider = new JSlider(0, max, current);
-        slider.setMajorTickSpacing(max > 10 ? 5 : 1);
-        slider.setMinorTickSpacing(1);
-        slider.setPaintTicks(true);
-        slider.setPaintLabels(true);
+        // Prawa część - przyciski
+        JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 0));
 
-        slider.addChangeListener(e -> {
-            int value = slider.getValue();
-            titleLabel.setText(label + ": " + value);
-            if (!slider.getValueIsAdjusting()) {
-                onChange.accept(value);
+        JButton minusButton = new JButton("-");
+        JButton plusButton = new JButton("+");
+
+        Dimension btnSize = new Dimension(45, 25);
+        minusButton.setPreferredSize(btnSize);
+        plusButton.setPreferredSize(btnSize);
+
+        // Aktualizuj stan przycisków
+        Runnable updateButtons = () -> {
+            int val = planet.getPopulationOnFood() + planet.getPopulationOnProduction() + planet.getPopulationOnResearch();
+            int available = planet.getTotalPopulation() - val;
+
+            // Sprawdź aktualną wartość dla tego kontrolera
+            int currentValue = 0;
+            if (label.contains("żywność")) {
+                currentValue = planet.getPopulationOnFood();
+            } else if (label.contains("Produkcja")) {
+                currentValue = planet.getPopulationOnProduction();
+            } else if (label.contains("Badania")) {
+                currentValue = planet.getPopulationOnResearch();
             }
+
+            minusButton.setEnabled(currentValue > 0);
+            plusButton.setEnabled(available > 0);
+            titleLabel.setText(label + ": " + currentValue);
+        };
+
+        minusButton.addActionListener(e -> {
+            int newValue = Math.max(0, current - 1);
+            onChange.accept(newValue);
+            mainWindow.showPlanet(planet, system);
         });
 
-        panel.add(slider, BorderLayout.CENTER);
+        plusButton.addActionListener(e -> {
+            int newValue = Math.min(max, current + 1);
+            onChange.accept(newValue);
+            mainWindow.showPlanet(planet, system);
+        });
+
+        updateButtons.run();
+
+        buttonsPanel.add(minusButton);
+        buttonsPanel.add(plusButton);
+        panel.add(buttonsPanel, BorderLayout.EAST);
 
         return panel;
     }

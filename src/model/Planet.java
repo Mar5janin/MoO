@@ -33,7 +33,7 @@ public class Planet implements OrbitObject {
 
     // Akumulacja żywności
     private int foodAccumulated = 0;
-    private static final int FOOD_PER_NEW_CITIZEN = 10; // Ile żywności potrzeba na nową populację
+    private static final int BASE_FOOD_PER_CITIZEN = 10; // Bazowa ilość żywności na pierwszą osobę
 
     // Przelicznik kredytów na produkcję (dla rush buy)
     public static final int CREDITS_PER_PRODUCTION = 2;
@@ -116,12 +116,12 @@ public class Planet implements OrbitObject {
         }
 
         colonized = true;
-        totalPopulation = 2;
+        totalPopulation = 1;
         maxPopulation = calculateMaxPopulation();
 
-        // Początkowe przypisanie
+        // Początkowe przypisanie - 1 osoba początkowo na produkcji żywności
         populationOnFood = 1;
-        populationOnProduction = 1;
+        populationOnProduction = 0;
         populationOnResearch = 0;
     }
 
@@ -185,9 +185,10 @@ public class Planet implements OrbitObject {
     // === GETTERY ZASOBÓW (uwzględniają populację i budynki) ===
 
     /**
-     * Produkcja żywności = pasywna + (populacja * bonus per capita)
+     * Produkcja żywności = (populacja × 1) + pasywna + (populacja × bonus per capita)
      */
     public int getFoodProduction() {
+        int baseProduction = populationOnFood; // Każda osoba produkuje 1 punkt bazowo
         int passive = 0;
         int perCapita = 0;
 
@@ -196,13 +197,14 @@ public class Planet implements OrbitObject {
             perCapita += b.getType().getFoodPerCapita();
         }
 
-        return passive + (populationOnFood * perCapita);
+        return baseProduction + passive + (populationOnFood * perCapita);
     }
 
     /**
-     * Produkcja = pasywna + (populacja * bonus per capita)
+     * Produkcja = (populacja × 1) + pasywna + (populacja × bonus per capita)
      */
     public int getProduction() {
+        int baseProduction = populationOnProduction; // Każda osoba produkuje 1 punkt bazowo
         int passive = 0;
         int perCapita = 0;
 
@@ -211,13 +213,14 @@ public class Planet implements OrbitObject {
             perCapita += b.getType().getProductionPerCapita();
         }
 
-        return passive + (populationOnProduction * perCapita);
+        return baseProduction + passive + (populationOnProduction * perCapita);
     }
 
     /**
-     * Badania = pasywna + (populacja * bonus per capita)
+     * Badania = (populacja × 1) + pasywna + (populacja × bonus per capita)
      */
     public int getResearch() {
+        int baseProduction = populationOnResearch; // Każda osoba produkuje 1 punkt bazowo
         int passive = 0;
         int perCapita = 0;
 
@@ -226,11 +229,11 @@ public class Planet implements OrbitObject {
             perCapita += b.getType().getResearchPerCapita();
         }
 
-        return passive + (populationOnResearch * perCapita);
+        return baseProduction + passive + (populationOnResearch * perCapita);
     }
 
     /**
-     * Kredyty = pasywna + (bezrobotna populacja * bonus per capita) + (całkowita populacja * podatki)
+     * Kredyty = pasywna + (bezrobotna populacja × (1 + bonus per capita)) + (całkowita populacja × podatki)
      */
     public int getCredits() {
         int passive = 0;
@@ -245,7 +248,8 @@ public class Planet implements OrbitObject {
 
         int unemployed = getUnassignedPopulation();
 
-        return passive + (unemployed * perCapita) + (totalPopulation * perTotalPopulation);
+        // Bezrobotni produkują 1 kredyt bazowo + bonusy
+        return passive + unemployed + (unemployed * perCapita) + (totalPopulation * perTotalPopulation);
     }
 
     // Stara metoda dla kompatybilności
@@ -411,8 +415,9 @@ public class Planet implements OrbitObject {
         int foodThisTurn = getFoodProduction();
         foodAccumulated += foodThisTurn;
 
-        if (foodAccumulated >= FOOD_PER_NEW_CITIZEN && totalPopulation < getMaxPopulation()) {
-            foodAccumulated -= FOOD_PER_NEW_CITIZEN;
+        int foodNeeded = getFoodNeededForGrowth();
+        if (foodAccumulated >= foodNeeded && totalPopulation < getMaxPopulation()) {
+            foodAccumulated -= foodNeeded;
             totalPopulation++;
             // Nowa populacja jest początkowo bezrobotna
         }
@@ -444,7 +449,19 @@ public class Planet implements OrbitObject {
         return foodAccumulated;
     }
 
+    /**
+     * Oblicza ile żywności potrzeba na następną populację
+     * Wzór: 10 + (aktualna_populacja × 2)
+     * Przykłady: 1→10, 2→14, 3→16, 4→18, 5→20, 10→30
+     */
     public int getFoodNeededForGrowth() {
-        return FOOD_PER_NEW_CITIZEN;
+        return BASE_FOOD_PER_CITIZEN + (totalPopulation * 2);
+    }
+
+    /**
+     * Sprawdza czy cała populacja jest przypisana
+     */
+    public boolean isPopulationFullyAssigned() {
+        return getUnassignedPopulation() == 0;
     }
 }
