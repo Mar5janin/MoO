@@ -62,6 +62,15 @@ public enum ShipType {
             0,
             5,
             null
+    ),
+
+    SPACE_FACTORY(
+            "Fabryka Kosmiczna",
+            "Pozwala budować instalacje na asteroidach i gazowych gigantach",
+            150,
+            0,
+            10,
+            "FABRYKA_KOSMICZNA"
     );
 
     private final String displayName;

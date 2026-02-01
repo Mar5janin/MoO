@@ -12,6 +12,7 @@ public class StarSystem {
     private List<StarSystem> neighbors = new ArrayList<>();
     private List<OrbitSlot> orbits = new ArrayList<>();
     private List<Fleet> fleets = new ArrayList<>();
+    private SpaceInstallation battleStation;
 
     public StarSystem(String name, int x, int y) {
         this.name = name;
@@ -64,7 +65,6 @@ public class StarSystem {
 
     public String getName() { return name; }
 
-    // === FLOTY ===
     public List<Fleet> getFleets() {
         return fleets;
     }
@@ -79,18 +79,10 @@ public class StarSystem {
         fleets.remove(fleet);
     }
 
-    /**
-     * Zwraca pierwszą flotę gracza w systemie
-     * UWAGA: Może być wiele osobnych flot!
-     */
     public Fleet getPlayerFleet() {
         return fleets.isEmpty() ? null : fleets.get(0);
     }
 
-    /**
-     * Zwraca istniejącą flotę lub tworzy nową
-     * UWAGA: Ta metoda jest używana tylko przy tworzeniu statków na planecie
-     */
     public Fleet getOrCreatePlayerFleet() {
         Fleet fleet = getPlayerFleet();
         if (fleet == null) {
@@ -98,5 +90,52 @@ public class StarSystem {
             fleets.add(fleet);
         }
         return fleet;
+    }
+
+    public SpaceInstallation getBattleStation() {
+        return battleStation;
+    }
+
+    public void setBattleStation(SpaceInstallation battleStation) {
+        this.battleStation = battleStation;
+    }
+
+    public boolean hasBattleStation() {
+        return battleStation != null && !battleStation.isDestroyed();
+    }
+
+    public boolean canBuildBattleStation(Fleet fleet, ResearchManager researchManager) {
+        if (hasBattleStation()) return false;
+        if (!researchManager.isUnlocked("POSTERUNEK_BOJOWY")) return false;
+        if (fleet == null) return false;
+        return fleet.countShipType(ShipType.SPACE_FACTORY) > 0;
+    }
+
+    public int getTotalCreditsBonus() {
+        int bonus = 0;
+        for (OrbitSlot orbit : orbits) {
+            if (orbit.getObject() instanceof AsteroidField asteroid) {
+                if (asteroid.hasInstallation()) {
+                    bonus += asteroid.getInstallation().getType().getCreditsBonus();
+                }
+            } else if (orbit.getObject() instanceof GasGiant giant) {
+                if (giant.hasInstallation()) {
+                    bonus += giant.getInstallation().getType().getCreditsBonus();
+                }
+            }
+        }
+        return bonus;
+    }
+
+    public int getTotalResearchBonus() {
+        int bonus = 0;
+        for (OrbitSlot orbit : orbits) {
+            if (orbit.getObject() instanceof AsteroidField asteroid) {
+                if (asteroid.hasInstallation()) {
+                    bonus += asteroid.getInstallation().getType().getResearchBonus();
+                }
+            }
+        }
+        return bonus;
     }
 }

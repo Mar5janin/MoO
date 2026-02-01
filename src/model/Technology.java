@@ -44,7 +44,7 @@ public enum Technology {
             "Umożliwia budowę fabryk kosmicznych",
             150,
             List.of(IMPROVED_PRODUCTION),
-            List.of(new TechEffect(TechEffectType.UNLOCK_BUILDING, "FABRYKA_KOSMICZNA"))
+            List.of(new TechEffect(TechEffectType.UNLOCK_SHIP, "Fabryka Kosmiczna"))
     ),
 
     BASIC_WEAPONS(
