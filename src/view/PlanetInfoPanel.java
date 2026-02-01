@@ -115,16 +115,13 @@ public class PlanetInfoPanel extends JPanel {
         add(sectionTitle("Populacja i Zasoby"));
         add(Box.createVerticalStrut(5));
 
-        JPanel popSection = new JPanel();
-        popSection.setLayout(new BoxLayout(popSection, BoxLayout.Y_AXIS));
-        popSection.setAlignmentX(Component.LEFT_ALIGNMENT);
-
         JLabel popLabel = new JLabel(String.format("Populacja: %d / %d",
                 planet.getTotalPopulation(), planet.getMaxPopulation()));
         popLabel.setFont(popLabel.getFont().deriveFont(Font.BOLD));
         popLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        popSection.add(popLabel);
-        popSection.add(Box.createVerticalStrut(3));
+        add(popLabel);
+
+        add(Box.createVerticalStrut(3));
 
         double foodAcc = planet.getFoodAccumulated();
         double foodNeeded = planet.getFoodNeededForGrowth();
@@ -144,8 +141,8 @@ public class PlanetInfoPanel extends JPanel {
             growthBar.setForeground(new Color(100, 200, 100));
         }
 
-        popSection.add(growthBar);
-        popSection.add(Box.createVerticalStrut(5));
+        add(growthBar);
+        add(Box.createVerticalStrut(5));
 
         double netFood = planet.getNetFoodProduction();
         String foodText = String.format("🌾 Żywność: %+.1f", netFood);
@@ -157,21 +154,19 @@ public class PlanetInfoPanel extends JPanel {
         } else {
             foodLabel.setForeground(new Color(100, 200, 100));
         }
-        popSection.add(foodLabel);
+        add(foodLabel);
 
         JLabel prodLabel = new JLabel("🏭 Produkcja: " + planet.getProduction());
         prodLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        popSection.add(prodLabel);
+        add(prodLabel);
 
         JLabel researchLabel = new JLabel("🔬 Badania: " + planet.getResearch());
         researchLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        popSection.add(researchLabel);
+        add(researchLabel);
 
         JLabel creditsLabel = new JLabel("💰 Kredyty: " + planet.getCredits());
         creditsLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        popSection.add(creditsLabel);
-
-        add(popSection);
+        add(creditsLabel);
 
         add(Box.createVerticalStrut(12));
 

@@ -429,6 +429,11 @@ public class Planet implements OrbitObject {
             savedBuildingProgress.remove(current.getBuildingType());
         } else {
             savedShipProgress.remove(current.getShipType());
+
+            if (current.getShipType() == ShipType.COLONY_SHIP && totalPopulation > 1) {
+                totalPopulation--;
+                rebalancePopulation();
+            }
         }
 
         return true;
