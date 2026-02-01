@@ -12,6 +12,10 @@ public class Planet implements OrbitObject {
     private boolean colonized;
     private boolean hasMoon;
 
+    private PlanetAttribute attribute;
+    private PlanetSize size;
+    private PlanetRichness richness;
+
     private final List<Building> buildings = new ArrayList<>();
 
     private static final int MAX_QUEUE = 5;
@@ -38,6 +42,34 @@ public class Planet implements OrbitObject {
         this.habitable = type.isHabitable();
         this.colonized = false;
         this.hasMoon = habitable && Math.random() < 0.55;
+
+        this.size = randomSize();
+        this.richness = randomRichness();
+        this.attribute = randomAttribute();
+    }
+
+    private PlanetSize randomSize() {
+        double r = Math.random();
+        if (r < 0.15) return PlanetSize.SMALL;
+        if (r < 0.60) return PlanetSize.MEDIUM;
+        if (r < 0.90) return PlanetSize.LARGE;
+        return PlanetSize.HUGE;
+    }
+
+    private PlanetRichness randomRichness() {
+        double r = Math.random();
+        if (r < 0.20) return PlanetRichness.POOR;
+        if (r < 0.70) return PlanetRichness.NORMAL;
+        if (r < 0.95) return PlanetRichness.RICH;
+        return PlanetRichness.ULTRA_RICH;
+    }
+
+    private PlanetAttribute randomAttribute() {
+        double r = Math.random();
+        if (r < 0.60) return PlanetAttribute.NONE;
+        if (r < 0.75) return PlanetAttribute.GOLD_DEPOSITS;
+        if (r < 0.90) return PlanetAttribute.ANCIENT_ARTIFACTS;
+        return PlanetAttribute.FERTILE_ALGAE;
     }
 
     @Override
@@ -65,6 +97,18 @@ public class Planet implements OrbitObject {
         planet.hasMoon = true;
     }
 
+    public PlanetAttribute getAttribute() {
+        return attribute;
+    }
+
+    public PlanetSize getSize() {
+        return size;
+    }
+
+    public PlanetRichness getRichness() {
+        return richness;
+    }
+
     public void colonizeHomePlanet(){
         colonized = true;
         totalPopulation = 5;
@@ -82,7 +126,7 @@ public class Planet implements OrbitObject {
             case VOLCANIC -> 5;
             case ICE -> 4;
         };
-        return base;
+        return base + size.getPopulationBonus();
     }
 
     public boolean canColonize(Fleet fleet) {
@@ -176,6 +220,10 @@ public class Planet implements OrbitObject {
             perCapita += b.getType().getFoodPerCapita();
         }
 
+        if (attribute != null) {
+            passive += attribute.getFoodBonus();
+        }
+
         return baseProduction + passive + (populationOnFood * perCapita);
     }
 
@@ -195,6 +243,10 @@ public class Planet implements OrbitObject {
             perCapita += b.getType().getProductionPerCapita();
         }
 
+        if (richness != null) {
+            passive += richness.getProductionBonus();
+        }
+
         return baseProduction + passive + (populationOnProduction * perCapita);
     }
 
@@ -208,6 +260,10 @@ public class Planet implements OrbitObject {
             perCapita += b.getType().getResearchPerCapita();
         }
 
+        if (attribute != null) {
+            passive += attribute.getResearchBonus();
+        }
+
         return baseProduction + passive + (populationOnResearch * perCapita);
     }
 
@@ -218,6 +274,10 @@ public class Planet implements OrbitObject {
         for (Building b : buildings) {
             passive += b.getType().getCreditsBonus();
             perTotalPopulation += b.getType().getCreditsPerTotalPopulation();
+        }
+
+        if (attribute != null) {
+            passive += attribute.getCreditsBonus();
         }
 
         return passive + (totalPopulation * perTotalPopulation);

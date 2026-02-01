@@ -47,6 +47,24 @@ public class PlanetInfoPanel extends JPanel {
         add(new JLabel("Typ: " + planet.getPlanetType().getDisplayName()));
         add(new JLabel("Zdatna do życia: " + yesNo(planet.isHabitable())));
         add(new JLabel("Księżyc: " + yesNo(planet.hasMoon())));
+
+        if (planet.getSize() != null) {
+            add(new JLabel("Rozmiar: " + planet.getSize().getDisplayName()));
+        }
+
+        if (planet.getRichness() != null) {
+            add(new JLabel("Bogactwo: " + planet.getRichness().getDisplayName()));
+        }
+
+        if (planet.getAttribute() != null && planet.getAttribute() != PlanetAttribute.NONE) {
+            String attrText = "Atrybut: " + planet.getAttribute().getDisplayName();
+            String desc = planet.getAttribute().getDescription();
+            if (!desc.isEmpty()) {
+                attrText += " (" + desc + ")";
+            }
+            add(new JLabel(attrText));
+        }
+
         add(Box.createVerticalStrut(10));
 
         if (!planet.isColonized()) {
@@ -95,17 +113,18 @@ public class PlanetInfoPanel extends JPanel {
         add(Box.createVerticalStrut(10));
 
         add(sectionTitle("Populacja i Zasoby"));
+        add(Box.createVerticalStrut(5));
+
+        JPanel popSection = new JPanel();
+        popSection.setLayout(new BoxLayout(popSection, BoxLayout.Y_AXIS));
+        popSection.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JLabel popLabel = new JLabel(String.format("Populacja: %d / %d",
                 planet.getTotalPopulation(), planet.getMaxPopulation()));
         popLabel.setFont(popLabel.getFont().deriveFont(Font.BOLD));
         popLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        add(popLabel);
-
-        JPanel growthPanel = new JPanel();
-        growthPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
-        growthPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 20));
-        growthPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        popSection.add(popLabel);
+        popSection.add(Box.createVerticalStrut(3));
 
         double foodAcc = planet.getFoodAccumulated();
         double foodNeeded = planet.getFoodNeededForGrowth();
@@ -114,6 +133,8 @@ public class PlanetInfoPanel extends JPanel {
         growthBar.setString("Wzrost: " + String.format("%.1f", foodAcc) + "/" + String.format("%.0f", foodNeeded));
         growthBar.setStringPainted(true);
         growthBar.setPreferredSize(new Dimension(300, 20));
+        growthBar.setMaximumSize(new Dimension(300, 20));
+        growthBar.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         if (foodAcc < 0) {
             growthBar.setForeground(Color.RED);
@@ -123,10 +144,8 @@ public class PlanetInfoPanel extends JPanel {
             growthBar.setForeground(new Color(100, 200, 100));
         }
 
-        growthPanel.add(growthBar);
-        add(growthPanel);
-
-        add(Box.createVerticalStrut(5));
+        popSection.add(growthBar);
+        popSection.add(Box.createVerticalStrut(5));
 
         double netFood = planet.getNetFoodProduction();
         String foodText = String.format("🌾 Żywność: %+.1f", netFood);
@@ -138,19 +157,21 @@ public class PlanetInfoPanel extends JPanel {
         } else {
             foodLabel.setForeground(new Color(100, 200, 100));
         }
-        add(foodLabel);
+        popSection.add(foodLabel);
 
         JLabel prodLabel = new JLabel("🏭 Produkcja: " + planet.getProduction());
         prodLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        add(prodLabel);
+        popSection.add(prodLabel);
 
         JLabel researchLabel = new JLabel("🔬 Badania: " + planet.getResearch());
         researchLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        add(researchLabel);
+        popSection.add(researchLabel);
 
         JLabel creditsLabel = new JLabel("💰 Kredyty: " + planet.getCredits());
         creditsLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        add(creditsLabel);
+        popSection.add(creditsLabel);
+
+        add(popSection);
 
         add(Box.createVerticalStrut(12));
 
