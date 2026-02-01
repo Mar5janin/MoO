@@ -112,7 +112,7 @@ public class PlanetInfoPanel extends JPanel {
     }
 
     // =============================
-    // KOLEJKA BUDOWY
+    // KOLEJKA BUDOWY - NAPRAWIONA WERSJA
     // =============================
     private void renderBuildQueueContent() {
 
@@ -136,10 +136,10 @@ public class PlanetInfoPanel extends JPanel {
 
                 GridBagConstraints gbc = new GridBagConstraints();
                 gbc.gridy = 0;
-                gbc.fill = GridBagConstraints.HORIZONTAL;
+                gbc.fill = GridBagConstraints.BOTH;
                 gbc.insets = new Insets(0, 4, 0, 4);
 
-                // ===== NAZWA (ELASTYCZNA) =====
+                // ===== NAZWA (ELASTYCZNA Z TOOLTIP) =====
                 JLabel nameLabel = new JLabel(fullText);
                 nameLabel.setToolTipText(fullText);
 
@@ -147,16 +147,7 @@ public class PlanetInfoPanel extends JPanel {
                 gbc.weightx = 1.0;
                 row.add(nameLabel, gbc);
 
-                SwingUtilities.invokeLater(() -> {
-                    FontMetrics fm = nameLabel.getFontMetrics(nameLabel.getFont());
-                    int width = nameLabel.getWidth();
-                    if (width > 0) {
-                        nameLabel.setText(
-                                ellipsizeToWidth(fullText, fm, width)
-                        );
-                    }
-                });
-
+                // ===== PANEL PRZYCISKÓW (STAŁA SZEROKOŚĆ) =====
                 JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT, BUTTON_GAP, 4));
 
                 int buttonsPanelWidth =
@@ -195,23 +186,27 @@ public class PlanetInfoPanel extends JPanel {
                 buttons.add(down);
                 buttons.add(remove);
 
+                // KLUCZOWA ZMIANA: anchor ustawiony na EAST i fill na NONE
                 gbc.gridx = 1;
                 gbc.weightx = 0;
+                gbc.fill = GridBagConstraints.NONE;
+                gbc.anchor = GridBagConstraints.EAST;
                 row.add(buttons, gbc);
 
-//                // ===== ELIPSA PO LAYOUTCIE =====
-//                row.addComponentListener(new ComponentAdapter() {
-//                    @Override
-//                    public void componentResized(ComponentEvent e) {
-//                        FontMetrics fm = nameLabel.getFontMetrics(nameLabel.getFont());
-//                        int width = nameLabel.getWidth();
-//                        if (width > 0) {
-//                            nameLabel.setText(
-//                                    ellipsizeToWidth(fullText, fm, width)
-//                            );
-//                        }
-//                    }
-//                });
+                // ===== AUTOMATYCZNE SKRACANIE TEKSTU =====
+                row.addComponentListener(new ComponentAdapter() {
+                    @Override
+                    public void componentResized(ComponentEvent e) {
+                        FontMetrics fm = nameLabel.getFontMetrics(nameLabel.getFont());
+                        // Obliczam dostępną szerokość dla tekstu
+                        int availableWidth = row.getWidth() - buttonsPanelWidth - 20;
+                        if (availableWidth > 0) {
+                            nameLabel.setText(
+                                    ellipsizeToWidth(fullText, fm, availableWidth)
+                            );
+                        }
+                    }
+                });
 
                 queuePanel.add(row);
             }
