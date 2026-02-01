@@ -28,7 +28,7 @@ public class FleetManagementDialog extends JDialog {
         this.onClose = onClose;
 
         setLayout(new BorderLayout());
-        setSize(500, 400);
+        setSize(500, 500);
         setLocationRelativeTo(parent);
 
         buildUI();
@@ -88,23 +88,38 @@ public class FleetManagementDialog extends JDialog {
 
         // Przycisk ruchu
         if (!fleet.isMoving()) {
-            JButton moveButton = new JButton("🚀 Przenieś flotę do sąsiedniego systemu");
+            JButton moveButton = new JButton("🚀 Przenieś flotę do wybranego systemu");
             moveButton.setFocusPainted(false);
             moveButton.addActionListener(e -> showMoveDialog());
             centerPanel.add(moveButton);
             centerPanel.add(Box.createVerticalStrut(5));
         } else {
-            JLabel movingLabel = new JLabel(
-                    "→ W drodze do: " + fleet.getDestination().getName() +
-                            " (" + fleet.getTurnsToDestination() + " tur)"
-            );
+            StarSystem dest = fleet.getDestination();
+            StarSystem next = fleet.getNextSystem();
+
+            String routeInfo = "→ W drodze do: " + dest.getName() +
+                    " (następny: " + next.getName() +
+                    ", " + fleet.getTurnsToDestination() + " tur)";
+
+            JLabel movingLabel = new JLabel(routeInfo);
             movingLabel.setForeground(new Color(100, 200, 100));
             centerPanel.add(movingLabel);
+            centerPanel.add(Box.createVerticalStrut(5));
+
+            // Przycisk anulowania podróży
+            JButton cancelButton = new JButton("❌ Anuluj podróż");
+            cancelButton.setFocusPainted(false);
+            cancelButton.addActionListener(e -> {
+                fleet.setDestination(null);
+                dispose();
+                onClose.run();
+            });
+            centerPanel.add(cancelButton);
             centerPanel.add(Box.createVerticalStrut(5));
         }
 
         // Przycisk oddzielenia statków
-        if (fleet.getShipCount() > 1) {
+        if (fleet.getShipCount() > 1 && !fleet.isMoving()) {
             JButton splitButton = new JButton("✂️ Oddziel statki (utwórz nową flotę)");
             splitButton.setFocusPainted(false);
             splitButton.addActionListener(e -> showSplitDialog());
@@ -122,20 +137,39 @@ public class FleetManagementDialog extends JDialog {
     }
 
     private void showMoveDialog() {
-        List<StarSystem> neighbors = location.getNeighbors();
+        // Pobierz wszystkie systemy z galaktyki
+        List<StarSystem> allSystems = game.getGalaxy().getSystems();
 
-        if (neighbors.isEmpty()) {
+        // Usuń obecny system z listy
+        List<StarSystem> availableSystems = allSystems.stream()
+                .filter(s -> s != location)
+                .sorted(Comparator.comparingDouble(location::distanceTo))
+                .toList();
+
+        if (availableSystems.isEmpty()) {
             JOptionPane.showMessageDialog(
                     this,
-                    "Brak sąsiednich systemów!",
+                    "Brak dostępnych systemów!",
                     "Nie można przenieść",
                     JOptionPane.WARNING_MESSAGE
             );
             return;
         }
 
-        String[] options = neighbors.stream()
-                .map(StarSystem::getName)
+        // Stwórz opcje z informacją o dystansie
+        String[] options = availableSystems.stream()
+                .map(s -> {
+                    List<StarSystem> path = Pathfinder.findPath(location, s);
+                    int distance = path != null ? path.size() - 1 : -1;
+
+                    if (distance == -1) {
+                        return s.getName() + " (NIEOSIĄGALNY)";
+                    } else if (distance == 1) {
+                        return s.getName() + " (1 tura)";
+                    } else {
+                        return s.getName() + " (" + distance + " tury)";
+                    }
+                })
                 .toArray(String[]::new);
 
         String selected = (String) JOptionPane.showInputDialog(
@@ -149,24 +183,41 @@ public class FleetManagementDialog extends JDialog {
         );
 
         if (selected != null) {
-            StarSystem destination = neighbors.stream()
-                    .filter(s -> s.getName().equals(selected))
+            // Wyciągnij nazwę systemu (przed nawiasem)
+            String systemName = selected.split(" \\(")[0];
+
+            StarSystem destination = availableSystems.stream()
+                    .filter(s -> s.getName().equals(systemName))
                     .findFirst()
                     .orElse(null);
 
             if (destination != null) {
-                // Oblicz liczbę tur (możesz dostosować wzór)
-                int turns = 1; // Na razie zawsze 1 tura do sąsiedniego systemu
+                boolean success = fleet.setDestination(destination);
 
-                fleet.setDestination(destination, turns);
+                if (success) {
+                    List<StarSystem> path = fleet.getRoute();
+                    int turns = fleet.getTurnsToDestination();
 
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Flota wyruszy do " + destination.getName() +
-                                "\nPrzybycie za: " + turns + " turę/tury",
-                        "Flota w drodze",
-                        JOptionPane.INFORMATION_MESSAGE
-                );
+                    StringBuilder routeText = new StringBuilder("Trasa: " + location.getName());
+                    for (StarSystem sys : path) {
+                        routeText.append(" → ").append(sys.getName());
+                    }
+
+                    JOptionPane.showMessageDialog(
+                            this,
+                            routeText + "\n\nPrzybycie za: " + turns +
+                                    (turns == 1 ? " turę" : turns < 5 ? " tury" : " tur"),
+                            "Flota w drodze",
+                            JOptionPane.INFORMATION_MESSAGE
+                    );
+                } else {
+                    JOptionPane.showMessageDialog(
+                            this,
+                            "Nie można znaleźć ścieżki do " + destination.getName(),
+                            "Błąd",
+                            JOptionPane.ERROR_MESSAGE
+                    );
+                }
 
                 dispose();
                 onClose.run();
@@ -177,7 +228,7 @@ public class FleetManagementDialog extends JDialog {
     private void showSplitDialog() {
         JDialog splitDialog = new JDialog(this, "Oddziel statki", true);
         splitDialog.setLayout(new BorderLayout(10, 10));
-        splitDialog.setSize(400, 300);
+        splitDialog.setSize(450, 400);
         splitDialog.setLocationRelativeTo(this);
 
         JPanel centerPanel = new JPanel();
@@ -195,10 +246,16 @@ public class FleetManagementDialog extends JDialog {
             int count = fleet.countShipType(type);
             if (count > 0) {
                 JPanel row = new JPanel(new BorderLayout(10, 0));
-                row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
+                row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+                row.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
-                JLabel label = new JLabel(type.getDisplayName() + " (max: " + count + ")");
-                JSpinner spinner = new JSpinner(new SpinnerNumberModel(0, 0, count - 1, 1));
+                JLabel label = new JLabel(type.getDisplayName() + " (dostępnych: " + count + ")");
+
+                // POPRAWKA: Minimum 0, maksimum (count - 1) jeśli count > 1, inaczej 0
+                int maxValue = count > 1 ? count - 1 : 0;
+                SpinnerNumberModel model = new SpinnerNumberModel(0, 0, maxValue, 1);
+                JSpinner spinner = new JSpinner(model);
+                spinner.setPreferredSize(new Dimension(80, 25));
 
                 spinners.put(type, spinner);
 
@@ -206,11 +263,12 @@ public class FleetManagementDialog extends JDialog {
                 row.add(spinner, BorderLayout.EAST);
 
                 centerPanel.add(row);
-                centerPanel.add(Box.createVerticalStrut(5));
             }
         }
 
-        splitDialog.add(centerPanel, BorderLayout.CENTER);
+        JScrollPane scrollPane = new JScrollPane(centerPanel);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        splitDialog.add(scrollPane, BorderLayout.CENTER);
 
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 
@@ -225,10 +283,13 @@ public class FleetManagementDialog extends JDialog {
 
                     if (toMove > 0) {
                         int moved = 0;
-                        Iterator<Ship> it = fleet.getShips().iterator();
 
-                        while (it.hasNext() && moved < toMove) {
-                            Ship ship = it.next();
+                        // Skopiuj listę, żeby uniknąć ConcurrentModificationException
+                        List<Ship> fleetShips = new ArrayList<>(fleet.getShips());
+
+                        for (Ship ship : fleetShips) {
+                            if (moved >= toMove) break;
+
                             if (ship.getType() == type) {
                                 shipsToMove.add(ship);
                                 moved++;
@@ -242,6 +303,17 @@ public class FleetManagementDialog extends JDialog {
                 JOptionPane.showMessageDialog(
                         splitDialog,
                         "Wybierz przynajmniej jeden statek!",
+                        "Błąd",
+                        JOptionPane.WARNING_MESSAGE
+                );
+                return;
+            }
+
+            // Sprawdź czy nie próbujemy przenieść WSZYSTKICH statków
+            if (shipsToMove.size() >= fleet.getShipCount()) {
+                JOptionPane.showMessageDialog(
+                        splitDialog,
+                        "Musisz zostawić przynajmniej jeden statek w oryginalnej flocie!",
                         "Błąd",
                         JOptionPane.WARNING_MESSAGE
                 );

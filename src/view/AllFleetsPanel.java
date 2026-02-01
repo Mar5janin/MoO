@@ -19,7 +19,7 @@ public class AllFleetsPanel extends JDialog {
         this.mainWindow = parent;
 
         setLayout(new BorderLayout());
-        setSize(700, 500);
+        setSize(800, 600);
         setLocationRelativeTo(parent);
 
         buildUI();
@@ -103,7 +103,7 @@ public class AllFleetsPanel extends JDialog {
                 BorderFactory.createLineBorder(new Color(100, 150, 255), 2),
                 BorderFactory.createEmptyBorder(10, 15, 10, 15)
         ));
-        panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 120));
+        panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 150));
 
         // Lewa część - informacje
         JPanel infoPanel = new JPanel();
@@ -142,16 +142,32 @@ public class AllFleetsPanel extends JDialog {
         infoPanel.add(Box.createVerticalStrut(3));
         infoPanel.add(compositionLabel);
 
-        // Status ruchu
+        // Status ruchu z trasą
         if (fleet.isMoving()) {
+            StarSystem dest = fleet.getDestination();
+            StarSystem next = fleet.getNextSystem();
+
             JLabel movingLabel = new JLabel(
-                    "→ W drodze do: " + fleet.getDestination().getName() +
+                    "→ Cel: " + dest.getName() + " | Następny: " + next.getName() +
                             " (" + fleet.getTurnsToDestination() + " tur)"
             );
             movingLabel.setForeground(new Color(100, 200, 100));
             movingLabel.setFont(movingLabel.getFont().deriveFont(Font.BOLD, 11f));
             infoPanel.add(Box.createVerticalStrut(3));
             infoPanel.add(movingLabel);
+
+            // Trasa
+            List<StarSystem> route = fleet.getRoute();
+            if (route != null && route.size() > 0) {
+                StringBuilder routeStr = new StringBuilder("Trasa: " + location.getName());
+                for (StarSystem sys : route) {
+                    routeStr.append(" → ").append(sys.getName());
+                }
+                JLabel routeLabel = new JLabel(routeStr.toString());
+                routeLabel.setFont(routeLabel.getFont().deriveFont(9f));
+                routeLabel.setForeground(Color.LIGHT_GRAY);
+                infoPanel.add(routeLabel);
+            }
         }
 
         panel.add(infoPanel, BorderLayout.CENTER);

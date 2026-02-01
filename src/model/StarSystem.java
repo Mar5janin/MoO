@@ -79,11 +79,18 @@ public class StarSystem {
         fleets.remove(fleet);
     }
 
+    /**
+     * Zwraca pierwszą flotę gracza w systemie
+     * UWAGA: Może być wiele osobnych flot!
+     */
     public Fleet getPlayerFleet() {
-        // Na razie zakładamy że gracz ma tylko jedną flotę w systemie
         return fleets.isEmpty() ? null : fleets.get(0);
     }
 
+    /**
+     * Zwraca istniejącą flotę lub tworzy nową
+     * UWAGA: Ta metoda jest używana tylko przy tworzeniu statków na planecie
+     */
     public Fleet getOrCreatePlayerFleet() {
         Fleet fleet = getPlayerFleet();
         if (fleet == null) {

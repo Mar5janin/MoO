@@ -107,12 +107,40 @@ public class MainWindow extends JFrame {
             // Sprawdź czy można zakończyć turę
             if (!game.canEndTurn()) {
                 String reason = game.getEndTurnBlockReason();
-                JOptionPane.showMessageDialog(
+
+                // Pokaż dialog z możliwością przejścia do problemu
+                int result = JOptionPane.showOptionDialog(
                         this,
                         reason,
                         "Nie można zakończyć tury",
-                        JOptionPane.WARNING_MESSAGE
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.WARNING_MESSAGE,
+                        null,
+                        new String[]{"Przejdź", "Anuluj"},
+                        "Przejdź"
                 );
+
+                if (result == JOptionPane.YES_OPTION) {
+                    // Sprawdź co jest problemem i otwórz odpowiedni panel
+                    if (reason.contains("nie ma kolejki budowy")) {
+                        // Znajdź planetę bez kolejki
+                        for (StarSystem system : game.getGalaxy().getSystems()) {
+                            for (model.OrbitSlot orbit : system.getOrbits()) {
+                                if (orbit.getObject() instanceof Planet planet) {
+                                    if (planet.isColonized() && planet.getBuildQueue().isEmpty()) {
+                                        // Otwórz panel tej planety
+                                        showPlanet(planet, system);
+                                        return;
+                                    }
+                                }
+                            }
+                        }
+                    } else if (reason.contains("projekt badawczy")) {
+                        // Otwórz panel badań
+                        new ResearchPanel(this, game).setVisible(true);
+                    }
+                }
+
                 return;
             }
 

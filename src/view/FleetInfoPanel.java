@@ -4,7 +4,7 @@ import model.*;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Map;
+import java.util.List;
 
 public class FleetInfoPanel extends JPanel {
 
@@ -65,13 +65,36 @@ public class FleetInfoPanel extends JPanel {
             }
         }
 
-        // Status ruchu
+        // Status ruchu z pełną trasą
         if (fleet.isMoving()) {
             panel.add(Box.createVerticalStrut(5));
-            JLabel moving = new JLabel("→ W drodze do: " + fleet.getDestination().getName() +
-                    " (" + fleet.getTurnsToDestination() + " tur)");
+
+            StarSystem dest = fleet.getDestination();
+            StarSystem next = fleet.getNextSystem();
+
+            JLabel moving = new JLabel("→ W drodze do: " + dest.getName());
             moving.setForeground(new Color(100, 150, 255));
+            moving.setFont(moving.getFont().deriveFont(Font.BOLD));
             panel.add(moving);
+
+            JLabel nextLabel = new JLabel("   Następny: " + next.getName() +
+                    " (" + fleet.getTurnsToDestination() + " tur)");
+            nextLabel.setForeground(new Color(150, 180, 255));
+            panel.add(nextLabel);
+
+            // Pokaż trasę
+            List<StarSystem> route = fleet.getRoute();
+            if (route != null && route.size() > 1) {
+                StringBuilder routeStr = new StringBuilder("   Trasa: ");
+                for (int i = 0; i < route.size(); i++) {
+                    if (i > 0) routeStr.append(" → ");
+                    routeStr.append(route.get(i).getName());
+                }
+                JLabel routeLabel = new JLabel(routeStr.toString());
+                routeLabel.setForeground(Color.LIGHT_GRAY);
+                routeLabel.setFont(routeLabel.getFont().deriveFont(10f));
+                panel.add(routeLabel);
+            }
         }
 
         return panel;
