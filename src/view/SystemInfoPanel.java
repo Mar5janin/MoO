@@ -21,7 +21,10 @@ public class SystemInfoPanel extends JPanel {
 
         int orbitIndex = 1;
         for (OrbitSlot orbit : system.getOrbits()) {
-            add(createOrbitComponent(orbitIndex++, orbit, system, mainWindow, game));
+            JComponent component = createOrbitComponent(orbitIndex++, orbit, system, mainWindow, game);
+            component.setAlignmentX(Component.LEFT_ALIGNMENT);
+            add(component);
+            add(Box.createVerticalStrut(3));
         }
 
         add(Box.createVerticalStrut(15));
@@ -40,6 +43,7 @@ public class SystemInfoPanel extends JPanel {
             Fleet fleet = system.getPlayerFleet();
             if (fleet != null && system.canBuildBattleStation(fleet, game.getResearchManager())) {
                 JButton buildStationBtn = new JButton("Zbuduj Posterunek Bojowy (100 prod., użyje Fabryki Kosmicznej)");
+                buildStationBtn.setAlignmentX(Component.LEFT_ALIGNMENT);
                 buildStationBtn.addActionListener(e -> {
                     if (game.spendCredits(100 * Planet.CREDITS_PER_PRODUCTION)) {
                         Ship factory = fleet.getShips().stream()
@@ -100,6 +104,7 @@ public class SystemInfoPanel extends JPanel {
 
             button.setHorizontalAlignment(SwingConstants.LEFT);
             button.setFocusPainted(false);
+            button.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
 
             button.addActionListener(e ->
                     mainWindow.showPlanet(planet, system)
@@ -109,16 +114,26 @@ public class SystemInfoPanel extends JPanel {
         }
 
         if (orbit.getObject() instanceof AsteroidField asteroid) {
-            JPanel panel = new JPanel(new BorderLayout());
+            JPanel panel = new JPanel();
+            panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+            panel.setAlignmentX(Component.LEFT_ALIGNMENT);
+            panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 60));
+
             JLabel label = new JLabel("Orbita " + index + ": Pole asteroid");
+            label.setAlignmentX(Component.LEFT_ALIGNMENT);
 
             if (asteroid.hasInstallation()) {
                 label.setText(label.getText() + " [" + asteroid.getInstallation().getType().getDisplayName() + "]");
+                panel.add(label);
             } else {
+                panel.add(label);
+
                 Fleet fleet = system.getPlayerFleet();
                 if (fleet != null && asteroid.canBuildInstallation(fleet)) {
-                    JButton buildBtn = new JButton("Buduj instalację");
+                    JButton buildBtn = new JButton("Buduj instalację (50 prod., użyje Fabryki Kosmicznej)");
+                    buildBtn.setAlignmentX(Component.LEFT_ALIGNMENT);
                     buildBtn.setFocusPainted(false);
+                    buildBtn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 25));
                     buildBtn.addActionListener(e -> {
                         String[] options = {"Laboratorium (+5 badań)", "Kopalnia (+5 kredytów)"};
                         int choice = JOptionPane.showOptionDialog(
@@ -149,6 +164,12 @@ public class SystemInfoPanel extends JPanel {
                                     asteroid.setInstallation(new SpaceInstallation(type));
                                     mainWindow.updateResourceDisplay();
                                     mainWindow.onSystemSelected(system);
+                                    JOptionPane.showMessageDialog(
+                                            this,
+                                            "Instalacja zbudowana!",
+                                            "Sukces",
+                                            JOptionPane.INFORMATION_MESSAGE
+                                    );
                                 }
                             } else {
                                 JOptionPane.showMessageDialog(
@@ -160,25 +181,34 @@ public class SystemInfoPanel extends JPanel {
                             }
                         }
                     });
-                    panel.add(buildBtn, BorderLayout.EAST);
+                    panel.add(buildBtn);
                 }
             }
 
-            panel.add(label, BorderLayout.CENTER);
             return panel;
         }
 
         if (orbit.getObject() instanceof GasGiant giant) {
-            JPanel panel = new JPanel(new BorderLayout());
+            JPanel panel = new JPanel();
+            panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+            panel.setAlignmentX(Component.LEFT_ALIGNMENT);
+            panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 60));
+
             JLabel label = new JLabel("Orbita " + index + ": Gazowy gigant");
+            label.setAlignmentX(Component.LEFT_ALIGNMENT);
 
             if (giant.hasInstallation()) {
                 label.setText(label.getText() + " [" + giant.getInstallation().getType().getDisplayName() + "]");
+                panel.add(label);
             } else {
+                panel.add(label);
+
                 Fleet fleet = system.getPlayerFleet();
                 if (fleet != null && giant.canBuildInstallation(fleet)) {
-                    JButton buildBtn = new JButton("Zbuduj Kopalnię Gazową");
+                    JButton buildBtn = new JButton("Zbuduj Kopalnię Gazową (60 prod., użyje Fabryki Kosmicznej)");
+                    buildBtn.setAlignmentX(Component.LEFT_ALIGNMENT);
                     buildBtn.setFocusPainted(false);
+                    buildBtn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 25));
                     buildBtn.addActionListener(e -> {
                         int cost = SpaceInstallationType.GAS_MINE.getCost() * Planet.CREDITS_PER_PRODUCTION;
 
@@ -192,6 +222,12 @@ public class SystemInfoPanel extends JPanel {
                                 giant.setInstallation(new SpaceInstallation(SpaceInstallationType.GAS_MINE));
                                 mainWindow.updateResourceDisplay();
                                 mainWindow.onSystemSelected(system);
+                                JOptionPane.showMessageDialog(
+                                        this,
+                                        "Kopalnia Gazowa zbudowana!",
+                                        "Sukces",
+                                        JOptionPane.INFORMATION_MESSAGE
+                                );
                             }
                         } else {
                             JOptionPane.showMessageDialog(
@@ -202,11 +238,10 @@ public class SystemInfoPanel extends JPanel {
                             );
                         }
                     });
-                    panel.add(buildBtn, BorderLayout.EAST);
+                    panel.add(buildBtn);
                 }
             }
 
-            panel.add(label, BorderLayout.CENTER);
             return panel;
         }
 
