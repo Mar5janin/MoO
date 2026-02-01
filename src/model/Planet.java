@@ -283,11 +283,6 @@ public class Planet implements OrbitObject {
         return passive + (totalPopulation * perTotalPopulation);
     }
 
-    @Deprecated
-    public int getPopulation() {
-        return getTotalPopulation();
-    }
-
     public List<Building> getBuildings() {
         return buildings;
     }
