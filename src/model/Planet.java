@@ -387,10 +387,11 @@ public class Planet implements OrbitObject {
         if (netFoodProduction < 0) {
             foodAccumulated += netFoodProduction;
 
-            if (foodAccumulated < 0) {
-                int deaths = Math.min(totalPopulation, (int)Math.abs(foodAccumulated) / 10);
-                totalPopulation = Math.max(1, totalPopulation - deaths);
-                foodAccumulated = 0;
+            if (foodAccumulated <= -10 && totalPopulation > 1) {
+                int deaths = (int)(Math.abs(foodAccumulated) / 10);
+                deaths = Math.min(deaths, totalPopulation - 1);
+                totalPopulation -= deaths;
+                foodAccumulated += (deaths * 10);
                 rebalancePopulation();
             }
         } else {

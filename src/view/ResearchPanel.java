@@ -24,7 +24,6 @@ public class ResearchPanel extends JDialog {
     }
 
     private void buildUI() {
-        // Górny panel z informacjami
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 20, 10));
         topPanel.setBackground(new Color(40, 40, 40));
         topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -49,7 +48,6 @@ public class ResearchPanel extends JDialog {
         topPanel.add(currentLabel);
         add(topPanel, BorderLayout.NORTH);
 
-        // Panel z listą dostępnych technologii
         techListPanel = new JPanel();
         techListPanel.setLayout(new BoxLayout(techListPanel, BoxLayout.Y_AXIS));
         techListPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -58,7 +56,6 @@ public class ResearchPanel extends JDialog {
         scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         add(scroll, BorderLayout.CENTER);
 
-        // Dolny panel z przyciskiem zamknięcia
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         JButton closeButton = new JButton("Zamknij");
         closeButton.addActionListener(e -> dispose());
@@ -72,7 +69,6 @@ public class ResearchPanel extends JDialog {
         techListPanel.removeAll();
         ResearchManager rm = game.getResearchManager();
 
-        // Grupuj technologie według kategorii
         addCategorySection("Przemysł i produkcja",
                 Technology.IMPROVED_PRODUCTION, Technology.IMPROVED_FARMING,
                 Technology.SPACE_CONSTRUCTION, Technology.ADVANCED_MINING);
@@ -86,7 +82,7 @@ public class ResearchPanel extends JDialog {
                 Technology.DEFENSIVE_PLATFORMS);
 
         addCategorySection("Ekonomia",
-                Technology.TRADE_NETWORKS);
+                Technology.TRADE_NETWORKS, Technology.ADVANCED_ECONOMICS);
 
         techListPanel.revalidate();
         techListPanel.repaint();
@@ -116,9 +112,8 @@ public class ResearchPanel extends JDialog {
                 BorderFactory.createLineBorder(Color.GRAY),
                 BorderFactory.createEmptyBorder(8, 10, 8, 10)
         ));
-        panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 100));
+        panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 120));
 
-        // Lewa część - informacje
         JPanel infoPanel = new JPanel();
         infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
 
@@ -132,7 +127,6 @@ public class ResearchPanel extends JDialog {
         JLabel costLabel = new JLabel("Koszt: " + tech.getCost() + " punktów badań");
         costLabel.setFont(costLabel.getFont().deriveFont(10f));
 
-        // Efekty
         StringBuilder effectsText = new StringBuilder("Efekty: ");
         for (int i = 0; i < tech.getEffects().size(); i++) {
             if (i > 0) effectsText.append(", ");
@@ -149,9 +143,26 @@ public class ResearchPanel extends JDialog {
         infoPanel.add(costLabel);
         infoPanel.add(effectsLabel);
 
+        if (tech.hasPrerequisites() && !rm.isResearched(tech)) {
+            StringBuilder prereqText = new StringBuilder("Wymaga: ");
+            boolean first = true;
+            for (Technology prereq : tech.getPrerequisites()) {
+                if (!first) prereqText.append(", ");
+                prereqText.append(prereq.getDisplayName());
+                if (rm.isResearched(prereq)) {
+                    prereqText.append(" ✓");
+                }
+                first = false;
+            }
+            JLabel prereqLabel = new JLabel(prereqText.toString());
+            prereqLabel.setFont(prereqLabel.getFont().deriveFont(10f));
+            prereqLabel.setForeground(new Color(255, 150, 100));
+            infoPanel.add(Box.createVerticalStrut(2));
+            infoPanel.add(prereqLabel);
+        }
+
         panel.add(infoPanel, BorderLayout.CENTER);
 
-        // Prawa część - przycisk
         JButton actionButton = new JButton();
         actionButton.setFocusPainted(false);
 
@@ -179,18 +190,6 @@ public class ResearchPanel extends JDialog {
         } else {
             actionButton.setText("Niedostępne");
             actionButton.setEnabled(false);
-
-            // Pokaż brakujące prerequisity
-            if (tech.hasPrerequisites()) {
-                StringBuilder missing = new StringBuilder("<html>Wymaga:<br>");
-                for (Technology prereq : tech.getPrerequisites()) {
-                    if (!rm.isResearched(prereq)) {
-                        missing.append("• ").append(prereq.getDisplayName()).append("<br>");
-                    }
-                }
-                missing.append("</html>");
-                actionButton.setToolTipText(missing.toString());
-            }
         }
 
         panel.add(actionButton, BorderLayout.EAST);

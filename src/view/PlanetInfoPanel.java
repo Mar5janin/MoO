@@ -99,11 +99,12 @@ public class PlanetInfoPanel extends JPanel {
         JLabel popLabel = new JLabel(String.format("Populacja: %d / %d",
                 planet.getTotalPopulation(), planet.getMaxPopulation()));
         popLabel.setFont(popLabel.getFont().deriveFont(Font.BOLD));
+        popLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
         add(popLabel);
 
         JPanel growthPanel = new JPanel();
-        growthPanel.setLayout(new BoxLayout(growthPanel, BoxLayout.X_AXIS));
-        growthPanel.setMaximumSize(new Dimension(300, 20));
+        growthPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        growthPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 20));
         growthPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         double foodAcc = planet.getFoodAccumulated();
@@ -123,7 +124,6 @@ public class PlanetInfoPanel extends JPanel {
         }
 
         growthPanel.add(growthBar);
-        growthPanel.add(Box.createHorizontalGlue());
         add(growthPanel);
 
         add(Box.createVerticalStrut(5));
@@ -131,6 +131,7 @@ public class PlanetInfoPanel extends JPanel {
         double netFood = planet.getNetFoodProduction();
         String foodText = String.format("🌾 Żywność: %+.1f", netFood);
         JLabel foodLabel = new JLabel(foodText);
+        foodLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
         if (netFood < 0) {
             foodLabel.setForeground(Color.RED);
             foodLabel.setFont(foodLabel.getFont().deriveFont(Font.BOLD));
@@ -139,9 +140,17 @@ public class PlanetInfoPanel extends JPanel {
         }
         add(foodLabel);
 
-        add(new JLabel("🏭 Produkcja: " + planet.getProduction()));
-        add(new JLabel("🔬 Badania: " + planet.getResearch()));
-        add(new JLabel("💰 Kredyty: " + planet.getCredits()));
+        JLabel prodLabel = new JLabel("🏭 Produkcja: " + planet.getProduction());
+        prodLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        add(prodLabel);
+
+        JLabel researchLabel = new JLabel("🔬 Badania: " + planet.getResearch());
+        researchLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        add(researchLabel);
+
+        JLabel creditsLabel = new JLabel("💰 Kredyty: " + planet.getCredits());
+        creditsLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        add(creditsLabel);
 
         add(Box.createVerticalStrut(12));
 
