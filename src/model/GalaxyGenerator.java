@@ -160,13 +160,13 @@ public class GalaxyGenerator {
                 .filter(s -> s.getName().equals("Sol"))
                 .findFirst() .orElse(null); if (sol == null) return;
 
-                for (StarSystem system : galaxy.getSystems()) {
+        for (StarSystem system : galaxy.getSystems()) {
 
-                    if (system.getName().equals("Alpha Centauri") || system.getName().equals("Sirius")) {
-                        sol.addNeighbor(system);
-                        system.addNeighbor(sol);
-                    }
-                }
+            if (system.getName().equals("Alpha Centauri") || system.getName().equals("Sirius")) {
+                sol.addNeighbor(system);
+                system.addNeighbor(sol);
+            }
+        }
     }
 
     private static double distance(int x1, int y1, int x2, int y2) {
@@ -366,6 +366,11 @@ public class GalaxyGenerator {
         Planet startPlanet = new Planet(PlanetType.TERRAN);
         startPlanet.colonizeHomePlanet();
         startPlanet.setMoon(startPlanet);
+
+        startPlanet.getBuildings().add(new Building(BuildingType.OSADA_GORNICZA));
+        startPlanet.getBuildings().add(new Building(BuildingType.CENTRUM_ADMINISTRACYJNE));
+        startPlanet.getBuildings().add(new Building(BuildingType.WIEZA_KOMUNIKACYJNA));
+        startPlanet.getBuildings().add(new Building(BuildingType.TARG_KOLONIALNY));
 
         if (home.getOrbits().isEmpty()) {
             home.addOrbit(new OrbitSlot(1, startPlanet));

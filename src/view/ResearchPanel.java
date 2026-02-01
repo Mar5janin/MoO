@@ -76,13 +76,18 @@ public class ResearchPanel extends JDialog {
         addCategorySection("Badania i rozwój",
                 Technology.ADVANCED_RESEARCH, Technology.POPULATION_GROWTH);
 
-        addCategorySection("Technologie wojskowe",
+        addCategorySection("Technologie wojskowe - podstawowe",
                 Technology.BASIC_WEAPONS, Technology.IMPROVED_WEAPONS,
-                Technology.IMPROVED_ARMOR, Technology.HEAVY_SHIPS,
+                Technology.IMPROVED_ARMOR, Technology.DESTROYER_TECH,
                 Technology.DEFENSIVE_PLATFORMS);
 
-        addCategorySection("Ekonomia",
-                Technology.TRADE_NETWORKS, Technology.ADVANCED_ECONOMICS);
+        addCategorySection("Technologie wojskowe - zaawansowane",
+                Technology.HEAVY_SHIPS, Technology.CAPITAL_SHIPS,
+                Technology.ADVANCED_FLEET_DOCTRINE);
+
+        addCategorySection("Ekonomia i rozwój cywilny",
+                Technology.TRADE_NETWORKS, Technology.ADVANCED_ECONOMICS,
+                Technology.COLONIAL_ADMINISTRATION, Technology.URBANIZATION);
 
         techListPanel.revalidate();
         techListPanel.repaint();
