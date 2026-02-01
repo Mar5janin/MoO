@@ -101,13 +101,18 @@ public class PlanetInfoPanel extends JPanel {
         popLabel.setFont(popLabel.getFont().deriveFont(Font.BOLD));
         add(popLabel);
 
-        int foodAcc = planet.getFoodAccumulated();
-        int foodNeeded = planet.getFoodNeededForGrowth();
-        JProgressBar growthBar = new JProgressBar(0, foodNeeded);
-        growthBar.setValue(Math.max(0, foodAcc));
-        growthBar.setString("Wzrost: " + foodAcc + "/" + foodNeeded);
+        JPanel growthPanel = new JPanel();
+        growthPanel.setLayout(new BoxLayout(growthPanel, BoxLayout.X_AXIS));
+        growthPanel.setMaximumSize(new Dimension(300, 20));
+        growthPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        double foodAcc = planet.getFoodAccumulated();
+        double foodNeeded = planet.getFoodNeededForGrowth();
+        JProgressBar growthBar = new JProgressBar(0, (int)foodNeeded);
+        growthBar.setValue(Math.max(0, (int)foodAcc));
+        growthBar.setString("Wzrost: " + String.format("%.1f", foodAcc) + "/" + String.format("%.0f", foodNeeded));
         growthBar.setStringPainted(true);
-        growthBar.setMaximumSize(new Dimension(300, 20));
+        growthBar.setPreferredSize(new Dimension(300, 20));
 
         if (foodAcc < 0) {
             growthBar.setForeground(Color.RED);
@@ -117,18 +122,20 @@ public class PlanetInfoPanel extends JPanel {
             growthBar.setForeground(new Color(100, 200, 100));
         }
 
-        add(growthBar);
+        growthPanel.add(growthBar);
+        growthPanel.add(Box.createHorizontalGlue());
+        add(growthPanel);
 
         add(Box.createVerticalStrut(5));
 
-        int netFood = planet.getNetFoodProduction();
-        String foodText = "🌾 Żywność: " + planet.getFoodProduction() +
-                " (utrzymanie: -" + planet.getTotalPopulation() +
-                ", netto: " + (netFood >= 0 ? "+" : "") + netFood + ")";
+        double netFood = planet.getNetFoodProduction();
+        String foodText = String.format("🌾 Żywność: %+.1f", netFood);
         JLabel foodLabel = new JLabel(foodText);
         if (netFood < 0) {
             foodLabel.setForeground(Color.RED);
             foodLabel.setFont(foodLabel.getFont().deriveFont(Font.BOLD));
+        } else {
+            foodLabel.setForeground(new Color(100, 200, 100));
         }
         add(foodLabel);
 
@@ -146,7 +153,7 @@ public class PlanetInfoPanel extends JPanel {
                 BorderFactory.createLineBorder(Color.GRAY),
                 BorderFactory.createEmptyBorder(8, 10, 8, 10)
         ));
-        popManagement.setMaximumSize(new Dimension(500, 250));
+        popManagement.setMaximumSize(new Dimension(500, 200));
 
         popManagement.add(createPopulationControl(
                 "🌾 Żywność",
@@ -172,14 +179,6 @@ public class PlanetInfoPanel extends JPanel {
                 planet.getTotalPopulation(),
                 planet::setPopulationOnResearch
         ));
-
-        popManagement.add(Box.createVerticalStrut(8));
-
-        int totalPop = planet.getTotalPopulation();
-        JLabel creditsInfo = new JLabel("💰 Wszystkie osoby płacą podatki (+" + totalPop + " kredytów)");
-        creditsInfo.setForeground(new Color(255, 215, 0));
-        creditsInfo.setFont(creditsInfo.getFont().deriveFont(Font.BOLD, 11f));
-        popManagement.add(creditsInfo);
 
         add(popManagement);
 

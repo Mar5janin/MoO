@@ -17,26 +17,20 @@ public class Planet implements OrbitObject {
     private static final int MAX_QUEUE = 5;
     private final List<ProductionOrder> productionQueue = new ArrayList<>();
 
-    // Mapy pamiętające postęp
     private final Map<BuildingType, Integer> savedBuildingProgress = new HashMap<>();
     private final Map<ShipType, Integer> savedShipProgress = new HashMap<>();
 
-    // === SYSTEM POPULACJI ===
     private int totalPopulation = 0;
-    private int maxPopulation = 10; // Zależy od typu planety i budynków
+    private int maxPopulation = 10;
 
-    // Przypisanie populacji do różnych zadań
     private int populationOnFood = 0;
     private int populationOnProduction = 0;
     private int populationOnResearch = 0;
 
-    // Akumulacja żywności
-    private int foodAccumulated = 0;
+    private double foodAccumulated = 0;
 
-    // NOWA MECHANIKA: Utrzymanie populacji
-    private static final int FOOD_UPKEEP_PER_CITIZEN = 1; // Każda osoba potrzebuje 1 jedzenia per turę
+    private static final double FOOD_UPKEEP_PER_CITIZEN = 0.4;
 
-    // Przelicznik kredytów na produkcję (dla rush buy)
     public static final int CREDITS_PER_PRODUCTION = 2;
 
     public Planet(PlanetType type) {
@@ -75,7 +69,6 @@ public class Planet implements OrbitObject {
         colonized = true;
         totalPopulation = 5;
         maxPopulation = calculateMaxPopulation();
-        // Początkowe przypisanie
         populationOnFood = 2;
         populationOnProduction = 2;
         populationOnResearch = 1;
@@ -92,19 +85,16 @@ public class Planet implements OrbitObject {
         return base;
     }
 
-    // === KOLONIZACJA ===
     public boolean canColonize(Fleet fleet) {
         if (!habitable || colonized) return false;
         if (fleet == null) return false;
 
-        // Sprawdź czy flota ma statek kolonizacyjny
         return fleet.countShipType(ShipType.COLONY_SHIP) > 0;
     }
 
     public void colonize(Fleet fleet) {
         if (!canColonize(fleet)) return;
 
-        // Usuń statek kolonizacyjny z floty
         Ship colonyShip = fleet.getShips().stream()
                 .filter(s -> s.getType() == ShipType.COLONY_SHIP)
                 .findFirst()
@@ -118,19 +108,16 @@ public class Planet implements OrbitObject {
         totalPopulation = 1;
         maxPopulation = calculateMaxPopulation();
 
-        // Początkowe przypisanie - 1 osoba początkowo na produkcji żywności
         populationOnFood = 1;
         populationOnProduction = 0;
         populationOnResearch = 0;
     }
 
-    // === ZARZĄDZANIE POPULACJĄ ===
     public int getTotalPopulation() {
         return totalPopulation;
     }
 
     public int getMaxPopulation() {
-        // Bazowa + bonusy z budynków
         int max = maxPopulation;
         for (Building b : buildings) {
             max += b.getType().getPopulationCapacityBonus();
@@ -169,11 +156,9 @@ public class Planet implements OrbitObject {
         rebalancePopulation();
     }
 
-    // Upewnij się że suma nie przekracza total
     private void rebalancePopulation() {
         int sum = populationOnFood + populationOnProduction + populationOnResearch;
         if (sum > totalPopulation) {
-            // Proporcjonalna redukcja
             double ratio = (double) totalPopulation / sum;
             populationOnFood = (int) (populationOnFood * ratio);
             populationOnProduction = (int) (populationOnProduction * ratio);
@@ -181,13 +166,8 @@ public class Planet implements OrbitObject {
         }
     }
 
-    // === GETTERY ZASOBÓW (uwzględniają populację i budynki) ===
-
-    /**
-     * Produkcja żywności = (populacja × 1) + pasywna + (populacja × bonus per capita)
-     */
     public int getFoodProduction() {
-        int baseProduction = populationOnFood; // Każda osoba produkuje 1 punkt bazowo
+        int baseProduction = populationOnFood;
         int passive = 0;
         int perCapita = 0;
 
@@ -199,14 +179,14 @@ public class Planet implements OrbitObject {
         return baseProduction + passive + (populationOnFood * perCapita);
     }
 
-    public int getNetFoodProduction() {
-        int production = getFoodProduction();
-        int upkeep = totalPopulation * FOOD_UPKEEP_PER_CITIZEN;
+    public double getNetFoodProduction() {
+        double production = getFoodProduction();
+        double upkeep = totalPopulation * FOOD_UPKEEP_PER_CITIZEN;
         return production - upkeep;
     }
 
     public int getProduction() {
-        int baseProduction = populationOnProduction; // Każda osoba produkuje 1 punkt bazowo
+        int baseProduction = populationOnProduction;
         int passive = 0;
         int perCapita = 0;
 
@@ -219,7 +199,7 @@ public class Planet implements OrbitObject {
     }
 
     public int getResearch() {
-        int baseProduction = populationOnResearch; // Każda osoba produkuje 1 punkt bazowo
+        int baseProduction = populationOnResearch;
         int passive = 0;
         int perCapita = 0;
 
@@ -233,7 +213,7 @@ public class Planet implements OrbitObject {
 
     public int getCredits() {
         int passive = 0;
-        int perTotalPopulation = 1; // Bazowy podatek od każdej osoby
+        int perTotalPopulation = 1;
 
         for (Building b : buildings) {
             passive += b.getType().getCreditsBonus();
@@ -256,7 +236,6 @@ public class Planet implements OrbitObject {
         return productionQueue;
     }
 
-    // === BUDYNKI ===
     public boolean hasBuilding(BuildingType type) {
         return buildings.stream()
                 .anyMatch(b -> b.getType() == type);
@@ -285,14 +264,11 @@ public class Planet implements OrbitObject {
         if (type.requiresMoon() && !hasMoon) return false;
         if (!type.isAvailable(researchManager)) return false;
 
-        // Sprawdź czy można budować wiele
         if (!type.canBuildMultiple()) {
-            // Budynek jednorazowy - sprawdź czy już istnieje lub jest w kolejce
             if (hasBuilding(type) || isBuildingInQueue(type)) {
                 return false;
             }
         } else {
-            // Budynek wielokrotny - sprawdź limit
             int currentCount = countBuilding(type);
             int inQueue = (int) productionQueue.stream()
                     .filter(o -> o.getProductionType() == ProductionType.BUILDING)
@@ -313,7 +289,6 @@ public class Planet implements OrbitObject {
         return true;
     }
 
-    // === KOLEJKA PRODUKCJI ===
     public void addBuildingToQueue(BuildingType type, ResearchManager researchManager) {
         if (!canBuild(type, researchManager)) return;
 
@@ -321,7 +296,6 @@ public class Planet implements OrbitObject {
             productionQueue.remove(productionQueue.size() - 1);
         }
 
-        // Przywróć zapisany postęp jeśli istnieje
         int savedCost = savedBuildingProgress.getOrDefault(type, type.getCost());
         ProductionOrder order = new ProductionOrder(type);
         order.setRemainingCost(savedCost);
@@ -336,7 +310,6 @@ public class Planet implements OrbitObject {
             productionQueue.remove(productionQueue.size() - 1);
         }
 
-        // Przywróć zapisany postęp jeśli istnieje
         int savedCost = savedShipProgress.getOrDefault(type, type.getCost());
         ProductionOrder order = new ProductionOrder(type);
         order.setRemainingCost(savedCost);
@@ -348,7 +321,6 @@ public class Planet implements OrbitObject {
         if (index >= 0 && index < productionQueue.size()) {
             ProductionOrder order = productionQueue.get(index);
 
-            // Zapisz postęp przed usunięciem
             if (order.getRemainingCost() < order.getOriginalCost()) {
                 if (order.getProductionType() == ProductionType.BUILDING) {
                     savedBuildingProgress.put(order.getBuildingType(), order.getRemainingCost());
@@ -385,20 +357,17 @@ public class Planet implements OrbitObject {
         int creditsNeeded = remainingCost * CREDITS_PER_PRODUCTION;
 
         if (game.getTotalCredits() < creditsNeeded) {
-            return false; // Za mało kredytów
+            return false;
         }
 
-        // Odejmij kredyty
         game.spendCredits(creditsNeeded);
 
-        // Zakończ produkcję natychmiast
         productionQueue.remove(0);
 
         if (current.getProductionType() == ProductionType.BUILDING) {
             buildings.add(new Building(current.getBuildingType()));
             savedBuildingProgress.remove(current.getBuildingType());
         } else {
-            // Statek będzie dodany przez Game.rushBuyShip()
             savedShipProgress.remove(current.getShipType());
         }
 
@@ -413,41 +382,32 @@ public class Planet implements OrbitObject {
     public Ship processTurn(StarSystem system) {
         if (!colonized) return null;
 
-        // 1. Produkcja żywności i wzrost populacji (NOWA MECHANIKA)
-        int netFoodProduction = getNetFoodProduction();
+        double netFoodProduction = getNetFoodProduction();
 
-        // Jeśli produkcja żywności jest ujemna, populacja głoduje
         if (netFoodProduction < 0) {
-            // Zmniejsz zgromadzoną żywność
             foodAccumulated += netFoodProduction;
 
-            // Jeśli zabraknie żywności, ludzie giną
             if (foodAccumulated < 0) {
-                int deaths = Math.min(totalPopulation, Math.abs(foodAccumulated) / 10);
-                totalPopulation = Math.max(1, totalPopulation - deaths); // Minimum 1 osoba zostaje
+                int deaths = Math.min(totalPopulation, (int)Math.abs(foodAccumulated) / 10);
+                totalPopulation = Math.max(1, totalPopulation - deaths);
                 foodAccumulated = 0;
                 rebalancePopulation();
             }
         } else {
-            // Dodaj nadwyżkę żywności
             foodAccumulated += netFoodProduction;
 
-            int foodNeeded = getFoodNeededForGrowth();
+            double foodNeeded = getFoodNeededForGrowth();
 
-            // Sprawdź czy można zwiększyć populację
             if (foodAccumulated >= foodNeeded && totalPopulation < getMaxPopulation()) {
                 foodAccumulated -= foodNeeded;
                 totalPopulation++;
-                // Nowa populacja jest początkowo nieprzypisana
             } else if (totalPopulation >= getMaxPopulation()) {
-                // Jeśli osiągnięto limit, gromadź żywność tylko do następnego poziomu
                 if (foodAccumulated > foodNeeded) {
-                    foodAccumulated = foodNeeded; // Nie przekraczaj kosztu następnej populacji
+                    foodAccumulated = foodNeeded;
                 }
             }
         }
 
-        // 2. Produkcja budynków/statków
         if (productionQueue.isEmpty()) return null;
 
         ProductionOrder current = productionQueue.get(0);
@@ -464,7 +424,6 @@ public class Planet implements OrbitObject {
                 Ship ship = new Ship(current.getShipType());
                 savedShipProgress.remove(current.getShipType());
 
-                // NOWA MECHANIKA: Statek kolonizacyjny zabiera 1 populację
                 if (current.getShipType() == ShipType.COLONY_SHIP && totalPopulation > 1) {
                     totalPopulation--;
                     rebalancePopulation();
@@ -477,26 +436,22 @@ public class Planet implements OrbitObject {
         return null;
     }
 
-    public int getFoodAccumulated() {
+    public double getFoodAccumulated() {
         return foodAccumulated;
     }
 
-    public int getFoodNeededForGrowth() {
+    public double getFoodNeededForGrowth() {
         int pop = totalPopulation;
 
         if (pop <= 0) return 10;
 
         if (pop <= 5) {
-            // 1-5: 10, 12, 14, 16, 18
             return 10 + (pop * 2);
         } else if (pop <= 10) {
-            // 6-10: 25, 27, 29, 31, 33
             return 25 + ((pop - 5) * 2);
         } else if (pop <= 20) {
-            // 11-20: 40, 42, 44... 58
             return 40 + ((pop - 10) * 2);
         } else {
-            // 21+: 70, 72, 74...
             return 70 + ((pop - 20) * 2);
         }
     }
