@@ -42,34 +42,11 @@ public class SystemInfoPanel extends JPanel {
         } else {
             Fleet fleet = system.getPlayerFleet();
             if (fleet != null && system.canBuildBattleStation(fleet, game.getResearchManager())) {
-                JButton buildStationBtn = new JButton("Zbuduj Posterunek Bojowy (100 prod., użyje Fabryki Kosmicznej)");
+                JButton buildStationBtn = new JButton("Zbuduj Posterunek Bojowy (100 prod.)");
                 buildStationBtn.setAlignmentX(Component.LEFT_ALIGNMENT);
                 buildStationBtn.addActionListener(e -> {
-                    if (game.spendCredits(100 * Planet.CREDITS_PER_PRODUCTION)) {
-                        Ship factory = fleet.getShips().stream()
-                                .filter(s -> s.getType() == ShipType.SPACE_FACTORY)
-                                .findFirst()
-                                .orElse(null);
-                        if (factory != null) {
-                            fleet.removeShip(factory);
-                            system.setBattleStation(new SpaceInstallation(SpaceInstallationType.BATTLE_STATION));
-                            mainWindow.updateResourceDisplay();
-                            mainWindow.onSystemSelected(system);
-                            JOptionPane.showMessageDialog(
-                                    this,
-                                    "Posterunek Bojowy zbudowany!",
-                                    "Sukces",
-                                    JOptionPane.INFORMATION_MESSAGE
-                            );
-                        }
-                    } else {
-                        JOptionPane.showMessageDialog(
-                                this,
-                                "Za mało kredytów!",
-                                "Błąd",
-                                JOptionPane.ERROR_MESSAGE
-                        );
-                    }
+                    fleet.startProject(SpaceInstallationType.BATTLE_STATION, null);
+                    mainWindow.onSystemSelected(system);
                 });
                 add(buildStationBtn);
                 add(Box.createVerticalStrut(10));
@@ -117,7 +94,7 @@ public class SystemInfoPanel extends JPanel {
             JPanel panel = new JPanel();
             panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
             panel.setAlignmentX(Component.LEFT_ALIGNMENT);
-            panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 60));
+            panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 80));
 
             JLabel label = new JLabel("Orbita " + index + ": Pole asteroid");
             label.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -129,59 +106,54 @@ public class SystemInfoPanel extends JPanel {
                 panel.add(label);
 
                 Fleet fleet = system.getPlayerFleet();
-                if (fleet != null && asteroid.canBuildInstallation(fleet)) {
-                    JButton buildBtn = new JButton("Buduj instalację (50 prod., użyje Fabryki Kosmicznej)");
-                    buildBtn.setAlignmentX(Component.LEFT_ALIGNMENT);
-                    buildBtn.setFocusPainted(false);
-                    buildBtn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 25));
-                    buildBtn.addActionListener(e -> {
-                        String[] options = {"Laboratorium (+5 badań)", "Kopalnia (+5 kredytów)"};
-                        int choice = JOptionPane.showOptionDialog(
-                                this,
-                                "Wybierz typ instalacji:",
-                                "Budowa na asteroidzie",
-                                JOptionPane.DEFAULT_OPTION,
-                                JOptionPane.QUESTION_MESSAGE,
-                                null,
-                                options,
-                                options[0]
-                        );
+                if (fleet != null) {
+                    InstallationOrder project = fleet.getCurrentProject();
 
-                        if (choice >= 0) {
-                            SpaceInstallationType type = choice == 0 ?
-                                    SpaceInstallationType.ASTEROID_LABORATORY :
-                                    SpaceInstallationType.ASTEROID_MINE;
+                    if (project != null && project.getTarget() == asteroid) {
+                        JLabel buildingLabel = new JLabel("🔨 Budowa: " + project.getDisplayName() +
+                                " (" + project.getRemainingCost() + "/" + project.getOriginalCost() + ")");
+                        buildingLabel.setForeground(new Color(255, 200, 100));
+                        buildingLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+                        panel.add(buildingLabel);
 
-                            int cost = type.getCost() * Planet.CREDITS_PER_PRODUCTION;
+                        JButton cancelBtn = new JButton("Anuluj budowę");
+                        cancelBtn.setAlignmentX(Component.LEFT_ALIGNMENT);
+                        cancelBtn.setFocusPainted(false);
+                        cancelBtn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 25));
+                        cancelBtn.addActionListener(e -> {
+                            fleet.cancelProject();
+                            mainWindow.onSystemSelected(system);
+                        });
+                        panel.add(cancelBtn);
+                    } else if (asteroid.canBuildInstallation(fleet) && project == null) {
+                        JButton buildBtn = new JButton("Buduj instalację (50 prod.)");
+                        buildBtn.setAlignmentX(Component.LEFT_ALIGNMENT);
+                        buildBtn.setFocusPainted(false);
+                        buildBtn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 25));
+                        buildBtn.addActionListener(e -> {
+                            String[] options = {"Laboratorium (+5 badań)", "Kopalnia (+5 kredytów)"};
+                            int choice = JOptionPane.showOptionDialog(
+                                    this,
+                                    "Wybierz typ instalacji:",
+                                    "Budowa na asteroidzie",
+                                    JOptionPane.DEFAULT_OPTION,
+                                    JOptionPane.QUESTION_MESSAGE,
+                                    null,
+                                    options,
+                                    options[0]
+                            );
 
-                            if (game.spendCredits(cost)) {
-                                Ship factory = fleet.getShips().stream()
-                                        .filter(s -> s.getType() == ShipType.SPACE_FACTORY)
-                                        .findFirst()
-                                        .orElse(null);
-                                if (factory != null) {
-                                    fleet.removeShip(factory);
-                                    asteroid.setInstallation(new SpaceInstallation(type));
-                                    mainWindow.updateResourceDisplay();
-                                    mainWindow.onSystemSelected(system);
-                                    JOptionPane.showMessageDialog(
-                                            this,
-                                            "Instalacja zbudowana!",
-                                            "Sukces",
-                                            JOptionPane.INFORMATION_MESSAGE
-                                    );
-                                }
-                            } else {
-                                JOptionPane.showMessageDialog(
-                                        this,
-                                        "Za mało kredytów!",
-                                        "Błąd",
-                                        JOptionPane.ERROR_MESSAGE
-                                );
+                            if (choice >= 0) {
+                                SpaceInstallationType type = choice == 0 ?
+                                        SpaceInstallationType.ASTEROID_LABORATORY :
+                                        SpaceInstallationType.ASTEROID_MINE;
+
+                                fleet.startProject(type, asteroid);
+                                mainWindow.onSystemSelected(system);
                             }
-                        }
-                    });
-                    panel.add(buildBtn);
+                        });
+                        panel.add(buildBtn);
+                    }
                 }
             }
 
@@ -192,7 +164,7 @@ public class SystemInfoPanel extends JPanel {
             JPanel panel = new JPanel();
             panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
             panel.setAlignmentX(Component.LEFT_ALIGNMENT);
-            panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 60));
+            panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 80));
 
             JLabel label = new JLabel("Orbita " + index + ": Gazowy gigant");
             label.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -204,41 +176,36 @@ public class SystemInfoPanel extends JPanel {
                 panel.add(label);
 
                 Fleet fleet = system.getPlayerFleet();
-                if (fleet != null && giant.canBuildInstallation(fleet)) {
-                    JButton buildBtn = new JButton("Zbuduj Kopalnię Gazową (60 prod., użyje Fabryki Kosmicznej)");
-                    buildBtn.setAlignmentX(Component.LEFT_ALIGNMENT);
-                    buildBtn.setFocusPainted(false);
-                    buildBtn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 25));
-                    buildBtn.addActionListener(e -> {
-                        int cost = SpaceInstallationType.GAS_MINE.getCost() * Planet.CREDITS_PER_PRODUCTION;
+                if (fleet != null) {
+                    InstallationOrder project = fleet.getCurrentProject();
 
-                        if (game.spendCredits(cost)) {
-                            Ship factory = fleet.getShips().stream()
-                                    .filter(s -> s.getType() == ShipType.SPACE_FACTORY)
-                                    .findFirst()
-                                    .orElse(null);
-                            if (factory != null) {
-                                fleet.removeShip(factory);
-                                giant.setInstallation(new SpaceInstallation(SpaceInstallationType.GAS_MINE));
-                                mainWindow.updateResourceDisplay();
-                                mainWindow.onSystemSelected(system);
-                                JOptionPane.showMessageDialog(
-                                        this,
-                                        "Kopalnia Gazowa zbudowana!",
-                                        "Sukces",
-                                        JOptionPane.INFORMATION_MESSAGE
-                                );
-                            }
-                        } else {
-                            JOptionPane.showMessageDialog(
-                                    this,
-                                    "Za mało kredytów!",
-                                    "Błąd",
-                                    JOptionPane.ERROR_MESSAGE
-                            );
-                        }
-                    });
-                    panel.add(buildBtn);
+                    if (project != null && project.getTarget() == giant) {
+                        JLabel buildingLabel = new JLabel("🔨 Budowa: " + project.getDisplayName() +
+                                " (" + project.getRemainingCost() + "/" + project.getOriginalCost() + ")");
+                        buildingLabel.setForeground(new Color(255, 200, 100));
+                        buildingLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+                        panel.add(buildingLabel);
+
+                        JButton cancelBtn = new JButton("Anuluj budowę");
+                        cancelBtn.setAlignmentX(Component.LEFT_ALIGNMENT);
+                        cancelBtn.setFocusPainted(false);
+                        cancelBtn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 25));
+                        cancelBtn.addActionListener(e -> {
+                            fleet.cancelProject();
+                            mainWindow.onSystemSelected(system);
+                        });
+                        panel.add(cancelBtn);
+                    } else if (giant.canBuildInstallation(fleet) && project == null) {
+                        JButton buildBtn = new JButton("Zbuduj Kopalnię Gazową (60 prod.)");
+                        buildBtn.setAlignmentX(Component.LEFT_ALIGNMENT);
+                        buildBtn.setFocusPainted(false);
+                        buildBtn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 25));
+                        buildBtn.addActionListener(e -> {
+                            fleet.startProject(SpaceInstallationType.GAS_MINE, giant);
+                            mainWindow.onSystemSelected(system);
+                        });
+                        panel.add(buildBtn);
+                    }
                 }
             }
 

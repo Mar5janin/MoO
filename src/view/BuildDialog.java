@@ -11,14 +11,13 @@ public class BuildDialog extends JDialog {
         super(parent, "Dodaj do kolejki", true);
 
         setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
-        setSize(400, 500);
+        setSize(500, 600);
         setLocationRelativeTo(parent);
 
         ResearchManager researchManager = game.getResearchManager();
         boolean anyBuildings = false;
         boolean anyShips = false;
 
-        // SEKCJA: BUDYNKI
         JLabel buildingsHeader = new JLabel("━━━ BUDYNKI ━━━");
         buildingsHeader.setFont(buildingsHeader.getFont().deriveFont(Font.BOLD, 12f));
         buildingsHeader.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -31,11 +30,14 @@ public class BuildDialog extends JDialog {
 
             anyBuildings = true;
 
-            JPanel btnPanel = new JPanel(new BorderLayout());
-            btnPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+            JPanel btnPanel = new JPanel();
+            btnPanel.setLayout(new BoxLayout(btnPanel, BoxLayout.Y_AXIS));
+            btnPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 65));
             btnPanel.setBorder(BorderFactory.createEmptyBorder(2, 5, 2, 5));
 
-            // Przygotuj nazwę budynku z licznikiem jeśli wielokrotny
+            JPanel topRow = new JPanel(new BorderLayout());
+            topRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
+
             String buttonText = type.getDisplayName();
             if (type.canBuildMultiple()) {
                 int currentCount = planet.countBuilding(type);
@@ -60,8 +62,19 @@ public class BuildDialog extends JDialog {
             costLabel.setForeground(Color.GRAY);
             costLabel.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
 
-            btnPanel.add(btn, BorderLayout.CENTER);
-            btnPanel.add(costLabel, BorderLayout.EAST);
+            topRow.add(btn, BorderLayout.CENTER);
+            topRow.add(costLabel, BorderLayout.EAST);
+
+            btnPanel.add(topRow);
+
+            String effects = type.getEffectsDescription();
+            if (!effects.isEmpty()) {
+                JLabel effectsLabel = new JLabel("  " + effects);
+                effectsLabel.setFont(effectsLabel.getFont().deriveFont(9f));
+                effectsLabel.setForeground(new Color(100, 150, 255));
+                effectsLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+                btnPanel.add(effectsLabel);
+            }
 
             add(btnPanel);
         }
@@ -73,7 +86,6 @@ public class BuildDialog extends JDialog {
             add(noBuildings);
         }
 
-        // SEKCJA: STATKI
         add(Box.createVerticalStrut(15));
         JLabel shipsHeader = new JLabel("━━━ STATKI ━━━");
         shipsHeader.setFont(shipsHeader.getFont().deriveFont(Font.BOLD, 12f));
@@ -94,7 +106,6 @@ public class BuildDialog extends JDialog {
                     type.getEffectiveAttack(researchManager) + " D:" +
                     type.getEffectiveDefense(researchManager) + ")";
 
-            // Dodaj ostrzeżenie dla statku kolonizacyjnego
             if (type == ShipType.COLONY_SHIP) {
                 shipInfo += " ⚠ Zabiera 1 pop.";
             }
@@ -103,7 +114,6 @@ public class BuildDialog extends JDialog {
             btn.setHorizontalAlignment(SwingConstants.LEFT);
 
             btn.addActionListener(e -> {
-                // Sprawdź czy planeta ma wystarczającą populację dla statku kolonizacyjnego
                 if (type == ShipType.COLONY_SHIP && planet.getTotalPopulation() <= 1) {
                     JOptionPane.showMessageDialog(
                             this,

@@ -6,9 +6,10 @@ import java.util.List;
 public class Fleet {
     private final List<Ship> ships = new ArrayList<>();
     private StarSystem location;
-    private List<StarSystem> route = null; // Pełna trasa podróży
-    private int currentRouteIndex = 0; // Indeks aktualnego celu w trasie
-    private int turnsToNextSystem = 0; // Tury do następnego systemu w trasie
+    private List<StarSystem> route = null;
+    private int currentRouteIndex = 0;
+    private int turnsToNextSystem = 0;
+    private InstallationOrder currentProject = null;
 
     public Fleet(StarSystem location) {
         this.location = location;
@@ -34,7 +35,7 @@ public class Fleet {
         if (route == null || route.isEmpty()) {
             return null;
         }
-        return route.get(route.size() - 1); // Końcowy cel
+        return route.get(route.size() - 1);
     }
 
     public StarSystem getNextSystem() {
@@ -48,7 +49,6 @@ public class Fleet {
         if (route == null) {
             return 0;
         }
-        // Tury do następnego systemu + pozostałe systemy w trasie
         int remaining = turnsToNextSystem;
         if (currentRouteIndex < route.size()) {
             remaining += (route.size() - currentRouteIndex - 1);
@@ -60,9 +60,6 @@ public class Fleet {
         return route != null && currentRouteIndex < route.size();
     }
 
-    /**
-     * Ustawia trasę do celu. Używa pathfindingu do znalezienia najkrótszej drogi.
-     */
     public boolean setDestination(StarSystem destination) {
         if (destination == null || destination == location) {
             this.route = null;
@@ -74,16 +71,47 @@ public class Fleet {
         List<StarSystem> path = Pathfinder.findPath(location, destination);
 
         if (path == null || path.size() <= 1) {
-            // Brak ścieżki
             return false;
         }
 
-        // Usuń pierwszy element (obecna lokalizacja)
         this.route = new ArrayList<>(path.subList(1, path.size()));
         this.currentRouteIndex = 0;
-        this.turnsToNextSystem = 1; // Na razie zawsze 1 tura między sąsiednimi systemami
+        this.turnsToNextSystem = 1;
 
         return true;
+    }
+
+    public InstallationOrder getCurrentProject() {
+        return currentProject;
+    }
+
+    public boolean canStartProject(SpaceInstallationType type, OrbitObject target) {
+        if (currentProject != null) return false;
+        if (isMoving()) return false;
+
+        int factoryCount = countShipType(ShipType.SPACE_FACTORY);
+        if (factoryCount == 0) return false;
+
+        if (type == SpaceInstallationType.BATTLE_STATION) {
+            return !location.hasBattleStation();
+        }
+
+        if (target instanceof AsteroidField asteroid) {
+            return !asteroid.hasInstallation();
+        } else if (target instanceof GasGiant giant) {
+            return !giant.hasInstallation() && type == SpaceInstallationType.GAS_MINE;
+        }
+
+        return false;
+    }
+
+    public void startProject(SpaceInstallationType type, OrbitObject target) {
+        if (!canStartProject(type, target)) return;
+        currentProject = new InstallationOrder(type, target);
+    }
+
+    public void cancelProject() {
+        currentProject = null;
     }
 
     public void processTurn() {
@@ -91,7 +119,6 @@ public class Fleet {
             turnsToNextSystem--;
 
             if (turnsToNextSystem <= 0) {
-                // Dotarliśmy do następnego systemu w trasie
                 StarSystem nextSystem = route.get(currentRouteIndex);
 
                 location.removeFleet(this);
@@ -100,20 +127,43 @@ public class Fleet {
 
                 currentRouteIndex++;
 
-                // Sprawdź czy dotarliśmy do końca trasy
                 if (currentRouteIndex >= route.size()) {
-                    // Koniec podróży
                     route = null;
                     currentRouteIndex = 0;
                     turnsToNextSystem = 0;
                 } else {
-                    // Przygotuj się do następnego skoku
                     turnsToNextSystem = 1;
                 }
             }
         }
 
-        // Usuń zniszczone statki
+        if (currentProject != null && !isMoving()) {
+            int production = 0;
+            for (Ship ship : ships) {
+                if (ship.getType() == ShipType.SPACE_FACTORY) {
+                    production += ship.getType().getProductionPerTurn();
+                }
+            }
+
+            currentProject.progress(production);
+
+            if (currentProject.isFinished()) {
+                SpaceInstallationType type = currentProject.getType();
+                OrbitObject target = currentProject.getTarget();
+                SpaceInstallation installation = new SpaceInstallation(type);
+
+                if (type == SpaceInstallationType.BATTLE_STATION) {
+                    location.setBattleStation(installation);
+                } else if (target instanceof AsteroidField asteroid) {
+                    asteroid.setInstallation(installation);
+                } else if (target instanceof GasGiant giant) {
+                    giant.setInstallation(installation);
+                }
+
+                currentProject = null;
+            }
+        }
+
         ships.removeIf(Ship::isDestroyed);
     }
 
@@ -137,16 +187,12 @@ public class Fleet {
         return ships.size();
     }
 
-    // Zwraca liczbę statków danego typu
     public int countShipType(ShipType type) {
         return (int) ships.stream()
                 .filter(ship -> ship.getType() == type)
                 .count();
     }
 
-    /**
-     * Zwraca pełną trasę podróży (dla wyświetlenia)
-     */
     public List<StarSystem> getRoute() {
         return route;
     }
