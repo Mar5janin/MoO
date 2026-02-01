@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public enum Technology {
-    // Technologie wymagające prerequisite
     ADVANCED_MINING(
             "Zaawansowane górnictwo",
             "Umożliwia budowę kopalń księżycowych",
@@ -48,7 +47,6 @@ public enum Technology {
             List.of(new TechEffect(TechEffectType.UNLOCK_BUILDING, "FABRYKA_KOSMICZNA"))
     ),
 
-    // Technologie wojskowe
     BASIC_WEAPONS(
             "Podstawowe uzbrojenie",
             "Odblokowuje lekkie statki bojowe",
@@ -73,12 +71,42 @@ public enum Technology {
             List.of(new TechEffect(TechEffectType.SHIP_DEFENSE_BONUS, 20))
     ),
 
+    DESTROYER_TECH(
+            "Niszczyciele",
+            "Odblokowuje niszczyciele",
+            140,
+            List.of(BASIC_WEAPONS),
+            List.of(new TechEffect(TechEffectType.UNLOCK_SHIP, "DESTROYER"))
+    ),
+
     HEAVY_SHIPS(
             "Ciężkie statki",
             "Odblokowuje krążowniki",
             200,
             List.of(IMPROVED_WEAPONS),
             List.of(new TechEffect(TechEffectType.UNLOCK_SHIP, "CRUISER"))
+    ),
+
+    CAPITAL_SHIPS(
+            "Okręty liniowe",
+            "Odblokowuje pancerniki i lotniskowce",
+            260,
+            List.of(HEAVY_SHIPS),
+            List.of(
+                    new TechEffect(TechEffectType.UNLOCK_SHIP, "BATTLESHIP"),
+                    new TechEffect(TechEffectType.UNLOCK_SHIP, "CARRIER")
+            )
+    ),
+
+    ADVANCED_FLEET_DOCTRINE(
+            "Zaawansowana doktryna floty",
+            "Zwiększa atak i obronę statków o 15%",
+            220,
+            List.of(IMPROVED_WEAPONS, IMPROVED_ARMOR),
+            List.of(
+                    new TechEffect(TechEffectType.SHIP_ATTACK_BONUS, 15),
+                    new TechEffect(TechEffectType.SHIP_DEFENSE_BONUS, 15)
+            )
     ),
 
     DEFENSIVE_PLATFORMS(
@@ -89,7 +117,6 @@ public enum Technology {
             List.of(new TechEffect(TechEffectType.UNLOCK_BUILDING, "POSTERUNEK_BOJOWY"))
     ),
 
-    // Technologie ekonomiczne
     TRADE_NETWORKS(
             "Sieci handlowe",
             "Zwiększa dochody z kredytów o 15%",
@@ -106,12 +133,32 @@ public enum Technology {
             List.of(new TechEffect(TechEffectType.POPULATION_BONUS, 25))
     ),
 
+    URBANIZATION(
+            "Urbanizacja",
+            "Umożliwia budowę megamiast",
+            180,
+            List.of(POPULATION_GROWTH),
+            List.of(new TechEffect(TechEffectType.UNLOCK_BUILDING, "MEGAMIASTO"))
+    ),
+
     ADVANCED_ECONOMICS(
             "Zaawansowana ekonomia",
             "Umożliwia budowę banków galaktycznych",
             110,
             List.of(TRADE_NETWORKS),
             List.of(new TechEffect(TechEffectType.UNLOCK_BUILDING, "BANK_GALAKTYCZNY"))
+    ),
+
+    COLONIAL_ADMINISTRATION(
+            "Administracja kolonialna",
+            "Odblokowuje akademię kolonialną, centrum logistyczne i hutę planetarną",
+            90,
+            null,
+            List.of(
+                    new TechEffect(TechEffectType.UNLOCK_BUILDING, "AKADEMIA_KOLONIALNA"),
+                    new TechEffect(TechEffectType.UNLOCK_BUILDING, "CENTRUM_LOGISTYCZNE"),
+                    new TechEffect(TechEffectType.UNLOCK_BUILDING, "HUTA_PLANETARNA")
+            )
     );
 
     private final String displayName;

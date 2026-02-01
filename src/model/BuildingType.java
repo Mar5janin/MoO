@@ -2,21 +2,19 @@ package model;
 
 public enum BuildingType {
 
-    // ========== PODSTAWOWE BUDYNKI ==========
-
     FARMA(
             "Farma",
             20,
             false,
             null,
-            false,  // canBuildMultiple
-            1,      // maxCount
-            0,      // populationCapacity
-            2,      // foodBonus (pasywny)
-            1,      // foodPerCapita (+1 za każdego pracownika)
-            0, 0,   // production
-            0, 0,   // research
-            0, 0    // credits
+            false,
+            1,
+            0,
+            2,
+            1,
+            0, 0,
+            0, 0,
+            0, 0
     ),
 
     FABRYKA(
@@ -24,14 +22,14 @@ public enum BuildingType {
             30,
             false,
             null,
-            false,  // canBuildMultiple
-            1,      // maxCount
-            0,      // populationCapacity
-            0, 0,   // food
-            1,      // productionBonus (pasywny)
-            1,      // productionPerCapita (+1 za każdego pracownika)
-            0, 0,   // research
-            0, 0    // credits
+            false,
+            1,
+            0,
+            0, 0,
+            1,
+            1,
+            0, 0,
+            0, 0
     ),
 
     LABORATORIUM(
@@ -39,32 +37,90 @@ public enum BuildingType {
             25,
             false,
             null,
-            false,  // canBuildMultiple
-            1,      // maxCount
-            0,      // populationCapacity
-            0, 0,   // food
-            0, 0,   // production
-            1,      // researchBonus (pasywny)
-            1,      // researchPerCapita (+1 za każdego pracownika)
-            0, 0    // credits
+            false,
+            1,
+            0,
+            0, 0,
+            0, 0,
+            1,
+            1,
+            0, 0
     ),
 
-    // ========== BUDYNKI WYMAGAJĄCE BADAŃ ==========
+    OSADA_GORNICZA(
+            "Osada Górnicza",
+            20,
+            false,
+            null,
+            false,
+            1,
+            0,
+            0, 0,
+            1,
+            1,
+            0, 0,
+            0, 0
+    ),
+
+    CENTRUM_ADMINISTRACYJNE(
+            "Centrum Administracyjne",
+            20,
+            false,
+            null,
+            false,
+            1,
+            0,
+            0, 0,
+            0, 0,
+            0, 0,
+            2,
+            1
+    ),
+
+    WIEZA_KOMUNIKACYJNA(
+            "Wieża Komunikacyjna",
+            22,
+            false,
+            null,
+            false,
+            1,
+            0,
+            0, 0,
+            0, 0,
+            1,
+            0,
+            0, 0
+    ),
+
+    TARG_KOLONIALNY(
+            "Targ Kolonialny",
+            25,
+            false,
+            null,
+            false,
+            1,
+            0,
+            0, 0,
+            0, 0,
+            0, 0,
+            1,
+            2
+    ),
 
     KOPALNIA_KSIĘŻYCOWA(
             "Kopalnia Księżycowa",
             35,
             true,
             "KOPALNIA_KSIĘŻYCOWA",
-            false,  // canBuildMultiple
-            1,      // maxCount
-            0,      // populationCapacity
-            0, 0,   // food
-            0,      // productionBonus (pasywny)
-            1,      // productionPerCapita
-            0, 0,   // research
-            3,      // creditsBonus (pasywny)
-            0       // creditsPerTotalPopulation
+            false,
+            1,
+            0,
+            0, 0,
+            0,
+            1,
+            0, 0,
+            3,
+            0
     ),
 
     ZAAWANSOWANA_FARMA(
@@ -72,14 +128,14 @@ public enum BuildingType {
             40,
             false,
             "ZAAWANSOWANA_FARMA",
-            false,  // canBuildMultiple
-            1,      // maxCount
-            2,      // populationCapacity (+2 max populacji)
-            3,      // foodBonus (pasywny)
-            2,      // foodPerCapita (+2 za każdego pracownika)
-            0, 0,   // production
-            0, 0,   // research
-            0, 0    // credits
+            false,
+            1,
+            2,
+            3,
+            2,
+            0, 0,
+            0, 0,
+            0, 0
     ),
 
     CENTRUM_BADAWCZE(
@@ -87,14 +143,14 @@ public enum BuildingType {
             50,
             false,
             "CENTRUM_BADAWCZE",
-            false,  // canBuildMultiple
-            1,      // maxCount
-            0,      // populationCapacity
-            0, 0,   // food
-            0, 0,   // production
-            3,      // researchBonus (pasywny)
-            2,      // researchPerCapita (+2 za każdego pracownika)
-            0, 0    // credits
+            false,
+            1,
+            0,
+            0, 0,
+            0, 0,
+            3,
+            2,
+            0, 0
     ),
 
     FABRYKA_KOSMICZNA(
@@ -102,14 +158,14 @@ public enum BuildingType {
             80,
             false,
             "FABRYKA_KOSMICZNA",
-            false,  // canBuildMultiple
-            1,      // maxCount
-            0,      // populationCapacity
-            0, 0,   // food
-            3,      // productionBonus (pasywny)
-            2,      // productionPerCapita (+2 za każdego pracownika)
-            0, 0,   // research
-            0, 0    // credits
+            false,
+            1,
+            0,
+            0, 0,
+            3,
+            2,
+            0, 0,
+            0, 0
     ),
 
     POSTERUNEK_BOJOWY(
@@ -117,68 +173,125 @@ public enum BuildingType {
             60,
             false,
             "POSTERUNEK_BOJOWY",
-            false,  // canBuildMultiple
-            1,      // maxCount
-            0,      // populationCapacity
-            0, 0,   // food
-            0, 0,   // production
-            0, 0,   // research
-            0, 0    // credits (obrona, póki co bez efektu)
+            false,
+            1,
+            0,
+            0, 0,
+            0, 0,
+            0, 0,
+            0, 0
     ),
-
-    // ========== NOWE BUDYNKI: EKONOMIA ==========
 
     BANK_GALAKTYCZNY(
             "Bank Galaktyczny",
             45,
             false,
             "BANK_GALAKTYCZNY",
-            false,  // canBuildMultiple
-            1,      // maxCount
-            0,      // populationCapacity
-            0, 0,   // food
-            0, 0,   // production
-            0, 0,   // research
-            5,      // creditsBonus (pasywny)
-            1       // creditsPerTotalPopulation (podatki: +1 za każdego na planecie)
+            false,
+            1,
+            0,
+            0, 0,
+            0, 0,
+            0, 0,
+            5,
+            1
     ),
 
-    // ========== OSIEDLE - MOŻNA BUDOWAĆ WIELOKROTNIE ==========
+    AKADEMIA_KOLONIALNA(
+            "Akademia Kolonialna",
+            70,
+            false,
+            "AKADEMIA_KOLONIALNA",
+            false,
+            1,
+            1,
+            0, 0,
+            0, 0,
+            2,
+            1,
+            0, 0
+    ),
+
+    HUTA_PLANETARNA(
+            "Huta Planetarna",
+            65,
+            false,
+            "HUTA_PLANETARNA",
+            false,
+            1,
+            0,
+            0, 0,
+            4,
+            1,
+            0, 0,
+            0, 0
+    ),
+
+    CENTRUM_LOGISTYCZNE(
+            "Centrum Logistyczne",
+            55,
+            false,
+            "CENTRUM_LOGISTYCZNE",
+            false,
+            1,
+            0,
+            0, 0,
+            1,
+            0,
+            0, 0,
+            3,
+            0
+    ),
+
+    MEGAMIASTO(
+            "Megamiasto",
+            90,
+            false,
+            "MEGAMIASTO",
+            true,
+            2,
+            5,
+            0, 0,
+            0, 0,
+            0, 0,
+            2,
+            1
+    ),
+
     OSIEDLE(
             "Osiedle Mieszkalne",
             30,
             false,
             null,
-            true,   // canBuildMultiple - MOŻNA BUDOWAĆ WIELE RAZY!
-            5,      // maxCount - maksymalnie 5 osiedli
-            3,      // populationCapacity (+3 max populacji)
-            0, 0,   // food
-            0, 0,   // production
-            0, 0,   // research
-            0, 0    // credits
+            true,
+            5,
+            3,
+            0, 0,
+            0, 0,
+            0, 0,
+            0, 0
     );
 
     private final String displayName;
     private final int cost;
     private final boolean requiresMoon;
     private final String techRequirement;
-    private final boolean canBuildMultiple;  // Czy można budować wiele razy
-    private final int maxCount;              // Maksymalna liczba tego budynku
+    private final boolean canBuildMultiple;
+    private final int maxCount;
 
-    // Bonusy
     private final int populationCapacityBonus;
 
-    private final int foodBonus;                    // Pasywny bonus do żywności
-    private final int foodPerCapita;                // Bonus za każdego pracownika na food
+    private final int foodBonus;
+    private final int foodPerCapita;
 
-    private final int productionBonus;              // Pasywny bonus do produkcji
-    private final int productionPerCapita;          // Bonus za każdego pracownika na production
+    private final int productionBonus;
+    private final int productionPerCapita;
 
-    private final int researchBonus;                // Pasywny bonus do badań
-    private final int researchPerCapita;            // Bonus za każdego pracownika na research
+    private final int researchBonus;
+    private final int researchPerCapita;
 
-    private final int creditsBonus;                 // Pasywny bonus do kredytów
-    private final int creditsPerTotalPopulation;    // Podatki - za każdego na planecie
+    private final int creditsBonus;
+    private final int creditsPerTotalPopulation;
 
     BuildingType(
             String displayName,
@@ -240,9 +353,6 @@ public enum BuildingType {
         return researchManager.isUnlocked(techRequirement);
     }
 
-    /**
-     * Zwraca opis efektów budynku
-     */
     public String getEffectsDescription() {
         StringBuilder sb = new StringBuilder();
 
@@ -279,7 +389,7 @@ public enum BuildingType {
         }
 
         if (sb.length() > 0) {
-            sb.setLength(sb.length() - 3); // Usuń ostatni " | "
+            sb.setLength(sb.length() - 3);
         }
 
         return sb.toString();

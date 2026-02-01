@@ -34,7 +34,7 @@ public class PlanetInfoPanel extends JPanel {
         this.game = game;
 
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        setBorder(BorderFactory.createEmptyBorder(5, 8, 5, 8));
 
         buildUI();
     }
@@ -42,7 +42,7 @@ public class PlanetInfoPanel extends JPanel {
     private void buildUI() {
 
         add(title("PLANETA"));
-        add(Box.createVerticalStrut(10));
+        add(Box.createVerticalStrut(3));
 
         add(new JLabel("Typ: " + planet.getPlanetType().getDisplayName()));
         add(new JLabel("Zdatna do życia: " + yesNo(planet.isHabitable())));
@@ -65,7 +65,7 @@ public class PlanetInfoPanel extends JPanel {
             add(new JLabel(attrText));
         }
 
-        add(Box.createVerticalStrut(10));
+        add(Box.createVerticalStrut(5));
 
         if (!planet.isColonized()) {
             renderUncolonized();
@@ -73,9 +73,10 @@ public class PlanetInfoPanel extends JPanel {
             renderColonized();
         }
 
-        add(Box.createVerticalStrut(15));
+        add(Box.createVerticalStrut(5));
 
         JButton back = new JButton("← Powrót do systemu");
+        back.setAlignmentX(Component.LEFT_ALIGNMENT);
         back.addActionListener(e ->
                 mainWindow.onSystemSelected(system)
         );
@@ -87,7 +88,7 @@ public class PlanetInfoPanel extends JPanel {
         add(new JLabel("Status: Nie skolonizowana"));
 
         if (planet.isHabitable()) {
-            add(Box.createVerticalStrut(10));
+            add(Box.createVerticalStrut(5));
 
             Fleet fleet = system.getPlayerFleet();
             boolean hasColonyShip = fleet != null && fleet.countShipType(ShipType.COLONY_SHIP) > 0;
@@ -110,10 +111,10 @@ public class PlanetInfoPanel extends JPanel {
     private void renderColonized() {
 
         add(new JLabel("Status: Skolonizowana"));
-        add(Box.createVerticalStrut(10));
+        add(Box.createVerticalStrut(4));
 
         add(sectionTitle("Populacja i Zasoby"));
-        add(Box.createVerticalStrut(5));
+        add(Box.createVerticalStrut(2));
 
         JLabel popLabel = new JLabel(String.format("Populacja: %d / %d",
                 planet.getTotalPopulation(), planet.getMaxPopulation()));
@@ -121,7 +122,7 @@ public class PlanetInfoPanel extends JPanel {
         popLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
         add(popLabel);
 
-        add(Box.createVerticalStrut(3));
+        add(Box.createVerticalStrut(2));
 
         double foodAcc = planet.getFoodAccumulated();
         double foodNeeded = planet.getFoodNeededForGrowth();
@@ -129,8 +130,8 @@ public class PlanetInfoPanel extends JPanel {
         growthBar.setValue(Math.max(0, (int)foodAcc));
         growthBar.setString("Wzrost: " + String.format("%.1f", foodAcc) + "/" + String.format("%.0f", foodNeeded));
         growthBar.setStringPainted(true);
-        growthBar.setPreferredSize(new Dimension(300, 20));
-        growthBar.setMaximumSize(new Dimension(300, 20));
+        growthBar.setPreferredSize(new Dimension(280, 20));
+        growthBar.setMaximumSize(new Dimension(280, 20));
         growthBar.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         if (foodAcc < 0) {
@@ -142,7 +143,7 @@ public class PlanetInfoPanel extends JPanel {
         }
 
         add(growthBar);
-        add(Box.createVerticalStrut(5));
+        add(Box.createVerticalStrut(2));
 
         double netFood = planet.getNetFoodProduction();
         String foodText = String.format("🌾 Żywność: %+.1f", netFood);
@@ -168,17 +169,18 @@ public class PlanetInfoPanel extends JPanel {
         creditsLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
         add(creditsLabel);
 
-        add(Box.createVerticalStrut(12));
+        add(Box.createVerticalStrut(5));
 
         add(sectionTitle("Zarządzanie Populacją"));
+        add(Box.createVerticalStrut(2));
 
         JPanel popManagement = new JPanel();
         popManagement.setLayout(new BoxLayout(popManagement, BoxLayout.Y_AXIS));
         popManagement.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(Color.GRAY),
-                BorderFactory.createEmptyBorder(8, 10, 8, 10)
+                BorderFactory.createEmptyBorder(4, 6, 4, 6)
         ));
-        popManagement.setMaximumSize(new Dimension(500, 200));
+        popManagement.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         popManagement.add(createPopulationControl(
                 "🌾 Żywność",
@@ -187,7 +189,7 @@ public class PlanetInfoPanel extends JPanel {
                 planet::setPopulationOnFood
         ));
 
-        popManagement.add(Box.createVerticalStrut(8));
+        popManagement.add(Box.createVerticalStrut(4));
 
         popManagement.add(createPopulationControl(
                 "🏭 Budowa",
@@ -196,7 +198,7 @@ public class PlanetInfoPanel extends JPanel {
                 planet::setPopulationOnProduction
         ));
 
-        popManagement.add(Box.createVerticalStrut(8));
+        popManagement.add(Box.createVerticalStrut(4));
 
         popManagement.add(createPopulationControl(
                 "🔬 Badania",
@@ -207,10 +209,11 @@ public class PlanetInfoPanel extends JPanel {
 
         add(popManagement);
 
-        add(Box.createVerticalStrut(12));
+        add(Box.createVerticalStrut(5));
 
         if (!planet.getBuildings().isEmpty()) {
             add(sectionTitle("Budynki"));
+            add(Box.createVerticalStrut(2));
 
             Map<BuildingType, Integer> buildingCounts = new java.util.HashMap<>();
             for (Building building : planet.getBuildings()) {
@@ -224,17 +227,19 @@ public class PlanetInfoPanel extends JPanel {
                 add(new JLabel("  • " + text));
             }
 
-            add(Box.createVerticalStrut(12));
+            add(Box.createVerticalStrut(5));
         }
 
         add(sectionTitle("Kolejka budowy"));
+        add(Box.createVerticalStrut(2));
 
         queuePanel = new JPanel();
         queuePanel.setLayout(new BoxLayout(queuePanel, BoxLayout.Y_AXIS));
+        queuePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JScrollPane scroll = new JScrollPane(queuePanel);
-        scroll.setPreferredSize(new Dimension(QUEUE_WIDTH, 160));
-        scroll.setMaximumSize(new Dimension(QUEUE_WIDTH, 160));
+        scroll.setPreferredSize(new Dimension(300, 160));
+        scroll.setAlignmentX(Component.LEFT_ALIGNMENT);
         scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
         add(scroll);
@@ -248,8 +253,8 @@ public class PlanetInfoPanel extends JPanel {
             int max,
             java.util.function.Consumer<Integer> onChange
     ) {
-        JPanel panel = new JPanel(new BorderLayout(10, 5));
-        panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        JPanel panel = new JPanel(new BorderLayout(8, 0));
+        panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
 
         JLabel titleLabel = new JLabel();
         titleLabel.setFont(titleLabel.getFont().deriveFont(Font.BOLD, 11f));
@@ -447,7 +452,10 @@ public class PlanetInfoPanel extends JPanel {
         queuePanel.revalidate();
         queuePanel.repaint();
 
+        add(Box.createVerticalStrut(3));
+
         JButton addButton = new JButton("Dodaj do kolejki");
+        addButton.setAlignmentX(Component.LEFT_ALIGNMENT);
         addButton.addActionListener(e ->
                 new BuildDialog(mainWindow, planet, game, () -> mainWindow.showPlanet(planet, system)).setVisible(true)
         );
@@ -467,13 +475,13 @@ public class PlanetInfoPanel extends JPanel {
 
     private JLabel title(String text) {
         JLabel label = new JLabel(text);
-        label.setFont(label.getFont().deriveFont(Font.BOLD, 14f));
+        label.setFont(label.getFont().deriveFont(Font.BOLD, 13f));
         return label;
     }
 
     private JLabel sectionTitle(String text) {
         JLabel label = new JLabel(text);
-        label.setFont(label.getFont().deriveFont(Font.BOLD, 12f));
+        label.setFont(label.getFont().deriveFont(Font.BOLD, 11f));
         return label;
     }
 

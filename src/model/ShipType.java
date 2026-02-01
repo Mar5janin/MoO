@@ -7,7 +7,7 @@ public enum ShipType {
             30,
             5,
             3,
-            null  // Dostępny od początku
+            null
     ),
 
     FIGHTER(
@@ -16,7 +16,16 @@ public enum ShipType {
             50,
             15,
             10,
-            "FIGHTER"  // Wymaga technologii BASIC_WEAPONS
+            "FIGHTER"
+    ),
+
+    DESTROYER(
+            "Niszczyciel",
+            "Uniwersalny średni statek bojowy",
+            80,
+            25,
+            20,
+            "DESTROYER"
     ),
 
     CRUISER(
@@ -25,7 +34,25 @@ public enum ShipType {
             120,
             40,
             35,
-            "CRUISER"  // Wymaga technologii HEAVY_SHIPS
+            "CRUISER"
+    ),
+
+    BATTLESHIP(
+            "Pancernik",
+            "Potężny okręt liniowy",
+            200,
+            70,
+            60,
+            "BATTLESHIP"
+    ),
+
+    CARRIER(
+            "Lotniskowiec",
+            "Wsparcie floty i projekcja siły",
+            180,
+            35,
+            70,
+            "CARRIER"
     ),
 
     COLONY_SHIP(
@@ -34,7 +61,7 @@ public enum ShipType {
             100,
             0,
             5,
-            null  // Dostępny od początku
+            null
     );
 
     private final String displayName;
@@ -42,7 +69,7 @@ public enum ShipType {
     private final int cost;
     private final int attack;
     private final int defense;
-    private final String requiredTech;  // Nazwa wymaganej technologii (stringValue z TechEffect)
+    private final String requiredTech;
 
     ShipType(String displayName, String description, int cost,
              int attack, int defense, String requiredTech) {
@@ -83,14 +110,12 @@ public enum ShipType {
         return researchManager.isUnlocked(requiredTech);
     }
 
-    // Zwraca efektywny atak z uwzględnieniem bonusów
     public int getEffectiveAttack(ResearchManager researchManager) {
         int base = attack;
         int bonus = researchManager.getShipAttackBonus();
         return base + (base * bonus / 100);
     }
 
-    // Zwraca efektywną obronę z uwzględnieniem bonusów
     public int getEffectiveDefense(ResearchManager researchManager) {
         int base = defense;
         int bonus = researchManager.getShipDefenseBonus();

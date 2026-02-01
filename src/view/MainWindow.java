@@ -18,7 +18,6 @@ public class MainWindow extends JFrame {
     private JButton endTurnButton;
     private Game game;
 
-    // Labele dla zasobów
     private JLabel creditsLabel;
     private JLabel researchLabel;
 
@@ -46,7 +45,6 @@ public class MainWindow extends JFrame {
         sidePanel.setPreferredSize(new Dimension(320, 0));
         sidePanel.setVisible(false);
 
-        // Inicjalizacja topPanel z zasobami
         initTopPanel();
     }
 
@@ -55,31 +53,25 @@ public class MainWindow extends JFrame {
         topPanel.setBackground(new Color(30, 30, 30));
         topPanel.setPreferredSize(new Dimension(0, 50));
 
-        // Tura
         turnLabel = new JLabel("Tura: 1");
         turnLabel.setForeground(Color.WHITE);
         turnLabel.setFont(turnLabel.getFont().deriveFont(Font.BOLD, 14f));
         topPanel.add(turnLabel);
 
-        // Separator
         topPanel.add(createSeparator());
 
-        // Kredyty
         creditsLabel = new JLabel("💰 Kredyty: 500");
-        creditsLabel.setForeground(new Color(255, 215, 0)); // Złoty kolor
+        creditsLabel.setForeground(new Color(255, 215, 0));
         creditsLabel.setFont(creditsLabel.getFont().deriveFont(Font.BOLD, 14f));
         topPanel.add(creditsLabel);
 
-        // Badania
         researchLabel = new JLabel("🔬 Badania: 0");
-        researchLabel.setForeground(new Color(100, 200, 255)); // Niebieski kolor
+        researchLabel.setForeground(new Color(100, 200, 255));
         researchLabel.setFont(researchLabel.getFont().deriveFont(Font.BOLD, 14f));
         topPanel.add(researchLabel);
 
-        // Separator
         topPanel.add(createSeparator());
 
-        // Przycisk badań
         JButton researchButton = new JButton("Badania");
         researchButton.setFocusPainted(false);
         researchButton.addActionListener(e -> {
@@ -89,7 +81,6 @@ public class MainWindow extends JFrame {
         });
         topPanel.add(researchButton);
 
-        // Przycisk flot
         JButton fleetsButton = new JButton("Floty");
         fleetsButton.setFocusPainted(false);
         fleetsButton.addActionListener(e -> {
@@ -99,17 +90,14 @@ public class MainWindow extends JFrame {
         });
         topPanel.add(fleetsButton);
 
-        // Przycisk zakończenia tury
         endTurnButton = new JButton("Zakończ turę");
         endTurnButton.setFocusPainted(false);
         endTurnButton.addActionListener(e -> {
             if (game == null) return;
 
-            // Sprawdź czy można zakończyć turę
             if (!game.canEndTurn()) {
                 String reason = game.getEndTurnBlockReason();
 
-                // Pokaż dialog z możliwością przejścia do problemu
                 int result = JOptionPane.showOptionDialog(
                         this,
                         reason,
@@ -122,18 +110,13 @@ public class MainWindow extends JFrame {
                 );
 
                 if (result == JOptionPane.YES_OPTION) {
-                    // Sprawdź co jest problemem i otwórz odpowiedni panel
                     if (reason.contains("nie ma kolejki budowy") || reason.contains("nieprzypisanych")) {
-                        // Znajdź planetę z problemem
                         for (StarSystem system : game.getGalaxy().getSystems()) {
                             for (OrbitSlot orbit : system.getOrbits()) {
                                 if (orbit.getObject() instanceof Planet planet) {
                                     if (planet.isColonized()) {
-                                        // Sprawdź czy to ta planeta z problemem
                                         if (planet.getBuildQueue().isEmpty() || !planet.isPopulationFullyAssigned()) {
-                                            // Najpierw przejdź do systemu
                                             onSystemSelected(system);
-                                            // Potem otwórz panel planety
                                             showPlanet(planet, system);
                                             return;
                                         }
@@ -142,7 +125,6 @@ public class MainWindow extends JFrame {
                             }
                         }
                     } else if (reason.contains("projektu badawczego")) {
-                        // Otwórz panel badań
                         ResearchPanel researchPanel = new ResearchPanel(this, game);
                         researchPanel.setVisible(true);
                     }
@@ -151,14 +133,11 @@ public class MainWindow extends JFrame {
                 return;
             }
 
-            // Zamknij panele
             sidePanel.removeAll();
             sidePanel.setVisible(false);
 
-            // Przelicz turę
             game.nextTurn();
 
-            // Zaktualizuj wyświetlanie
             updateResourceDisplay();
 
             repaint();
@@ -206,7 +185,15 @@ public class MainWindow extends JFrame {
         sidePanel.removeAll();
         sidePanel.setVisible(true);
         sidePanel.setLayout(new BorderLayout());
-        sidePanel.add(new PlanetInfoPanel(planet, system, this, game), BorderLayout.NORTH);
+
+        JPanel container = new JPanel(new BorderLayout());
+        container.add(new PlanetInfoPanel(planet, system, this, game), BorderLayout.NORTH);
+
+        JScrollPane scrollPane = new JScrollPane(container);
+        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setBorder(null);
+
+        sidePanel.add(scrollPane, BorderLayout.CENTER);
         sidePanel.revalidate();
         sidePanel.repaint();
     }
