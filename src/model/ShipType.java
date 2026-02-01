@@ -70,7 +70,7 @@ public enum ShipType {
             150,
             0,
             10,
-            "FABRYKA_KOSMICZNA"
+            "Fabryka Kosmiczna"
     );
 
     private final String displayName;
