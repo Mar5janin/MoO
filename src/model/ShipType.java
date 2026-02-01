@@ -16,7 +16,7 @@ public enum ShipType {
             50,
             15,
             10,
-            "FIGHTER"
+            "Myśliwiec"
     ),
 
     DESTROYER(
@@ -25,7 +25,7 @@ public enum ShipType {
             80,
             25,
             20,
-            "DESTROYER"
+            "Niszczyciel"
     ),
 
     CRUISER(
@@ -34,7 +34,7 @@ public enum ShipType {
             120,
             40,
             35,
-            "CRUISER"
+            "Krążownik"
     ),
 
     BATTLESHIP(
@@ -43,7 +43,7 @@ public enum ShipType {
             200,
             70,
             60,
-            "BATTLESHIP"
+            "Pancernik"
     ),
 
     CARRIER(
@@ -52,7 +52,7 @@ public enum ShipType {
             180,
             35,
             70,
-            "CARRIER"
+            "Lotniskowiec"
     ),
 
     COLONY_SHIP(

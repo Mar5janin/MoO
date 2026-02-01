@@ -52,7 +52,7 @@ public enum Technology {
             "Odblokowuje lekkie statki bojowe",
             80,
             null,
-            List.of(new TechEffect(TechEffectType.UNLOCK_SHIP, "FIGHTER"))
+            List.of(new TechEffect(TechEffectType.UNLOCK_SHIP, "Myśliwiec"))
     ),
 
     IMPROVED_WEAPONS(
@@ -76,7 +76,7 @@ public enum Technology {
             "Odblokowuje niszczyciele",
             140,
             List.of(BASIC_WEAPONS),
-            List.of(new TechEffect(TechEffectType.UNLOCK_SHIP, "DESTROYER"))
+            List.of(new TechEffect(TechEffectType.UNLOCK_SHIP, "Niszczyciel"))
     ),
 
     HEAVY_SHIPS(
@@ -84,7 +84,7 @@ public enum Technology {
             "Odblokowuje krążowniki",
             200,
             List.of(IMPROVED_WEAPONS),
-            List.of(new TechEffect(TechEffectType.UNLOCK_SHIP, "CRUISER"))
+            List.of(new TechEffect(TechEffectType.UNLOCK_SHIP, "Krążownik"))
     ),
 
     CAPITAL_SHIPS(
@@ -93,8 +93,8 @@ public enum Technology {
             260,
             List.of(HEAVY_SHIPS),
             List.of(
-                    new TechEffect(TechEffectType.UNLOCK_SHIP, "BATTLESHIP"),
-                    new TechEffect(TechEffectType.UNLOCK_SHIP, "CARRIER")
+                    new TechEffect(TechEffectType.UNLOCK_SHIP, "Pancernik"),
+                    new TechEffect(TechEffectType.UNLOCK_SHIP, "Lotniskowiec")
             )
     ),
 
