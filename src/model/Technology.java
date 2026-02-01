@@ -104,6 +104,14 @@ public enum Technology {
             130,
             List.of(IMPROVED_FARMING),
             List.of(new TechEffect(TechEffectType.POPULATION_BONUS, 25))
+    ),
+
+    ADVANCED_ECONOMICS(
+            "Zaawansowana ekonomia",
+            "Umożliwia budowę banków galaktycznych",
+            110,
+            List.of(TRADE_NETWORKS),
+            List.of(new TechEffect(TechEffectType.UNLOCK_BUILDING, "BANK_GALAKTYCZNY"))
     );
 
     private final String displayName;

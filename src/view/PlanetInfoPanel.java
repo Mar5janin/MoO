@@ -100,14 +100,93 @@ public class PlanetInfoPanel extends JPanel {
         add(new JLabel("Status: Skolonizowana"));
         add(Box.createVerticalStrut(10));
 
-        add(sectionTitle("Kolonia"));
-        add(new JLabel("Populacja: " + planet.getPopulation()));
-        add(new JLabel("Produkcja: " + planet.getProduction()));
-        add(new JLabel("Badania: " + planet.getResearch()));
-        add(new JLabel("Kredyty: " + planet.getCredits()));
+        // === POPULACJA I ZASOBY ===
+        add(sectionTitle("Populacja i Zasoby"));
+
+        JLabel popLabel = new JLabel(String.format("Populacja: %d / %d",
+                planet.getTotalPopulation(), planet.getMaxPopulation()));
+        popLabel.setFont(popLabel.getFont().deriveFont(Font.BOLD));
+        add(popLabel);
+
+        // Progres wzrostu populacji
+        int foodAcc = planet.getFoodAccumulated();
+        int foodNeeded = planet.getFoodNeededForGrowth();
+        JProgressBar growthBar = new JProgressBar(0, foodNeeded);
+        growthBar.setValue(foodAcc);
+        growthBar.setString("Wzrost: " + foodAcc + "/" + foodNeeded);
+        growthBar.setStringPainted(true);
+        growthBar.setMaximumSize(new Dimension(300, 20));
+        add(growthBar);
+
+        add(Box.createVerticalStrut(5));
+        add(new JLabel("🌾 Żywność: " + planet.getFoodProduction() + " / turę"));
+        add(new JLabel("🏭 Produkcja: " + planet.getProduction()));
+        add(new JLabel("🔬 Badania: " + planet.getResearch()));
+        add(new JLabel("💰 Kredyty: " + planet.getCredits()));
 
         add(Box.createVerticalStrut(12));
 
+        // === ZARZĄDZANIE POPULACJĄ ===
+        add(sectionTitle("Zarządzanie Populacją"));
+
+        JPanel popManagement = new JPanel();
+        popManagement.setLayout(new BoxLayout(popManagement, BoxLayout.Y_AXIS));
+        popManagement.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Color.GRAY),
+                BorderFactory.createEmptyBorder(8, 10, 8, 10)
+        ));
+        popManagement.setMaximumSize(new Dimension(500, 200));
+
+        // Żywność
+        popManagement.add(createPopulationSlider(
+                "🌾 Produkcja żywności",
+                planet.getPopulationOnFood(),
+                planet.getTotalPopulation(),
+                value -> {
+                    planet.setPopulationOnFood(value);
+                    mainWindow.showPlanet(planet, system);
+                }
+        ));
+
+        popManagement.add(Box.createVerticalStrut(8));
+
+        // Produkcja
+        popManagement.add(createPopulationSlider(
+                "🏭 Produkcja budynków/statków",
+                planet.getPopulationOnProduction(),
+                planet.getTotalPopulation(),
+                value -> {
+                    planet.setPopulationOnProduction(value);
+                    mainWindow.showPlanet(planet, system);
+                }
+        ));
+
+        popManagement.add(Box.createVerticalStrut(8));
+
+        // Badania
+        popManagement.add(createPopulationSlider(
+                "🔬 Badania",
+                planet.getPopulationOnResearch(),
+                planet.getTotalPopulation(),
+                value -> {
+                    planet.setPopulationOnResearch(value);
+                    mainWindow.showPlanet(planet, system);
+                }
+        ));
+
+        popManagement.add(Box.createVerticalStrut(8));
+
+        // Bezrobotni
+        int unemployed = planet.getUnassignedPopulation();
+        JLabel unemployedLabel = new JLabel("💼 Bezrobotni (generują kredyty): " + unemployed);
+        unemployedLabel.setForeground(new Color(255, 215, 0));
+        popManagement.add(unemployedLabel);
+
+        add(popManagement);
+
+        add(Box.createVerticalStrut(12));
+
+        // === KOLEJKA BUDOWY ===
         add(sectionTitle("Kolejka budowy"));
 
         queuePanel = new JPanel();
@@ -124,7 +203,36 @@ public class PlanetInfoPanel extends JPanel {
     }
 
     // =============================
-    // KOLEJKA BUDOWY - Z WYŚWIETLANIEM TUR
+    // SLIDER DO ZARZĄDZANIA POPULACJĄ
+    // =============================
+    private JPanel createPopulationSlider(String label, int current, int max, java.util.function.Consumer<Integer> onChange) {
+        JPanel panel = new JPanel(new BorderLayout(10, 0));
+
+        JLabel titleLabel = new JLabel(label + ": " + current);
+        titleLabel.setFont(titleLabel.getFont().deriveFont(Font.BOLD, 11f));
+        panel.add(titleLabel, BorderLayout.NORTH);
+
+        JSlider slider = new JSlider(0, max, current);
+        slider.setMajorTickSpacing(max > 10 ? 5 : 1);
+        slider.setMinorTickSpacing(1);
+        slider.setPaintTicks(true);
+        slider.setPaintLabels(true);
+
+        slider.addChangeListener(e -> {
+            int value = slider.getValue();
+            titleLabel.setText(label + ": " + value);
+            if (!slider.getValueIsAdjusting()) {
+                onChange.accept(value);
+            }
+        });
+
+        panel.add(slider, BorderLayout.CENTER);
+
+        return panel;
+    }
+
+    // =============================
+    // KOLEJKA BUDOWY - Z WYŚWIETLANIEM TUR I RUSH BUY
     // =============================
     private void renderBuildQueueContent() {
 
@@ -163,12 +271,14 @@ public class PlanetInfoPanel extends JPanel {
                 gbc.weightx = 1.0;
                 row.add(nameLabel, gbc);
 
-                // ===== PANEL PRZYCISKÓW (STAŁA SZEROKOŚĆ) =====
+                // ===== PANEL PRZYCISKÓW =====
                 JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT, BUTTON_GAP, 4));
 
+                int rushBuyButtonWidth = 80; // Szerszy przycisk dla "Rush"
                 int buttonsPanelWidth =
                         BUTTON_COUNT * BUTTON_WIDTH +
-                                (BUTTON_COUNT - 1) * BUTTON_GAP + 8;
+                                rushBuyButtonWidth +
+                                (BUTTON_COUNT) * BUTTON_GAP + 8;
 
                 buttons.setPreferredSize(new Dimension(buttonsPanelWidth, ROW_HEIGHT));
                 buttons.setMinimumSize(new Dimension(buttonsPanelWidth, ROW_HEIGHT));
@@ -197,6 +307,37 @@ public class PlanetInfoPanel extends JPanel {
                     planet.removeFromQueue(index);
                     mainWindow.showPlanet(planet, system);
                 });
+
+                // Przycisk Rush Buy (tylko dla pierwszego elementu)
+                if (i == 0) {
+                    int rushCost = planet.getRushBuyCost();
+                    JButton rushButton = new JButton("Rush: " + rushCost + "💰");
+                    rushButton.setPreferredSize(new Dimension(rushBuyButtonWidth, 24));
+                    rushButton.setToolTipText("Natychmiast zakończ produkcję za " + rushCost + " kredytów");
+
+                    if (game.getTotalCredits() >= rushCost) {
+                        rushButton.setBackground(new Color(100, 200, 100));
+                    } else {
+                        rushButton.setEnabled(false);
+                        rushButton.setBackground(Color.LIGHT_GRAY);
+                    }
+
+                    rushButton.addActionListener(e -> {
+                        boolean success = game.rushBuyOnPlanet(planet, system);
+                        if (success) {
+                            mainWindow.updateResourceDisplay();
+                            mainWindow.showPlanet(planet, system);
+                            JOptionPane.showMessageDialog(
+                                    this,
+                                    "Produkcja zakończona natychmiast!",
+                                    "Rush Buy",
+                                    JOptionPane.INFORMATION_MESSAGE
+                            );
+                        }
+                    });
+
+                    buttons.add(rushButton);
+                }
 
                 buttons.add(up);
                 buttons.add(down);

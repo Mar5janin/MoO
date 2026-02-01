@@ -251,9 +251,8 @@ public class FleetManagementDialog extends JDialog {
 
                 JLabel label = new JLabel(type.getDisplayName() + " (dostępnych: " + count + ")");
 
-                // POPRAWKA: Minimum 0, maksimum (count - 1) jeśli count > 1, inaczej 0
-                int maxValue = count > 1 ? count - 1 : 0;
-                SpinnerNumberModel model = new SpinnerNumberModel(0, 0, maxValue, 1);
+                // Można oddzielić wszystkie statki danego typu (max = count)
+                SpinnerNumberModel model = new SpinnerNumberModel(0, 0, count, 1);
                 JSpinner spinner = new JSpinner(model);
                 spinner.setPreferredSize(new Dimension(80, 25));
 

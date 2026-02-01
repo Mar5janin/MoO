@@ -74,6 +74,54 @@ public class Game {
         return researchManager;
     }
 
+    /**
+     * Wydaje kredyty (np. na rush buy)
+     * @param amount Ile wydać
+     * @return true jeśli się udało
+     */
+    public boolean spendCredits(int amount) {
+        if (totalCredits >= amount) {
+            totalCredits -= amount;
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Rush buy - natychmiast kończy produkcję na planecie za kredyty
+     * @param planet Planeta na której dokonujemy rush buy
+     * @param system System w którym znajduje się planeta (dla dodania statku do floty)
+     * @return true jeśli się udało
+     */
+    public boolean rushBuyOnPlanet(Planet planet, StarSystem system) {
+        if (planet.getBuildQueue().isEmpty()) {
+            return false;
+        }
+
+        int cost = planet.getRushBuyCost();
+
+        if (totalCredits < cost) {
+            return false;
+        }
+
+        // Sprawdź czy to statek czy budynek
+        ProductionOrder current = planet.getBuildQueue().get(0);
+        boolean isShip = (current.getProductionType() == ProductionType.SHIP);
+        ShipType shipType = isShip ? current.getShipType() : null;
+
+        // Wykonaj rush buy na planecie
+        boolean success = planet.rushBuy(this);
+
+        // Jeśli to był statek, dodaj go do floty
+        if (success && isShip && shipType != null) {
+            Ship newShip = new Ship(shipType);
+            Fleet fleet = system.getOrCreatePlayerFleet();
+            fleet.addShip(newShip);
+        }
+
+        return success;
+    }
+
     public boolean canEndTurn() {
         // Sprawdź czy wszystkie skolonizowane planety mają kolejkę budowy
         for (StarSystem system : galaxy.getSystems()) {
