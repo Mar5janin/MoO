@@ -15,10 +15,11 @@ public class Planet implements OrbitObject {
     private final List<Building> buildings = new ArrayList<>();
 
     private static final int MAX_QUEUE = 5;
-    private final List<BuildOrder> buildQueue = new ArrayList<>();
+    private final List<ProductionOrder> productionQueue = new ArrayList<>();
 
-    // Mapa pamiętająca postęp w budynkach
-    private final Map<BuildingType, Integer> savedProgress = new HashMap<>();
+    // Mapy pamiętające postęp
+    private final Map<BuildingType, Integer> savedBuildingProgress = new HashMap<>();
+    private final Map<ShipType, Integer> savedShipProgress = new HashMap<>();
 
     private int basePopulation;
     private int baseProduction;
@@ -106,8 +107,8 @@ public class Planet implements OrbitObject {
         return buildings;
     }
 
-    public List<BuildOrder> getBuildQueue() {
-        return buildQueue;
+    public List<ProductionOrder> getBuildQueue() {
+        return productionQueue;
     }
 
 
@@ -117,9 +118,16 @@ public class Planet implements OrbitObject {
                 .anyMatch(b -> b.getType() == type);
     }
 
-    public boolean isInQueue(BuildingType type) {
-        return buildQueue.stream()
-                .anyMatch(o -> o.getType() == type);
+    public boolean isBuildingInQueue(BuildingType type) {
+        return productionQueue.stream()
+                .filter(o -> o.getProductionType() == ProductionType.BUILDING)
+                .anyMatch(o -> o.getBuildingType() == type);
+    }
+
+    public boolean isShipInQueue(ShipType type) {
+        return productionQueue.stream()
+                .filter(o -> o.getProductionType() == ProductionType.SHIP)
+                .anyMatch(o -> o.getShipType() == type);
     }
 
 
@@ -130,66 +138,100 @@ public class Planet implements OrbitObject {
         return true;
     }
 
-    // === KOLEJKA ===
-    public void addToQueue(BuildingType type, ResearchManager researchManager) {
+    public boolean canBuildShip(ShipType type, ResearchManager researchManager) {
+        if (!colonized) return false;
+        if (!type.isAvailable(researchManager)) return false;
+        return true;
+    }
 
+    // === KOLEJKA PRODUKCJI ===
+    public void addBuildingToQueue(BuildingType type, ResearchManager researchManager) {
         if (!canBuild(type, researchManager)) return;
         if (hasBuilding(type)) return;
-        if (isInQueue(type)) return;
+        if (isBuildingInQueue(type)) return;
 
-        if (buildQueue.size() >= MAX_QUEUE) {
-            buildQueue.remove(buildQueue.size() - 1);
+        if (productionQueue.size() >= MAX_QUEUE) {
+            productionQueue.remove(productionQueue.size() - 1);
         }
 
         // Przywróć zapisany postęp jeśli istnieje
-        int savedCost = savedProgress.getOrDefault(type, type.getCost());
-        BuildOrder order = new BuildOrder(type);
+        int savedCost = savedBuildingProgress.getOrDefault(type, type.getCost());
+        ProductionOrder order = new ProductionOrder(type);
         order.setRemainingCost(savedCost);
 
-        buildQueue.add(order);
+        productionQueue.add(order);
+    }
+
+    public void addShipToQueue(ShipType type, ResearchManager researchManager) {
+        if (!canBuildShip(type, researchManager)) return;
+
+        if (productionQueue.size() >= MAX_QUEUE) {
+            productionQueue.remove(productionQueue.size() - 1);
+        }
+
+        // Przywróć zapisany postęp jeśli istnieje
+        int savedCost = savedShipProgress.getOrDefault(type, type.getCost());
+        ProductionOrder order = new ProductionOrder(type);
+        order.setRemainingCost(savedCost);
+
+        productionQueue.add(order);
     }
 
     public void removeFromQueue(int index) {
-        if (index >= 0 && index < buildQueue.size()) {
-            BuildOrder order = buildQueue.get(index);
+        if (index >= 0 && index < productionQueue.size()) {
+            ProductionOrder order = productionQueue.get(index);
+
             // Zapisz postęp przed usunięciem
-            if (order.getRemainingCost() < order.getType().getCost()) {
-                savedProgress.put(order.getType(), order.getRemainingCost());
+            if (order.getRemainingCost() < order.getOriginalCost()) {
+                if (order.getProductionType() == ProductionType.BUILDING) {
+                    savedBuildingProgress.put(order.getBuildingType(), order.getRemainingCost());
+                } else {
+                    savedShipProgress.put(order.getShipType(), order.getRemainingCost());
+                }
             }
-            buildQueue.remove(index);
+
+            productionQueue.remove(index);
         }
     }
 
     public void moveQueueUp(int index) {
         if (index > 0) {
-            var tmp = buildQueue.get(index);
-            buildQueue.set(index, buildQueue.get(index - 1));
-            buildQueue.set(index - 1, tmp);
+            var tmp = productionQueue.get(index);
+            productionQueue.set(index, productionQueue.get(index - 1));
+            productionQueue.set(index - 1, tmp);
         }
     }
 
     public void moveQueueDown(int index) {
-        if (index < buildQueue.size() - 1) {
-            var tmp = buildQueue.get(index);
-            buildQueue.set(index, buildQueue.get(index + 1));
-            buildQueue.set(index + 1, tmp);
+        if (index < productionQueue.size() - 1) {
+            var tmp = productionQueue.get(index);
+            productionQueue.set(index, productionQueue.get(index + 1));
+            productionQueue.set(index + 1, tmp);
         }
     }
 
-    public void processTurn() {
+    public Ship processTurn(StarSystem system) {
+        if (!colonized) return null;
+        if (productionQueue.isEmpty()) return null;
 
-        if (!colonized) return;
-        if (buildQueue.isEmpty()) return;
-
-        BuildOrder current = buildQueue.get(0);
+        ProductionOrder current = productionQueue.get(0);
         current.progress(getProduction());
 
         if (current.isFinished()) {
-            buildings.add(new Building(current.getType()));
-            // Usuń zapisany postęp po ukończeniu
-            savedProgress.remove(current.getType());
-            buildQueue.remove(0);
+            productionQueue.remove(0);
+
+            if (current.getProductionType() == ProductionType.BUILDING) {
+                buildings.add(new Building(current.getBuildingType()));
+                savedBuildingProgress.remove(current.getBuildingType());
+                return null;
+            } else {
+                Ship ship = new Ship(current.getShipType());
+                savedShipProgress.remove(current.getShipType());
+                return ship; // Zwróć statek do dodania do floty
+            }
         }
+
+        return null;
     }
 
 }

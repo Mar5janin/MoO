@@ -11,6 +11,7 @@ public class StarSystem {
 
     private List<StarSystem> neighbors = new ArrayList<>();
     private List<OrbitSlot> orbits = new ArrayList<>();
+    private List<Fleet> fleets = new ArrayList<>();
 
     public StarSystem(String name, int x, int y) {
         this.name = name;
@@ -62,4 +63,33 @@ public class StarSystem {
     public void setY(int y) { this.y = y; }
 
     public String getName() { return name; }
+
+    // === FLOTY ===
+    public List<Fleet> getFleets() {
+        return fleets;
+    }
+
+    public void addFleet(Fleet fleet) {
+        if (!fleets.contains(fleet)) {
+            fleets.add(fleet);
+        }
+    }
+
+    public void removeFleet(Fleet fleet) {
+        fleets.remove(fleet);
+    }
+
+    public Fleet getPlayerFleet() {
+        // Na razie zakładamy że gracz ma tylko jedną flotę w systemie
+        return fleets.isEmpty() ? null : fleets.get(0);
+    }
+
+    public Fleet getOrCreatePlayerFleet() {
+        Fleet fleet = getPlayerFleet();
+        if (fleet == null) {
+            fleet = new Fleet(this);
+            fleets.add(fleet);
+        }
+        return fleet;
+    }
 }

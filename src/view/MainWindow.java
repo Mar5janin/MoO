@@ -145,7 +145,12 @@ public class MainWindow extends JFrame {
         } else {
             sidePanel.setVisible(true);
             sidePanel.setLayout(new BorderLayout());
-            sidePanel.add(new SystemInfoPanel(system, this), BorderLayout.NORTH);
+
+            JScrollPane scrollPane = new JScrollPane(new SystemInfoPanel(system, this, game));
+            scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+            scrollPane.setBorder(null);
+
+            sidePanel.add(scrollPane, BorderLayout.CENTER);
         }
 
         sidePanel.revalidate();

@@ -29,9 +29,21 @@ public class Game {
                     if (planet.isColonized()) {
                         creditsThisTurn += planet.getCredits();
                         researchThisTurn += planet.getResearch();
-                        planet.processTurn();
+
+                        // Przetwórz turę planety i odbierz nowy statek jeśli został wyprodukowany
+                        Ship newShip = planet.processTurn(system);
+                        if (newShip != null) {
+                            // Dodaj statek do floty w tym systemie
+                            Fleet fleet = system.getOrCreatePlayerFleet();
+                            fleet.addShip(newShip);
+                        }
                     }
                 }
+            }
+
+            // Przetwórz tury dla wszystkich flot w systemie
+            for (Fleet fleet : system.getFleets()) {
+                fleet.processTurn();
             }
         }
 

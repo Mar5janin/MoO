@@ -126,8 +126,7 @@ public class PlanetInfoPanel extends JPanel {
         } else {
             for (int i = 0; i < planet.getBuildQueue().size(); i++) {
                 int index = i;
-                BuildOrder order = planet.getBuildQueue().get(i);
-                BuildingType type = order.getType();
+                ProductionOrder order = planet.getBuildQueue().get(i);
 
                 // Oblicz ilość tur
                 int turnsRemaining = calculateTurnsRemaining(order, i);
@@ -135,7 +134,7 @@ public class PlanetInfoPanel extends JPanel {
                         turnsRemaining < 5 ? " tury" : " tur");
 
                 String fullText = (i + 1) + ". " +
-                        type.getDisplayName() +
+                        order.getDisplayName() +
                         " (" + turnsText + ")";
 
                 JPanel row = new JPanel(new GridBagLayout());
@@ -237,7 +236,7 @@ public class PlanetInfoPanel extends JPanel {
     // =============================
     // OBLICZANIE TUR
     // =============================
-    private int calculateTurnsRemaining(BuildOrder order, int queueIndex) {
+    private int calculateTurnsRemaining(ProductionOrder order, int queueIndex) {
         int production = planet.getProduction();
         if (production <= 0) return 999; // Zabezpieczenie
 
@@ -247,7 +246,7 @@ public class PlanetInfoPanel extends JPanel {
         }
 
         // Dla kolejnych elementów używamy pełnego kosztu
-        return (int) Math.ceil((double) order.getType().getCost() / production);
+        return (int) Math.ceil((double) order.getOriginalCost() / production);
     }
 
     // =============================

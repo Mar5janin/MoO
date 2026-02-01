@@ -7,24 +7,35 @@ import java.awt.*;
 
 public class SystemInfoPanel extends JPanel {
 
-    public SystemInfoPanel(StarSystem system, MainWindow mainWindow) {
+    public SystemInfoPanel(StarSystem system, MainWindow mainWindow, Game game) {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         add(title("SYSTEM: " + system.getName()));
         add(Box.createVerticalStrut(10));
 
+        // SEKCJA: ORBITY
+        JLabel orbitsLabel = new JLabel("Orbity:");
+        orbitsLabel.setFont(orbitsLabel.getFont().deriveFont(Font.BOLD, 12f));
+        add(orbitsLabel);
+        add(Box.createVerticalStrut(5));
+
         int orbitIndex = 1;
         for (OrbitSlot orbit : system.getOrbits()) {
-            add(createOrbitComponent(orbitIndex++, orbit, system, mainWindow));
+            add(createOrbitComponent(orbitIndex++, orbit, system, mainWindow, game));
         }
+
+        // SEKCJA: FLOTY
+        add(Box.createVerticalStrut(15));
+        add(new FleetInfoPanel(system, game));
     }
 
     private JComponent createOrbitComponent(
             int index,
             OrbitSlot orbit,
             StarSystem system,
-            MainWindow mainWindow
+            MainWindow mainWindow,
+            Game game
     ) {
 
         if (orbit.getObject() == null) {
