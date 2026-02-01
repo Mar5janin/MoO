@@ -28,8 +28,6 @@ public class BuildDialog extends JDialog {
 
         for (BuildingType type : BuildingType.values()) {
             if (!planet.canBuild(type, researchManager)) continue;
-            if (planet.isBuildingInQueue(type)) continue;
-            if (planet.hasBuilding(type)) continue;
 
             anyBuildings = true;
 
@@ -37,7 +35,19 @@ public class BuildDialog extends JDialog {
             btnPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
             btnPanel.setBorder(BorderFactory.createEmptyBorder(2, 5, 2, 5));
 
-            JButton btn = new JButton(type.getDisplayName());
+            // Przygotuj nazwę budynku z licznikiem jeśli wielokrotny
+            String buttonText = type.getDisplayName();
+            if (type.canBuildMultiple()) {
+                int currentCount = planet.countBuilding(type);
+                int inQueue = (int) planet.getBuildQueue().stream()
+                        .filter(o -> o.getProductionType() == ProductionType.BUILDING)
+                        .filter(o -> o.getBuildingType() == type)
+                        .count();
+                int total = currentCount + inQueue;
+                buttonText += " (" + total + "/" + type.getMaxCount() + ")";
+            }
+
+            JButton btn = new JButton(buttonText);
             btn.setHorizontalAlignment(SwingConstants.LEFT);
 
             btn.addActionListener(e -> {
@@ -84,10 +94,27 @@ public class BuildDialog extends JDialog {
                     type.getEffectiveAttack(researchManager) + " D:" +
                     type.getEffectiveDefense(researchManager) + ")";
 
+            // Dodaj ostrzeżenie dla statku kolonizacyjnego
+            if (type == ShipType.COLONY_SHIP) {
+                shipInfo += " ⚠ Zabiera 1 pop.";
+            }
+
             JButton btn = new JButton(shipInfo);
             btn.setHorizontalAlignment(SwingConstants.LEFT);
 
             btn.addActionListener(e -> {
+                // Sprawdź czy planeta ma wystarczającą populację dla statku kolonizacyjnego
+                if (type == ShipType.COLONY_SHIP && planet.getTotalPopulation() <= 1) {
+                    JOptionPane.showMessageDialog(
+                            this,
+                            "Nie możesz zbudować statku kolonizacyjnego!\n" +
+                                    "Potrzebujesz przynajmniej 2 populacji (statek zabiera 1 osobę).",
+                            "Za mało populacji",
+                            JOptionPane.WARNING_MESSAGE
+                    );
+                    return;
+                }
+
                 planet.addShipToQueue(type, researchManager);
                 dispose();
                 onClose.run();

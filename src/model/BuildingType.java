@@ -9,6 +9,8 @@ public enum BuildingType {
             20,
             false,
             null,
+            false,  // canBuildMultiple
+            1,      // maxCount
             0,      // populationCapacity
             2,      // foodBonus (pasywny)
             1,      // foodPerCapita (+1 za każdego pracownika)
@@ -22,6 +24,8 @@ public enum BuildingType {
             30,
             false,
             null,
+            false,  // canBuildMultiple
+            1,      // maxCount
             0,      // populationCapacity
             0, 0,   // food
             1,      // productionBonus (pasywny)
@@ -35,6 +39,8 @@ public enum BuildingType {
             25,
             false,
             null,
+            false,  // canBuildMultiple
+            1,      // maxCount
             0,      // populationCapacity
             0, 0,   // food
             0, 0,   // production
@@ -50,6 +56,8 @@ public enum BuildingType {
             35,
             true,
             "KOPALNIA_KSIĘŻYCOWA",
+            false,  // canBuildMultiple
+            1,      // maxCount
             0,      // populationCapacity
             0, 0,   // food
             0,      // productionBonus (pasywny)
@@ -64,6 +72,8 @@ public enum BuildingType {
             40,
             false,
             "ZAAWANSOWANA_FARMA",
+            false,  // canBuildMultiple
+            1,      // maxCount
             2,      // populationCapacity (+2 max populacji)
             3,      // foodBonus (pasywny)
             2,      // foodPerCapita (+2 za każdego pracownika)
@@ -77,6 +87,8 @@ public enum BuildingType {
             50,
             false,
             "CENTRUM_BADAWCZE",
+            false,  // canBuildMultiple
+            1,      // maxCount
             0,      // populationCapacity
             0, 0,   // food
             0, 0,   // production
@@ -90,6 +102,8 @@ public enum BuildingType {
             80,
             false,
             "FABRYKA_KOSMICZNA",
+            false,  // canBuildMultiple
+            1,      // maxCount
             0,      // populationCapacity
             0, 0,   // food
             3,      // productionBonus (pasywny)
@@ -103,6 +117,8 @@ public enum BuildingType {
             60,
             false,
             "POSTERUNEK_BOJOWY",
+            false,  // canBuildMultiple
+            1,      // maxCount
             0,      // populationCapacity
             0, 0,   // food
             0, 0,   // production
@@ -117,6 +133,8 @@ public enum BuildingType {
             45,
             false,
             "BANK_GALAKTYCZNY",
+            false,  // canBuildMultiple
+            1,      // maxCount
             0,      // populationCapacity
             0, 0,   // food
             0, 0,   // production
@@ -125,11 +143,14 @@ public enum BuildingType {
             1       // creditsPerTotalPopulation (podatki: +1 za każdego na planecie)
     ),
 
+    // ========== OSIEDLE - MOŻNA BUDOWAĆ WIELOKROTNIE ==========
     OSIEDLE(
             "Osiedle Mieszkalne",
             30,
             false,
             null,
+            true,   // canBuildMultiple - MOŻNA BUDOWAĆ WIELE RAZY!
+            5,      // maxCount - maksymalnie 5 osiedli
             3,      // populationCapacity (+3 max populacji)
             0, 0,   // food
             0, 0,   // production
@@ -141,6 +162,8 @@ public enum BuildingType {
     private final int cost;
     private final boolean requiresMoon;
     private final String techRequirement;
+    private final boolean canBuildMultiple;  // Czy można budować wiele razy
+    private final int maxCount;              // Maksymalna liczba tego budynku
 
     // Bonusy
     private final int populationCapacityBonus;
@@ -162,6 +185,8 @@ public enum BuildingType {
             int cost,
             boolean requiresMoon,
             String techRequirement,
+            boolean canBuildMultiple,
+            int maxCount,
             int populationCapacityBonus,
             int foodBonus,
             int foodPerCapita,
@@ -176,6 +201,8 @@ public enum BuildingType {
         this.cost = cost;
         this.requiresMoon = requiresMoon;
         this.techRequirement = techRequirement;
+        this.canBuildMultiple = canBuildMultiple;
+        this.maxCount = maxCount;
         this.populationCapacityBonus = populationCapacityBonus;
         this.foodBonus = foodBonus;
         this.foodPerCapita = foodPerCapita;
@@ -191,6 +218,8 @@ public enum BuildingType {
     public int getCost() { return cost; }
     public boolean requiresMoon() { return requiresMoon; }
     public String getTechRequirement() { return techRequirement; }
+    public boolean canBuildMultiple() { return canBuildMultiple; }
+    public int getMaxCount() { return maxCount; }
 
     public int getPopulationCapacityBonus() { return populationCapacityBonus; }
 

@@ -6,6 +6,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.util.Map;
 
 public class PlanetInfoPanel extends JPanel {
 
@@ -63,9 +64,6 @@ public class PlanetInfoPanel extends JPanel {
         add(back);
     }
 
-    // =============================
-    // NIESKOLONIZOWANA
-    // =============================
     private void renderUncolonized() {
 
         add(new JLabel("Status: Nie skolonizowana"));
@@ -73,7 +71,6 @@ public class PlanetInfoPanel extends JPanel {
         if (planet.isHabitable()) {
             add(Box.createVerticalStrut(10));
 
-            // Sprawdź czy w systemie jest statek kolonizacyjny
             Fleet fleet = system.getPlayerFleet();
             boolean hasColonyShip = fleet != null && fleet.countShipType(ShipType.COLONY_SHIP) > 0;
 
@@ -92,15 +89,11 @@ public class PlanetInfoPanel extends JPanel {
         }
     }
 
-    // =============================
-    // SKOLONIZOWANA
-    // =============================
     private void renderColonized() {
 
         add(new JLabel("Status: Skolonizowana"));
         add(Box.createVerticalStrut(10));
 
-        // === POPULACJA I ZASOBY ===
         add(sectionTitle("Populacja i Zasoby"));
 
         JLabel popLabel = new JLabel(String.format("Populacja: %d / %d",
@@ -108,25 +101,43 @@ public class PlanetInfoPanel extends JPanel {
         popLabel.setFont(popLabel.getFont().deriveFont(Font.BOLD));
         add(popLabel);
 
-        // Progres wzrostu populacji
         int foodAcc = planet.getFoodAccumulated();
         int foodNeeded = planet.getFoodNeededForGrowth();
         JProgressBar growthBar = new JProgressBar(0, foodNeeded);
-        growthBar.setValue(foodAcc);
+        growthBar.setValue(Math.max(0, foodAcc));
         growthBar.setString("Wzrost: " + foodAcc + "/" + foodNeeded);
         growthBar.setStringPainted(true);
         growthBar.setMaximumSize(new Dimension(300, 20));
+
+        if (foodAcc < 0) {
+            growthBar.setForeground(Color.RED);
+        } else if (planet.getTotalPopulation() >= planet.getMaxPopulation()) {
+            growthBar.setForeground(Color.ORANGE);
+        } else {
+            growthBar.setForeground(new Color(100, 200, 100));
+        }
+
         add(growthBar);
 
         add(Box.createVerticalStrut(5));
-        add(new JLabel("🌾 Żywność: " + planet.getFoodProduction() + " / turę"));
+
+        int netFood = planet.getNetFoodProduction();
+        String foodText = "🌾 Żywność: " + planet.getFoodProduction() +
+                " (utrzymanie: -" + planet.getTotalPopulation() +
+                ", netto: " + (netFood >= 0 ? "+" : "") + netFood + ")";
+        JLabel foodLabel = new JLabel(foodText);
+        if (netFood < 0) {
+            foodLabel.setForeground(Color.RED);
+            foodLabel.setFont(foodLabel.getFont().deriveFont(Font.BOLD));
+        }
+        add(foodLabel);
+
         add(new JLabel("🏭 Produkcja: " + planet.getProduction()));
         add(new JLabel("🔬 Badania: " + planet.getResearch()));
         add(new JLabel("💰 Kredyty: " + planet.getCredits()));
 
         add(Box.createVerticalStrut(12));
 
-        // === ZARZĄDZANIE POPULACJĄ ===
         add(sectionTitle("Zarządzanie Populacją"));
 
         JPanel popManagement = new JPanel();
@@ -137,40 +148,33 @@ public class PlanetInfoPanel extends JPanel {
         ));
         popManagement.setMaximumSize(new Dimension(500, 250));
 
-        // UWAGA: Parametr 'current' (drugi argument) jest ignorowany w nowej wersji metody!
-        // Metoda sama pobiera aktualną wartość z obiektu planet
-
-        // Żywność
         popManagement.add(createPopulationControl(
                 "🌾 Żywność",
-                planet.getPopulationOnFood(),  // Ten parametr jest ignorowany (dla kompatybilności)
+                planet.getPopulationOnFood(),
                 planet.getTotalPopulation(),
                 planet::setPopulationOnFood
         ));
 
         popManagement.add(Box.createVerticalStrut(8));
 
-        // Produkcja
         popManagement.add(createPopulationControl(
                 "🏭 Budowa",
-                planet.getPopulationOnProduction(),  // Ten parametr jest ignorowany
+                planet.getPopulationOnProduction(),
                 planet.getTotalPopulation(),
                 planet::setPopulationOnProduction
         ));
 
         popManagement.add(Box.createVerticalStrut(8));
 
-        // Badania
         popManagement.add(createPopulationControl(
                 "🔬 Badania",
-                planet.getPopulationOnResearch(),  // Ten parametr jest ignorowany
+                planet.getPopulationOnResearch(),
                 planet.getTotalPopulation(),
                 planet::setPopulationOnResearch
         ));
 
         popManagement.add(Box.createVerticalStrut(8));
 
-        // Info o kredytach
         int totalPop = planet.getTotalPopulation();
         JLabel creditsInfo = new JLabel("💰 Wszystkie osoby płacą podatki (+" + totalPop + " kredytów)");
         creditsInfo.setForeground(new Color(255, 215, 0));
@@ -181,7 +185,24 @@ public class PlanetInfoPanel extends JPanel {
 
         add(Box.createVerticalStrut(12));
 
-        // === KOLEJKA BUDOWY ===
+        if (!planet.getBuildings().isEmpty()) {
+            add(sectionTitle("Budynki"));
+
+            Map<BuildingType, Integer> buildingCounts = new java.util.HashMap<>();
+            for (Building building : planet.getBuildings()) {
+                buildingCounts.merge(building.getType(), 1, Integer::sum);
+            }
+
+            for (Map.Entry<BuildingType, Integer> entry : buildingCounts.entrySet()) {
+                String text = entry.getValue() > 1
+                        ? entry.getKey().getDisplayName() + " x" + entry.getValue()
+                        : entry.getKey().getDisplayName();
+                add(new JLabel("  • " + text));
+            }
+
+            add(Box.createVerticalStrut(12));
+        }
+
         add(sectionTitle("Kolejka budowy"));
 
         queuePanel = new JPanel();
@@ -199,19 +220,17 @@ public class PlanetInfoPanel extends JPanel {
 
     private JPanel createPopulationControl(
             String label,
-            int current,  // <- NIEUŻYWANY! (zostawiony dla kompatybilności z wywołaniami)
-            int max,      // <- NIEUŻYWANY!
+            int current,
+            int max,
             java.util.function.Consumer<Integer> onChange
     ) {
         JPanel panel = new JPanel(new BorderLayout(10, 5));
         panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
 
-        // Lewa część - label z wartością (będzie aktualizowany dynamicznie)
         JLabel titleLabel = new JLabel();
         titleLabel.setFont(titleLabel.getFont().deriveFont(Font.BOLD, 11f));
         panel.add(titleLabel, BorderLayout.WEST);
 
-        // Prawa część - przyciski
         JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 0));
 
         JButton minusButton = new JButton("-");
@@ -221,40 +240,28 @@ public class PlanetInfoPanel extends JPanel {
         minusButton.setPreferredSize(btnSize);
         plusButton.setPreferredSize(btnSize);
 
-        // ====================================================================
-        // KLUCZOWA METODA: updateUI
-        // Ta metoda pobiera ŚWIEŻE wartości z obiektu planet za każdym razem
-        // ====================================================================
         Runnable updateUI = () -> {
-            // 1. Pobierz aktualną wartość z planety (NIE używamy parametru 'current'!)
             int currentValue = 0;
             if (label.contains("Żywność")) {
-                currentValue = planet.getPopulationOnFood();  // <- Zawsze aktualna wartość!
+                currentValue = planet.getPopulationOnFood();
             } else if (label.contains("Budowa")) {
                 currentValue = planet.getPopulationOnProduction();
             } else if (label.contains("Badania")) {
                 currentValue = planet.getPopulationOnResearch();
             }
 
-            // 2. Oblicz dostępną populację (nieprzypisaną)
             int assigned = planet.getPopulationOnFood() +
                     planet.getPopulationOnProduction() +
                     planet.getPopulationOnResearch();
             int available = planet.getTotalPopulation() - assigned;
 
-            // 3. Aktualizuj tekst (używamy świeżej wartości currentValue)
             titleLabel.setText(label + ": " + currentValue);
 
-            // 4. Aktualizuj stan przycisków
-            minusButton.setEnabled(currentValue > 0);      // Minus gdy jest kogo zabrać
-            plusButton.setEnabled(available > 0);           // Plus gdy są wolni ludzie
+            minusButton.setEnabled(currentValue > 0);
+            plusButton.setEnabled(available > 0);
         };
 
-        // ====================================================================
-        // OBSŁUGA PRZYCISKU MINUS
-        // ====================================================================
         minusButton.addActionListener(e -> {
-            // Pobierz AKTUALNĄ wartość (nie zaufaną jakiejś zmiennej!)
             int currentValue = 0;
             if (label.contains("Żywność")) {
                 currentValue = planet.getPopulationOnFood();
@@ -264,21 +271,12 @@ public class PlanetInfoPanel extends JPanel {
                 currentValue = planet.getPopulationOnResearch();
             }
 
-            // Zmniejsz wartość (minimum 0)
             int newValue = Math.max(0, currentValue - 1);
-
-            // Zapisz nową wartość w modelu
             onChange.accept(newValue);
-
-            // WAŻNE: Odśwież cały panel planety żeby wszystkie liczby się zaktualizowały
             mainWindow.showPlanet(planet, system);
         });
 
-        // ====================================================================
-        // OBSŁUGA PRZYCISKU PLUS
-        // ====================================================================
         plusButton.addActionListener(e -> {
-            // Pobierz AKTUALNĄ wartość
             int currentValue = 0;
             if (label.contains("Żywność")) {
                 currentValue = planet.getPopulationOnFood();
@@ -288,22 +286,13 @@ public class PlanetInfoPanel extends JPanel {
                 currentValue = planet.getPopulationOnResearch();
             }
 
-            // Zwiększ wartość (maksimum = całkowita populacja)
             int newValue = Math.min(planet.getTotalPopulation(), currentValue + 1);
-
-            // Zapisz nową wartość w modelu
             onChange.accept(newValue);
-
-            // WAŻNE: Odśwież cały panel planety
             mainWindow.showPlanet(planet, system);
         });
 
-        // ====================================================================
-        // INICJALIZACJA - wywołaj updateUI aby ustawić początkowe wartości
-        // ====================================================================
         updateUI.run();
 
-        // Dodaj przyciski do panelu
         buttonsPanel.add(minusButton);
         buttonsPanel.add(plusButton);
         panel.add(buttonsPanel, BorderLayout.EAST);
@@ -311,11 +300,7 @@ public class PlanetInfoPanel extends JPanel {
         return panel;
     }
 
-    // =============================
-    // KOLEJKA BUDOWY - Z WYŚWIETLANIEM TUR
-    // =============================
     private void renderBuildQueueContent() {
-
         queuePanel.removeAll();
 
         if (planet.getBuildQueue().isEmpty()) {
@@ -325,14 +310,11 @@ public class PlanetInfoPanel extends JPanel {
                 int index = i;
                 ProductionOrder order = planet.getBuildQueue().get(i);
 
-                // Oblicz ilość tur
                 int turnsRemaining = calculateTurnsRemaining(order, i);
                 String turnsText = turnsRemaining + (turnsRemaining == 1 ? " tura" :
                         turnsRemaining < 5 ? " tury" : " tur");
 
-                String fullText = (i + 1) + ". " +
-                        order.getDisplayName() +
-                        " (" + turnsText + ")";
+                String fullText = (i + 1) + ". " + order.getDisplayName() + " (" + turnsText + ")";
 
                 JPanel row = new JPanel(new GridBagLayout());
                 row.setMaximumSize(new Dimension(Integer.MAX_VALUE, ROW_HEIGHT));
@@ -343,7 +325,6 @@ public class PlanetInfoPanel extends JPanel {
                 gbc.fill = GridBagConstraints.BOTH;
                 gbc.insets = new Insets(0, 4, 0, 4);
 
-                // ===== NAZWA (ELASTYCZNA Z TOOLTIP) =====
                 JLabel nameLabel = new JLabel(fullText);
                 nameLabel.setToolTipText(fullText);
 
@@ -351,14 +332,10 @@ public class PlanetInfoPanel extends JPanel {
                 gbc.weightx = 1.0;
                 row.add(nameLabel, gbc);
 
-                // ===== PANEL PRZYCISKÓW (STAŁA SZEROKOŚĆ) =====
                 JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT, BUTTON_GAP, 4));
 
-                int rushBuyButtonWidth = 80; // Szerszy przycisk dla "Rush"
-                int buttonsPanelWidth =
-                        BUTTON_COUNT * BUTTON_WIDTH +
-                                rushBuyButtonWidth +
-                                (BUTTON_COUNT) * BUTTON_GAP + 8;
+                int rushBuyButtonWidth = 80;
+                int buttonsPanelWidth = BUTTON_COUNT * BUTTON_WIDTH + rushBuyButtonWidth + (BUTTON_COUNT) * BUTTON_GAP + 8;
 
                 buttons.setPreferredSize(new Dimension(buttonsPanelWidth, ROW_HEIGHT));
                 buttons.setMinimumSize(new Dimension(buttonsPanelWidth, ROW_HEIGHT));
@@ -388,7 +365,6 @@ public class PlanetInfoPanel extends JPanel {
                     mainWindow.showPlanet(planet, system);
                 });
 
-                // Przycisk Rush Buy (tylko dla pierwszego elementu)
                 if (i == 0) {
                     int rushCost = planet.getRushBuyCost();
                     JButton rushButton = new JButton("Rush: " + rushCost + "💰");
@@ -429,23 +405,19 @@ public class PlanetInfoPanel extends JPanel {
                 gbc.anchor = GridBagConstraints.EAST;
                 row.add(buttons, gbc);
 
-                // ===== AUTOMATYCZNE SKRACANIE TEKSTU =====
                 row.addComponentListener(new ComponentAdapter() {
                     @Override
                     public void componentResized(ComponentEvent e) {
                         FontMetrics fm = nameLabel.getFontMetrics(nameLabel.getFont());
                         int availableWidth = row.getWidth() - buttonsPanelWidth - 20;
                         if (availableWidth > 0) {
-                            nameLabel.setText(
-                                    ellipsizeToWidth(fullText, fm, availableWidth)
-                            );
+                            nameLabel.setText(ellipsizeToWidth(fullText, fm, availableWidth));
                         }
                     }
                 });
 
                 queuePanel.add(row);
             }
-
         }
 
         queuePanel.revalidate();
@@ -453,35 +425,22 @@ public class PlanetInfoPanel extends JPanel {
 
         JButton addButton = new JButton("Dodaj do kolejki");
         addButton.addActionListener(e ->
-                new BuildDialog(
-                        mainWindow,
-                        planet,
-                        game,
-                        () -> mainWindow.showPlanet(planet, system)
-                ).setVisible(true)
+                new BuildDialog(mainWindow, planet, game, () -> mainWindow.showPlanet(planet, system)).setVisible(true)
         );
         add(addButton);
     }
 
-    // =============================
-    // OBLICZANIE TUR
-    // =============================
     private int calculateTurnsRemaining(ProductionOrder order, int queueIndex) {
         int production = planet.getProduction();
-        if (production <= 0) return 999; // Zabezpieczenie
+        if (production <= 0) return 999;
 
-        // Jeśli to pierwszy element w kolejce, używamy jego aktualnego pozostałego kosztu
         if (queueIndex == 0) {
             return (int) Math.ceil((double) order.getRemainingCost() / production);
         }
 
-        // Dla kolejnych elementów używamy pełnego kosztu
         return (int) Math.ceil((double) order.getOriginalCost() / production);
     }
 
-    // =============================
-    // UI HELPERS
-    // =============================
     private JLabel title(String text) {
         JLabel label = new JLabel(text);
         label.setFont(label.getFont().deriveFont(Font.BOLD, 14f));

@@ -74,11 +74,6 @@ public class Game {
         return researchManager;
     }
 
-    /**
-     * Wydaje kredyty (np. na rush buy)
-     * @param amount Ile wydać
-     * @return true jeśli się udało
-     */
     public boolean spendCredits(int amount) {
         if (totalCredits >= amount) {
             totalCredits -= amount;
@@ -87,12 +82,6 @@ public class Game {
         return false;
     }
 
-    /**
-     * Rush buy - natychmiast kończy produkcję na planecie za kredyty
-     * @param planet Planeta na której dokonujemy rush buy
-     * @param system System w którym znajduje się planeta (dla dodania statku do floty)
-     * @return true jeśli się udało
-     */
     public boolean rushBuyOnPlanet(Planet planet, StarSystem system) {
         if (planet.getBuildQueue().isEmpty()) {
             return false;

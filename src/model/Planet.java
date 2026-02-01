@@ -32,7 +32,9 @@ public class Planet implements OrbitObject {
 
     // Akumulacja żywności
     private int foodAccumulated = 0;
-    private static final int BASE_FOOD_PER_CITIZEN = 10; // Bazowa ilość żywności na pierwszą osobę
+
+    // NOWA MECHANIKA: Utrzymanie populacji
+    private static final int FOOD_UPKEEP_PER_CITIZEN = 1; // Każda osoba potrzebuje 1 jedzenia per turę
 
     // Przelicznik kredytów na produkcję (dla rush buy)
     public static final int CREDITS_PER_PRODUCTION = 2;
@@ -197,9 +199,12 @@ public class Planet implements OrbitObject {
         return baseProduction + passive + (populationOnFood * perCapita);
     }
 
-    /**
-     * Produkcja = (populacja × 1) + pasywna + (populacja × bonus per capita)
-     */
+    public int getNetFoodProduction() {
+        int production = getFoodProduction();
+        int upkeep = totalPopulation * FOOD_UPKEEP_PER_CITIZEN;
+        return production - upkeep;
+    }
+
     public int getProduction() {
         int baseProduction = populationOnProduction; // Każda osoba produkuje 1 punkt bazowo
         int passive = 0;
@@ -213,9 +218,6 @@ public class Planet implements OrbitObject {
         return baseProduction + passive + (populationOnProduction * perCapita);
     }
 
-    /**
-     * Badania = (populacja × 1) + pasywna + (populacja × bonus per capita)
-     */
     public int getResearch() {
         int baseProduction = populationOnResearch; // Każda osoba produkuje 1 punkt bazowo
         int passive = 0;
@@ -229,10 +231,6 @@ public class Planet implements OrbitObject {
         return baseProduction + passive + (populationOnResearch * perCapita);
     }
 
-    /**
-     * Kredyty = pasywna + (całkowita populacja × (1 + podatki per capita))
-     * ZMIANA: Teraz wszystkie osoby płacą podatki, nie tylko bezrobotni
-     */
     public int getCredits() {
         int passive = 0;
         int perTotalPopulation = 1; // Bazowy podatek od każdej osoby
@@ -242,11 +240,9 @@ public class Planet implements OrbitObject {
             perTotalPopulation += b.getType().getCreditsPerTotalPopulation();
         }
 
-        // Wszystkie osoby płacą podatki
         return passive + (totalPopulation * perTotalPopulation);
     }
 
-    // Stara metoda dla kompatybilności
     @Deprecated
     public int getPopulation() {
         return getTotalPopulation();
@@ -266,6 +262,12 @@ public class Planet implements OrbitObject {
                 .anyMatch(b -> b.getType() == type);
     }
 
+    public int countBuilding(BuildingType type) {
+        return (int) buildings.stream()
+                .filter(b -> b.getType() == type)
+                .count();
+    }
+
     public boolean isBuildingInQueue(BuildingType type) {
         return productionQueue.stream()
                 .filter(o -> o.getProductionType() == ProductionType.BUILDING)
@@ -278,11 +280,30 @@ public class Planet implements OrbitObject {
                 .anyMatch(o -> o.getShipType() == type);
     }
 
-
     public boolean canBuild(BuildingType type, ResearchManager researchManager) {
         if (!colonized) return false;
         if (type.requiresMoon() && !hasMoon) return false;
         if (!type.isAvailable(researchManager)) return false;
+
+        // Sprawdź czy można budować wiele
+        if (!type.canBuildMultiple()) {
+            // Budynek jednorazowy - sprawdź czy już istnieje lub jest w kolejce
+            if (hasBuilding(type) || isBuildingInQueue(type)) {
+                return false;
+            }
+        } else {
+            // Budynek wielokrotny - sprawdź limit
+            int currentCount = countBuilding(type);
+            int inQueue = (int) productionQueue.stream()
+                    .filter(o -> o.getProductionType() == ProductionType.BUILDING)
+                    .filter(o -> o.getBuildingType() == type)
+                    .count();
+
+            if (currentCount + inQueue >= type.getMaxCount()) {
+                return false;
+            }
+        }
+
         return true;
     }
 
@@ -295,8 +316,6 @@ public class Planet implements OrbitObject {
     // === KOLEJKA PRODUKCJI ===
     public void addBuildingToQueue(BuildingType type, ResearchManager researchManager) {
         if (!canBuild(type, researchManager)) return;
-        if (hasBuilding(type)) return;
-        if (isBuildingInQueue(type)) return;
 
         if (productionQueue.size() >= MAX_QUEUE) {
             productionQueue.remove(productionQueue.size() - 1);
@@ -386,30 +405,46 @@ public class Planet implements OrbitObject {
         return true;
     }
 
-    /**
-     * Zwraca koszt rush buy dla obecnego elementu w kolejce
-     */
     public int getRushBuyCost() {
         if (productionQueue.isEmpty()) return 0;
         return productionQueue.get(0).getRemainingCost() * CREDITS_PER_PRODUCTION;
     }
 
-    /**
-     * Przetwarza turę - produkcja, żywność, wzrost populacji
-     * @return Nowo wyprodukowany statek (jeśli jakiś)
-     */
     public Ship processTurn(StarSystem system) {
         if (!colonized) return null;
 
-        // 1. Produkcja żywności i wzrost populacji
-        int foodThisTurn = getFoodProduction();
-        foodAccumulated += foodThisTurn;
+        // 1. Produkcja żywności i wzrost populacji (NOWA MECHANIKA)
+        int netFoodProduction = getNetFoodProduction();
 
-        int foodNeeded = getFoodNeededForGrowth();
-        if (foodAccumulated >= foodNeeded && totalPopulation < getMaxPopulation()) {
-            foodAccumulated -= foodNeeded;
-            totalPopulation++;
-            // Nowa populacja jest początkowo nieprzypisana
+        // Jeśli produkcja żywności jest ujemna, populacja głoduje
+        if (netFoodProduction < 0) {
+            // Zmniejsz zgromadzoną żywność
+            foodAccumulated += netFoodProduction;
+
+            // Jeśli zabraknie żywności, ludzie giną
+            if (foodAccumulated < 0) {
+                int deaths = Math.min(totalPopulation, Math.abs(foodAccumulated) / 10);
+                totalPopulation = Math.max(1, totalPopulation - deaths); // Minimum 1 osoba zostaje
+                foodAccumulated = 0;
+                rebalancePopulation();
+            }
+        } else {
+            // Dodaj nadwyżkę żywności
+            foodAccumulated += netFoodProduction;
+
+            int foodNeeded = getFoodNeededForGrowth();
+
+            // Sprawdź czy można zwiększyć populację
+            if (foodAccumulated >= foodNeeded && totalPopulation < getMaxPopulation()) {
+                foodAccumulated -= foodNeeded;
+                totalPopulation++;
+                // Nowa populacja jest początkowo nieprzypisana
+            } else if (totalPopulation >= getMaxPopulation()) {
+                // Jeśli osiągnięto limit, gromadź żywność tylko do następnego poziomu
+                if (foodAccumulated > foodNeeded) {
+                    foodAccumulated = foodNeeded; // Nie przekraczaj kosztu następnej populacji
+                }
+            }
         }
 
         // 2. Produkcja budynków/statków
@@ -428,6 +463,13 @@ public class Planet implements OrbitObject {
             } else {
                 Ship ship = new Ship(current.getShipType());
                 savedShipProgress.remove(current.getShipType());
+
+                // NOWA MECHANIKA: Statek kolonizacyjny zabiera 1 populację
+                if (current.getShipType() == ShipType.COLONY_SHIP && totalPopulation > 1) {
+                    totalPopulation--;
+                    rebalancePopulation();
+                }
+
                 return ship;
             }
         }
@@ -439,18 +481,26 @@ public class Planet implements OrbitObject {
         return foodAccumulated;
     }
 
-    /**
-     * Oblicza ile żywności potrzeba na następną populację
-     * Wzór: 10 + (aktualna_populacja × 2)
-     * Przykłady: 1→10, 2→14, 3→16, 4→18, 5→20, 10→30
-     */
     public int getFoodNeededForGrowth() {
-        return BASE_FOOD_PER_CITIZEN + (totalPopulation * 2);
+        int pop = totalPopulation;
+
+        if (pop <= 0) return 10;
+
+        if (pop <= 5) {
+            // 1-5: 10, 12, 14, 16, 18
+            return 10 + (pop * 2);
+        } else if (pop <= 10) {
+            // 6-10: 25, 27, 29, 31, 33
+            return 25 + ((pop - 5) * 2);
+        } else if (pop <= 20) {
+            // 11-20: 40, 42, 44... 58
+            return 40 + ((pop - 10) * 2);
+        } else {
+            // 21+: 70, 72, 74...
+            return 70 + ((pop - 20) * 2);
+        }
     }
 
-    /**
-     * Sprawdza czy cała populacja jest przypisana
-     */
     public boolean isPopulationFullyAssigned() {
         return getUnassignedPopulation() == 0;
     }
