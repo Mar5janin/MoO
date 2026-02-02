@@ -398,7 +398,7 @@ public class GalaxyGenerator {
     }
 
     private static void setupAIPlayer(Galaxy galaxy, StarSystem playerHome) {
-        AIPlayer ai = new AIPlayer("Imperium Galaktyczne", java.awt.Color.RED);
+        Enemy ai = new Enemy("Imperium Galaktyczne", java.awt.Color.RED);
 
         List<StarSystem> candidateSystems = findDistantSystems(galaxy, playerHome);
 

@@ -8,7 +8,7 @@ import java.util.List;
 public class Fleet {
     private final List<Ship> ships = new ArrayList<>();
     private StarSystem location;
-    private AIPlayer owner;
+    private Enemy owner;
     private List<StarSystem> route = null;
     private int currentRouteIndex = 0;
     private int turnsToNextSystem = 0;
@@ -18,16 +18,16 @@ public class Fleet {
         this(location, null);
     }
 
-    public Fleet(StarSystem location, AIPlayer owner) {
+    public Fleet(StarSystem location, Enemy owner) {
         this.location = location;
         this.owner = owner;
     }
 
-    public AIPlayer getOwner() {
+    public Enemy getOwner() {
         return owner;
     }
 
-    public void setOwner(AIPlayer owner) {
+    public void setOwner(Enemy owner) {
         this.owner = owner;
     }
 

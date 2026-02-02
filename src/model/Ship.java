@@ -2,7 +2,7 @@ package model;
 
 public class Ship {
     private final ShipType type;
-    private final AIPlayer owner;
+    private final Enemy owner;
     private int currentHP;
     private final int maxHP;
 
@@ -10,7 +10,7 @@ public class Ship {
         this(type, null);
     }
 
-    public Ship(ShipType type, AIPlayer owner) {
+    public Ship(ShipType type, Enemy owner) {
         this.type = type;
         this.owner = owner;
         this.maxHP = type.getDefense() * 10;
@@ -21,7 +21,7 @@ public class Ship {
         return type;
     }
 
-    public AIPlayer getOwner() {
+    public Enemy getOwner() {
         return owner;
     }
 

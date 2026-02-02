@@ -2,12 +2,12 @@ package model;
 
 import java.awt.*;
 
-public class AIPlayer {
+public class Enemy {
     private final String name;
     private final Color color;
     private StarSystem homeSystem;
 
-    public AIPlayer(String name, Color color) {
+    public Enemy(String name, Color color) {
         this.name = name;
         this.color = color;
     }

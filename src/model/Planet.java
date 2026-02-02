@@ -13,7 +13,7 @@ public class Planet implements OrbitObject {
     private final boolean habitable;
     private boolean colonized;
     private boolean hasMoon;
-    private AIPlayer owner;
+    private Enemy owner;
 
     private PlanetAttribute attribute;
     private PlanetSize size;
@@ -113,11 +113,11 @@ public class Planet implements OrbitObject {
         return richness;
     }
 
-    public AIPlayer getOwner() {
+    public Enemy getOwner() {
         return owner;
     }
 
-    public void setOwner(AIPlayer owner) {
+    public void setOwner(Enemy owner) {
         this.owner = owner;
     }
 
@@ -130,7 +130,7 @@ public class Planet implements OrbitObject {
         populationOnResearch = 1;
     }
 
-    public void colonizeHomePlanetForAI(AIPlayer ai) {
+    public void colonizeHomePlanetForAI(Enemy ai) {
         colonized = true;
         owner = ai;
         totalPopulation = 5;
