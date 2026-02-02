@@ -27,7 +27,6 @@ public class AllFleetsPanel extends JDialog {
     }
 
     private void buildUI() {
-        // Górny panel z informacjami
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 20, 10));
         topPanel.setBackground(new Color(40, 40, 40));
         topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -36,9 +35,11 @@ public class AllFleetsPanel extends JDialog {
         int totalShips = 0;
 
         for (StarSystem system : game.getGalaxy().getSystems()) {
-            totalFleets += system.getFleets().size();
             for (Fleet fleet : system.getFleets()) {
-                totalShips += fleet.getShipCount();
+                if (fleet.getOwner() == null) {
+                    totalFleets++;
+                    totalShips += fleet.getShipCount();
+                }
             }
         }
 
@@ -49,7 +50,6 @@ public class AllFleetsPanel extends JDialog {
 
         add(topPanel, BorderLayout.NORTH);
 
-        // Panel z listą flot
         fleetsListPanel = new JPanel();
         fleetsListPanel.setLayout(new BoxLayout(fleetsListPanel, BoxLayout.Y_AXIS));
         fleetsListPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -58,7 +58,6 @@ public class AllFleetsPanel extends JDialog {
         scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         add(scroll, BorderLayout.CENTER);
 
-        // Dolny panel z przyciskiem zamknięcia
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         JButton closeButton = new JButton("Zamknij");
         closeButton.addActionListener(e -> dispose());
@@ -73,10 +72,11 @@ public class AllFleetsPanel extends JDialog {
 
         List<FleetLocation> allFleets = new ArrayList<>();
 
-        // Zbierz wszystkie floty
         for (StarSystem system : game.getGalaxy().getSystems()) {
             for (Fleet fleet : system.getFleets()) {
-                allFleets.add(new FleetLocation(fleet, system));
+                if (fleet.getOwner() == null) {
+                    allFleets.add(new FleetLocation(fleet, system));
+                }
             }
         }
 
@@ -106,7 +106,6 @@ public class AllFleetsPanel extends JDialog {
         ));
         panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 150));
 
-        // Lewa część - informacje
         JPanel infoPanel = new JPanel();
         infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
 
@@ -122,7 +121,6 @@ public class AllFleetsPanel extends JDialog {
         );
         statsLabel.setFont(statsLabel.getFont().deriveFont(11f));
 
-        // Skład floty
         StringBuilder composition = new StringBuilder("Skład: ");
         boolean first = true;
         for (ShipType type : ShipType.values()) {
@@ -143,7 +141,6 @@ public class AllFleetsPanel extends JDialog {
         infoPanel.add(Box.createVerticalStrut(3));
         infoPanel.add(compositionLabel);
 
-        // Status ruchu z trasą
         if (fleet.isMoving()) {
             StarSystem dest = fleet.getDestination();
             StarSystem next = fleet.getNextSystem();
@@ -157,7 +154,6 @@ public class AllFleetsPanel extends JDialog {
             infoPanel.add(Box.createVerticalStrut(3));
             infoPanel.add(movingLabel);
 
-            // Trasa
             List<StarSystem> route = fleet.getRoute();
             if (route != null && route.size() > 0) {
                 StringBuilder routeStr = new StringBuilder("Trasa: " + location.getName());
@@ -173,7 +169,6 @@ public class AllFleetsPanel extends JDialog {
 
         panel.add(infoPanel, BorderLayout.CENTER);
 
-        // Prawa część - przyciski
         JPanel buttonsPanel = new JPanel();
         buttonsPanel.setLayout(new BoxLayout(buttonsPanel, BoxLayout.Y_AXIS));
 
@@ -200,7 +195,6 @@ public class AllFleetsPanel extends JDialog {
         return panel;
     }
 
-    // Klasa pomocnicza do trzymania floty i jej lokacji
     private static class FleetLocation {
         Fleet fleet;
         StarSystem location;
