@@ -12,6 +12,23 @@ public class SystemInfoPanel extends JPanel {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
+        if (!game.getFogOfWar().isSystemVisible(system)) {
+            add(title("SYSTEM: " + system.getName()));
+            add(Box.createVerticalStrut(10));
+
+            JLabel unknown = new JLabel("Brak danych rozpoznawczych");
+            unknown.setForeground(Color.GRAY);
+            add(unknown);
+
+            JLabel hint = new JLabel("<html>Wyślij zwiadowcę<br>aby rozpoznać system</html>");
+            hint.setForeground(Color.LIGHT_GRAY);
+            hint.setFont(hint.getFont().deriveFont(10f));
+            add(Box.createVerticalStrut(10));
+            add(hint);
+
+            return;
+        }
+
         add(title("SYSTEM: " + system.getName()));
         add(Box.createVerticalStrut(10));
 

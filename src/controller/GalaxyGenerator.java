@@ -380,6 +380,11 @@ public class GalaxyGenerator {
         } else {
             home.getOrbits().set(0, new OrbitSlot(1, startPlanet));
         }
+
+        Fleet startingFleet = new Fleet(home);
+        startingFleet.addShip(new Ship(ShipType.SCOUT));
+        startingFleet.addShip(new Ship(ShipType.SCOUT));
+        home.addFleet(startingFleet);
     }
 
 

@@ -11,9 +11,12 @@ public class Game {
     private int totalResearch = 0;
 
     private final ResearchManager researchManager = new ResearchManager();
+    private final FogOfWar fogOfWar;
 
     public Game(Galaxy galaxy) {
         this.galaxy = galaxy;
+        this.fogOfWar = new FogOfWar(galaxy);
+        this.fogOfWar.updateVisibility();
     }
 
     public void nextTurn() {
@@ -50,6 +53,8 @@ public class Game {
         totalResearch += researchThisTurn;
 
         researchManager.addResearchPoints(researchThisTurn);
+
+        fogOfWar.updateVisibility();
     }
 
     public int getTurn() {
@@ -70,6 +75,10 @@ public class Game {
 
     public ResearchManager getResearchManager() {
         return researchManager;
+    }
+
+    public FogOfWar getFogOfWar() {
+        return fogOfWar;
     }
 
     public boolean spendCredits(int amount) {

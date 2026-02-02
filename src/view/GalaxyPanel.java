@@ -1,5 +1,6 @@
 package view;
 
+import controller.FogOfWar;
 import controller.GalaxyGenerator;
 import controller.Game;
 import model.*;
@@ -124,7 +125,21 @@ public class GalaxyPanel extends JPanel {
         }
 
         selectedSystem = clicked;
-        mainWindow.onSystemSelected(selectedSystem);
+
+        if (selectedSystem != null && game.getFogOfWar().isSystemVisible(selectedSystem)) {
+            mainWindow.onSystemSelected(selectedSystem);
+        } else if (selectedSystem != null) {
+            mainWindow.onSystemSelected(null);
+            JOptionPane.showMessageDialog(
+                    this,
+                    "System " + selectedSystem.getName() + " jest poza zasięgiem twoich czujników.\nWyślij zwiadowcę aby go rozpoznać.",
+                    "Brak informacji",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+        } else {
+            mainWindow.onSystemSelected(null);
+        }
+
         repaint();
     }
 
@@ -173,16 +188,52 @@ public class GalaxyPanel extends JPanel {
 
         g2.setStroke(oldStroke);
 
-        for (StarSystem system : galaxy.getSystems()) {
+        FogOfWar fog = game.getFogOfWar();
 
-            g2.setColor(system == selectedSystem ? Color.YELLOW : Color.WHITE);
+        for (StarSystem system : galaxy.getSystems()) {
+            boolean isVisible = fog.isSystemVisible(system);
+            boolean isSelected = (system == selectedSystem);
 
             int size = (int) (STAR_SIZE * camera.getZoom());
             int x = camera.worldToScreenX(system.getX());
             int y = camera.worldToScreenY(system.getY());
 
-            g2.fillOval(x, y, size, size);
-            g2.drawString(system.getName(), x + size + 4, y + size);
+            if (isVisible) {
+                g2.setColor(isSelected ? Color.YELLOW : Color.WHITE);
+                g2.fillOval(x, y, size, size);
+
+                g2.setColor(isSelected ? Color.YELLOW : Color.WHITE);
+                g2.drawString(system.getName(), x + size + 4, y + size);
+
+                boolean hasColony = false;
+                for (OrbitSlot orbit : system.getOrbits()) {
+                    if (orbit.getObject() instanceof Planet planet && planet.isColonized()) {
+                        hasColony = true;
+                        break;
+                    }
+                }
+
+                if (hasColony) {
+                    g2.setColor(new Color(100, 255, 100, 200));
+                    g2.drawOval(x - 3, y - 3, size + 6, size + 6);
+                    g2.drawOval(x - 4, y - 4, size + 8, size + 8);
+                }
+
+                if (!system.getFleets().isEmpty()) {
+                    g2.setColor(new Color(255, 200, 100));
+                    int triangleSize = (int) (6 * camera.getZoom());
+                    int[] xPoints = {x + size/2, x + size/2 - triangleSize/2, x + size/2 + triangleSize/2};
+                    int[] yPoints = {y - 8, y - 8 - triangleSize, y - 8 - triangleSize};
+                    g2.fillPolygon(xPoints, yPoints, 3);
+                }
+
+            } else {
+                g2.setColor(new Color(100, 100, 100, 150));
+                g2.fillOval(x, y, size, size);
+
+                g2.setColor(new Color(150, 150, 150, 100));
+                g2.drawString(system.getName(), x + size + 4, y + size);
+            }
         }
     }
 }
