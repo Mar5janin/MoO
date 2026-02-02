@@ -38,7 +38,7 @@ public class FogOfWar {
     private boolean hasPlayerColony(StarSystem system) {
         for (OrbitSlot orbit : system.getOrbits()) {
             if (orbit.getObject() instanceof Planet planet) {
-                if (planet.isColonized()) {
+                if (planet.isColonized() && planet.getOwner() == null) {
                     return true;
                 }
             }
@@ -47,11 +47,13 @@ public class FogOfWar {
     }
 
     private boolean hasPlayerFleet(StarSystem system) {
-        return !system.getFleets().isEmpty();
+        return system.getFleets().stream()
+                .anyMatch(f -> f.getOwner() == null);
     }
 
     private boolean hasScout(Fleet fleet) {
         if (fleet == null) return false;
+        if (fleet.getOwner() != null) return false;
         return fleet.countShipType(ShipType.SCOUT) > 0;
     }
 

@@ -9,8 +9,13 @@ public class GalaxyGenerator {
 
     private static final GalaxyMask MASK = new GalaxyMask("/galaxy_mask.png");
 
-    public static int getGalaxyWidth() { return galaxyWidth; }
-    public static int getGalaxyHeight() { return galaxyHeight; }
+    public static int getGalaxyWidth() {
+        return galaxyWidth;
+    }
+
+    public static int getGalaxyHeight() {
+        return galaxyHeight;
+    }
 
     private static int minStarDistance() {
         int base = Math.min(galaxyWidth, galaxyHeight) / 18;
@@ -62,7 +67,9 @@ public class GalaxyGenerator {
             int x = (int) (centerX + Math.cos(angle) * radius * maxRadiusX);
             int y = (int) (centerY + Math.sin(angle) * radius * maxRadiusY);
 
-            if (!MASK.isAllowedWeighted( x, y, galaxyWidth, galaxyHeight, densityMultiplier )) { continue; }
+            if (!MASK.isAllowedWeighted(x, y, galaxyWidth, galaxyHeight, densityMultiplier)) {
+                continue;
+            }
 
             if (!isFarEnough(x, y, galaxy)) continue;
 
@@ -94,7 +101,7 @@ public class GalaxyGenerator {
             if (system.getNeighbors().size() >= min) continue;
 
             List<StarSystem> sorted =
-                    systems.stream() .filter(s -> s != system)
+                    systems.stream().filter(s -> s != system)
                             .filter(s -> !system.getNeighbors().contains(s))
                             .sorted(Comparator.comparingDouble(system::distanceTo))
                             .toList();
@@ -161,7 +168,8 @@ public class GalaxyGenerator {
 
         StarSystem sol = galaxy.getSystems().stream()
                 .filter(s -> s.getName().equals("Sol"))
-                .findFirst() .orElse(null); if (sol == null) return;
+                .findFirst().orElse(null);
+        if (sol == null) return;
 
         for (StarSystem system : galaxy.getSystems()) {
 
@@ -221,13 +229,13 @@ public class GalaxyGenerator {
         }
     }
 
-    private static StarSystem generateMaskedStar( String name, Galaxy galaxy, Random random ) {
+    private static StarSystem generateMaskedStar(String name, Galaxy galaxy, Random random) {
         for (int i = 0; i < 5000; i++) {
 
             int x = random.nextInt(galaxyWidth);
             int y = random.nextInt(galaxyHeight);
 
-            if (!MASK.isAllowedWeighted( x, y, galaxyWidth, galaxyHeight, 1.2 )) continue;
+            if (!MASK.isAllowedWeighted(x, y, galaxyWidth, galaxyHeight, 1.2)) continue;
 
             if (!isFarEnough(x, y, galaxy)) continue;
 
@@ -237,7 +245,7 @@ public class GalaxyGenerator {
         throw new RuntimeException("Nie udało się umieścić gwiazdy: " + name);
     }
 
-    private static void generateNearbyStar( String name, StarSystem center, Galaxy galaxy, Random random ) {
+    private static void generateNearbyStar(String name, StarSystem center, Galaxy galaxy, Random random) {
         for (int i = 0; i < 2000; i++) {
 
             double angle = random.nextDouble() * Math.PI * 2;
@@ -248,7 +256,7 @@ public class GalaxyGenerator {
 
             if (x < 0 || y < 0 || x >= galaxyWidth || y >= galaxyHeight) continue;
 
-            if (!MASK.isAllowedWeighted( x, y, galaxyWidth, galaxyHeight, 1.0 )) continue;
+            if (!MASK.isAllowedWeighted(x, y, galaxyWidth, galaxyHeight, 1.0)) continue;
 
             if (!isFarEnough(x, y, galaxy)) continue;
 
@@ -385,7 +393,69 @@ public class GalaxyGenerator {
         startingFleet.addShip(new Ship(ShipType.SCOUT));
         startingFleet.addShip(new Ship(ShipType.SCOUT));
         home.addFleet(startingFleet);
+
+        setupAIPlayer(galaxy, home);
     }
 
+    private static void setupAIPlayer(Galaxy galaxy, StarSystem playerHome) {
+        AIPlayer ai = new AIPlayer("Imperium Galaktyczne", java.awt.Color.RED);
 
+        List<StarSystem> candidateSystems = findDistantSystems(galaxy, playerHome);
+
+        if (candidateSystems.isEmpty()) return;
+
+        StarSystem aiHome = candidateSystems.get(new java.util.Random().nextInt(candidateSystems.size()));
+        ai.setHomeSystem(aiHome);
+
+        Planet aiStartPlanet = new Planet(PlanetType.TERRAN);
+        aiStartPlanet.colonizeHomePlanetForAI(ai);
+        aiStartPlanet.setMoon(aiStartPlanet);
+
+        aiStartPlanet.getBuildings().add(new Building(BuildingType.OSADA_GORNICZA));
+        aiStartPlanet.getBuildings().add(new Building(BuildingType.CENTRUM_ADMINISTRACYJNE));
+        aiStartPlanet.getBuildings().add(new Building(BuildingType.WIEZA_KOMUNIKACYJNA));
+        aiStartPlanet.getBuildings().add(new Building(BuildingType.TARG_KOLONIALNY));
+
+        if (aiHome.getOrbits().isEmpty()) {
+            aiHome.addOrbit(new OrbitSlot(1, aiStartPlanet));
+        } else {
+            aiHome.getOrbits().set(0, new OrbitSlot(1, aiStartPlanet));
+        }
+
+        Fleet aiFleet = new Fleet(aiHome, ai);
+        aiFleet.addShip(new Ship(ShipType.SCOUT, ai));
+        aiFleet.addShip(new Ship(ShipType.SCOUT, ai));
+        aiHome.addFleet(aiFleet);
+    }
+
+    private static List<StarSystem> findDistantSystems(Galaxy galaxy, StarSystem playerHome) {
+        List<StarSystem> allSystems = new ArrayList<>(galaxy.getSystems());
+
+        Map<StarSystem, Integer> distances = new HashMap<>();
+
+        for (StarSystem system : allSystems) {
+            if (system == playerHome) continue;
+
+            List<StarSystem> path = Pathfinder.findPath(playerHome, system);
+            if (path != null) {
+                int distance = path.size() - 1;
+                distances.put(system, distance);
+            }
+        }
+
+        if (distances.isEmpty()) return List.of();
+
+        int maxDistance = distances.values().stream().max(Integer::compareTo).orElse(0);
+
+        if (maxDistance < 3) return List.of();
+
+        int minAcceptableDistance = Math.max(maxDistance - 1, 4);
+
+        return distances.entrySet().stream()
+                .filter(e -> e.getValue() >= minAcceptableDistance)
+                .map(Map.Entry::getKey)
+                .filter(s -> s.getOrbits().stream()
+                        .anyMatch(o -> o.getObject() instanceof Planet p && p.isHabitable()))
+                .collect(java.util.stream.Collectors.toList());
+    }
 }

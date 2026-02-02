@@ -80,7 +80,10 @@ public class StarSystem {
     }
 
     public Fleet getPlayerFleet() {
-        return fleets.isEmpty() ? null : fleets.get(0);
+        return fleets.stream()
+                .filter(f -> f.getOwner() == null)
+                .findFirst()
+                .orElse(null);
     }
 
     public Fleet getOrCreatePlayerFleet() {

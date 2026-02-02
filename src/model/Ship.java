@@ -2,18 +2,27 @@ package model;
 
 public class Ship {
     private final ShipType type;
+    private final AIPlayer owner;
     private int currentHP;
     private final int maxHP;
 
     public Ship(ShipType type) {
+        this(type, null);
+    }
+
+    public Ship(ShipType type, AIPlayer owner) {
         this.type = type;
-        // HP bazuje na obronie statku
+        this.owner = owner;
         this.maxHP = type.getDefense() * 10;
         this.currentHP = maxHP;
     }
 
     public ShipType getType() {
         return type;
+    }
+
+    public AIPlayer getOwner() {
+        return owner;
     }
 
     public int getCurrentHP() {

@@ -13,6 +13,7 @@ public class Planet implements OrbitObject {
     private final boolean habitable;
     private boolean colonized;
     private boolean hasMoon;
+    private AIPlayer owner;
 
     private PlanetAttribute attribute;
     private PlanetSize size;
@@ -48,6 +49,7 @@ public class Planet implements OrbitObject {
         this.size = randomSize();
         this.richness = randomRichness();
         this.attribute = randomAttribute();
+        this.owner = null;
     }
 
     private PlanetSize randomSize() {
@@ -111,8 +113,26 @@ public class Planet implements OrbitObject {
         return richness;
     }
 
+    public AIPlayer getOwner() {
+        return owner;
+    }
+
+    public void setOwner(AIPlayer owner) {
+        this.owner = owner;
+    }
+
     public void colonizeHomePlanet(){
         colonized = true;
+        totalPopulation = 5;
+        maxPopulation = calculateMaxPopulation();
+        populationOnFood = 2;
+        populationOnProduction = 2;
+        populationOnResearch = 1;
+    }
+
+    public void colonizeHomePlanetForAI(AIPlayer ai) {
+        colonized = true;
+        owner = ai;
         totalPopulation = 5;
         maxPopulation = calculateMaxPopulation();
         populationOnFood = 2;
@@ -151,6 +171,7 @@ public class Planet implements OrbitObject {
         }
 
         colonized = true;
+        owner = fleet.getOwner();
         totalPopulation = 1;
         maxPopulation = calculateMaxPopulation();
 
@@ -484,7 +505,7 @@ public class Planet implements OrbitObject {
                 savedBuildingProgress.remove(current.getBuildingType());
                 return null;
             } else {
-                Ship ship = new Ship(current.getShipType());
+                Ship ship = new Ship(current.getShipType(), owner);
                 savedShipProgress.remove(current.getShipType());
 
                 if (current.getShipType() == ShipType.COLONY_SHIP && totalPopulation > 1) {

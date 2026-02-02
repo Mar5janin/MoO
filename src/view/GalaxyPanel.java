@@ -202,24 +202,33 @@ public class GalaxyPanel extends JPanel {
                 g2.setColor(isSelected ? Color.YELLOW : Color.WHITE);
                 g2.fillOval(x, y, size, size);
 
-                g2.setColor(isSelected ? Color.YELLOW : Color.WHITE);
-                g2.drawString(system.getName(), x + size + 4, y + size);
+                Planet playerColony = null;
+                Planet aiColony = null;
 
-                boolean hasColony = false;
                 for (OrbitSlot orbit : system.getOrbits()) {
                     if (orbit.getObject() instanceof Planet planet && planet.isColonized()) {
-                        hasColony = true;
-                        break;
+                        if (planet.getOwner() == null) {
+                            playerColony = planet;
+                        } else {
+                            aiColony = planet;
+                        }
                     }
                 }
 
-                if (hasColony) {
+                if (playerColony != null) {
                     g2.setColor(new Color(100, 255, 100, 200));
+                    g2.drawOval(x - 3, y - 3, size + 6, size + 6);
+                    g2.drawOval(x - 4, y - 4, size + 8, size + 8);
+                } else if (aiColony != null) {
+                    g2.setColor(new Color(255, 100, 100, 200));
                     g2.drawOval(x - 3, y - 3, size + 6, size + 6);
                     g2.drawOval(x - 4, y - 4, size + 8, size + 8);
                 }
 
-                if (!system.getFleets().isEmpty()) {
+                boolean hasPlayerFleet = system.getFleets().stream().anyMatch(f -> f.getOwner() == null);
+                boolean hasAIFleet = system.getFleets().stream().anyMatch(f -> f.getOwner() != null);
+
+                if (hasPlayerFleet) {
                     g2.setColor(new Color(255, 200, 100));
                     int triangleSize = (int) (6 * camera.getZoom());
                     int[] xPoints = {x + size/2, x + size/2 - triangleSize/2, x + size/2 + triangleSize/2};
@@ -227,13 +236,22 @@ public class GalaxyPanel extends JPanel {
                     g2.fillPolygon(xPoints, yPoints, 3);
                 }
 
+                if (hasAIFleet) {
+                    g2.setColor(new Color(255, 50, 50));
+                    int triangleSize = (int) (6 * camera.getZoom());
+                    int offsetX = hasPlayerFleet ? 10 : 0;
+                    int[] xPoints = {x + size/2 + offsetX, x + size/2 - triangleSize/2 + offsetX, x + size/2 + triangleSize/2 + offsetX};
+                    int[] yPoints = {y - 8, y - 8 - triangleSize, y - 8 - triangleSize};
+                    g2.fillPolygon(xPoints, yPoints, 3);
+                }
+
             } else {
                 g2.setColor(new Color(100, 100, 100, 150));
                 g2.fillOval(x, y, size, size);
-
-                g2.setColor(new Color(150, 150, 150, 100));
-                g2.drawString(system.getName(), x + size + 4, y + size);
             }
+
+            g2.setColor(isSelected ? Color.YELLOW : Color.WHITE);
+            g2.drawString(system.getName(), x + size + 4, y + size);
         }
     }
 }

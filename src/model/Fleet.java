@@ -8,13 +8,27 @@ import java.util.List;
 public class Fleet {
     private final List<Ship> ships = new ArrayList<>();
     private StarSystem location;
+    private AIPlayer owner;
     private List<StarSystem> route = null;
     private int currentRouteIndex = 0;
     private int turnsToNextSystem = 0;
     private InstallationOrder currentProject = null;
 
     public Fleet(StarSystem location) {
+        this(location, null);
+    }
+
+    public Fleet(StarSystem location, AIPlayer owner) {
         this.location = location;
+        this.owner = owner;
+    }
+
+    public AIPlayer getOwner() {
+        return owner;
+    }
+
+    public void setOwner(AIPlayer owner) {
+        this.owner = owner;
     }
 
     public void addShip(Ship ship) {
