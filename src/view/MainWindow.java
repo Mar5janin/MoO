@@ -7,6 +7,7 @@ import model.StarSystem;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.List;
 
 public class MainWindow extends JFrame {
 
@@ -137,6 +138,28 @@ public class MainWindow extends JFrame {
             sidePanel.setVisible(false);
 
             game.nextTurn();
+
+            List<String> combatReports = game.getCombatReports();
+            if (!combatReports.isEmpty()) {
+                StringBuilder allReports = new StringBuilder();
+                for (String report : combatReports) {
+                    allReports.append(report).append("\n\n");
+                }
+
+                JTextArea textArea = new JTextArea(allReports.toString());
+                textArea.setEditable(false);
+                textArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+
+                JScrollPane scrollPane = new JScrollPane(textArea);
+                scrollPane.setPreferredSize(new Dimension(600, 400));
+
+                JOptionPane.showMessageDialog(
+                        this,
+                        scrollPane,
+                        "Raporty z walk",
+                        JOptionPane.INFORMATION_MESSAGE
+                );
+            }
 
             updateResourceDisplay();
 

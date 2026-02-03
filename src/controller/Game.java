@@ -1,6 +1,7 @@
 package controller;
 
 import model.*;
+import java.util.*;
 
 public class Game {
 
@@ -13,6 +14,8 @@ public class Game {
     private final ResearchManager researchManager = new ResearchManager();
     private final FogOfWar fogOfWar;
     private EnemyController enemyController;
+
+    private final List<String> combatReports = new ArrayList<>();
 
     public Game(Galaxy galaxy) {
         this.galaxy = galaxy;
@@ -28,6 +31,7 @@ public class Game {
 
     public void nextTurn() {
         turn++;
+        combatReports.clear();
 
         int creditsThisTurn = 0;
         int researchThisTurn = 0;
@@ -77,6 +81,19 @@ public class Game {
             }
         }
 
+        for (StarSystem system : galaxy.getSystems()) {
+            ResearchManager enemyRM = enemyController != null ?
+                    enemyController.getResearchManager() : new ResearchManager();
+
+            CombatResolver.CombatResult result = CombatResolver.resolveBattle(system, researchManager, enemyRM);
+
+            if (result != null) {
+                combatReports.add(result.report);
+            }
+
+            CombatResolver.resolveSystemControl(system);
+        }
+
         totalCredits += creditsThisTurn;
         totalResearch += researchThisTurn;
 
@@ -102,6 +119,10 @@ public class Game {
         fogOfWar.updateVisibility();
     }
 
+    public List<String> getCombatReports() {
+        return new ArrayList<>(combatReports);
+    }
+
     public int getTurn() {
         return turn;
     }
@@ -120,6 +141,13 @@ public class Game {
 
     public ResearchManager getResearchManager() {
         return researchManager;
+    }
+
+    public ResearchManager getEnemyResearchManager() {
+        if (enemyController != null) {
+            return enemyController.getResearchManager();
+        }
+        return new ResearchManager();
     }
 
     public FogOfWar getFogOfWar() {

@@ -29,21 +29,27 @@ public class FleetInfoPanel extends JPanel {
     private JPanel createFleetPanel(Fleet fleet, Game game) {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+
+        boolean isPlayerFleet = fleet.getOwner() == null;
+        Color borderColor = isPlayerFleet ? Color.GRAY : new Color(255, 100, 100);
+
         panel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Color.GRAY),
+                BorderFactory.createLineBorder(borderColor, 2),
                 BorderFactory.createEmptyBorder(5, 10, 5, 10)
         ));
         panel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        ResearchManager rm = game.getResearchManager();
+        ResearchManager rm = isPlayerFleet ? game.getResearchManager() : game.getEnemyResearchManager();
 
-        // Nagłówek floty
-        JLabel fleetLabel = new JLabel("Flota gracza (" + fleet.getShipCount() + " statków)");
+        String fleetOwner = isPlayerFleet ? "Flota gracza" : "Flota przeciwnika";
+        JLabel fleetLabel = new JLabel(fleetOwner + " (" + fleet.getShipCount() + " statków)");
         fleetLabel.setFont(fleetLabel.getFont().deriveFont(Font.BOLD, 12f));
+        if (!isPlayerFleet) {
+            fleetLabel.setForeground(new Color(255, 100, 100));
+        }
         panel.add(fleetLabel);
         panel.add(Box.createVerticalStrut(5));
 
-        // Statystyki floty
         int totalAttack = fleet.getTotalAttack(rm);
         int totalDefense = fleet.getTotalDefense(rm);
 
@@ -51,7 +57,6 @@ public class FleetInfoPanel extends JPanel {
         panel.add(new JLabel("Całkowita obrona: " + totalDefense));
         panel.add(Box.createVerticalStrut(5));
 
-        // Grupuj statki według typu
         JLabel shipsLabel = new JLabel("Skład floty:");
         shipsLabel.setFont(shipsLabel.getFont().deriveFont(Font.BOLD, 11f));
         panel.add(shipsLabel);
@@ -66,7 +71,6 @@ public class FleetInfoPanel extends JPanel {
             }
         }
 
-        // Status ruchu z pełną trasą
         if (fleet.isMoving()) {
             panel.add(Box.createVerticalStrut(5));
 
@@ -83,7 +87,6 @@ public class FleetInfoPanel extends JPanel {
             nextLabel.setForeground(new Color(150, 180, 255));
             panel.add(nextLabel);
 
-            // Pokaż trasę
             List<StarSystem> route = fleet.getRoute();
             if (route != null && route.size() > 1) {
                 StringBuilder routeStr = new StringBuilder("   Trasa: ");

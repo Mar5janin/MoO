@@ -33,6 +33,21 @@ public class FogOfWar {
                 }
             }
         }
+
+        for (StarSystem system : galaxy.getSystems()) {
+            for (Fleet fleet : system.getFleets()) {
+                if (fleet.getOwner() == null && fleet.isMoving()) {
+                    StarSystem currentPosition = fleet.getLocation();
+                    visibleSystems.add(currentPosition);
+
+                    if (hasScout(fleet)) {
+                        addNeighbors(currentPosition, 2);
+                    } else {
+                        addNeighbors(currentPosition, 1);
+                    }
+                }
+            }
+        }
     }
 
     private boolean hasPlayerColony(StarSystem system) {

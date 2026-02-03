@@ -48,12 +48,15 @@ public class SystemInfoPanel extends JPanel {
         add(Box.createVerticalStrut(15));
 
         if (system.hasBattleStation()) {
-            JLabel stationLabel = new JLabel("⚔️ Posterunek Bojowy");
+            SpaceInstallation station = system.getBattleStation();
+            boolean isPlayerStation = station.getOwner() == null;
+
+            String stationOwner = isPlayerStation ? "Twój Posterunek Bojowy" : "Posterunek Bojowy przeciwnika";
+            JLabel stationLabel = new JLabel("⚔️ " + stationOwner);
             stationLabel.setFont(stationLabel.getFont().deriveFont(Font.BOLD, 12f));
-            stationLabel.setForeground(new Color(255, 100, 100));
+            stationLabel.setForeground(isPlayerStation ? new Color(100, 200, 100) : new Color(255, 100, 100));
             add(stationLabel);
 
-            SpaceInstallation station = system.getBattleStation();
             JLabel hpLabel = new JLabel("HP: " + station.getCurrentHP() + "/" + station.getMaxHP());
             add(hpLabel);
             add(Box.createVerticalStrut(10));
@@ -88,13 +91,18 @@ public class SystemInfoPanel extends JPanel {
         }
 
         if (orbit.getObject() instanceof Planet planet) {
+            String planetOwner = "";
+            if (planet.isColonized()) {
+                planetOwner = planet.getOwner() == null ? " [TWOJA KOLONIA]" : " [KOLONIA PRZECIWNIKA]";
+            }
+
             JButton button = new JButton(
                     "Orbita " + index + ": Planeta (" +
-                            planet.getPlanetType().getDisplayName() + ")"
+                            planet.getPlanetType().getDisplayName() + ")" + planetOwner
             );
 
-            if (planet.isColonized()) {
-                button.setText(button.getText() + " [SKOLONIZOWANA]");
+            if (planet.isColonized() && planet.getOwner() != null) {
+                button.setForeground(new Color(255, 100, 100));
             }
 
             button.setHorizontalAlignment(SwingConstants.LEFT);

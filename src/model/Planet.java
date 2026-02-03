@@ -14,6 +14,7 @@ public class Planet implements OrbitObject {
     private boolean colonized;
     private boolean hasMoon;
     private Enemy owner;
+    private Enemy originalOwner;
 
     private PlanetAttribute attribute;
     private PlanetSize size;
@@ -50,6 +51,7 @@ public class Planet implements OrbitObject {
         this.richness = randomRichness();
         this.attribute = randomAttribute();
         this.owner = null;
+        this.originalOwner = null;
     }
 
     private PlanetSize randomSize() {
@@ -121,6 +123,10 @@ public class Planet implements OrbitObject {
         this.owner = owner;
     }
 
+    public Enemy getOriginalOwner() {
+        return originalOwner;
+    }
+
     public void colonizeHomePlanet(){
         colonized = true;
         totalPopulation = 5;
@@ -128,11 +134,13 @@ public class Planet implements OrbitObject {
         populationOnFood = 2;
         populationOnProduction = 2;
         populationOnResearch = 1;
+        originalOwner = null;
     }
 
     public void colonizeHomePlanetForAI(Enemy enemy) {
         colonized = true;
         owner = enemy;
+        originalOwner = enemy;
         totalPopulation = 5;
         maxPopulation = calculateMaxPopulation();
         populationOnFood = 2;
@@ -172,6 +180,7 @@ public class Planet implements OrbitObject {
 
         colonized = true;
         owner = fleet.getOwner();
+        originalOwner = fleet.getOwner();
         totalPopulation = 1;
         maxPopulation = calculateMaxPopulation();
 

@@ -109,7 +109,7 @@ public class Fleet {
         if (factoryCount == 0) return false;
 
         if (type == SpaceInstallationType.BATTLE_STATION) {
-            return !location.hasBattleStation();
+            return !location.hasBattleStation() && location.hasFullControl(owner);
         }
 
         if (target instanceof AsteroidField asteroid) {
@@ -166,7 +166,7 @@ public class Fleet {
             if (currentProject.isFinished()) {
                 SpaceInstallationType type = currentProject.getType();
                 OrbitObject target = currentProject.getTarget();
-                SpaceInstallation installation = new SpaceInstallation(type);
+                SpaceInstallation installation = new SpaceInstallation(type, owner);
 
                 if (type == SpaceInstallationType.BATTLE_STATION) {
                     location.setBattleStation(installation);

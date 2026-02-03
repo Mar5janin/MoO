@@ -111,7 +111,30 @@ public class StarSystem {
         if (hasBattleStation()) return false;
         if (!researchManager.isUnlocked("POSTERUNEK_BOJOWY")) return false;
         if (fleet == null) return false;
-        return fleet.countShipType(ShipType.SPACE_FACTORY) > 0;
+        if (fleet.countShipType(ShipType.SPACE_FACTORY) == 0) return false;
+
+        if (!hasFullControl(fleet.getOwner())) return false;
+
+        return true;
+    }
+
+    public boolean hasFullControl(Enemy owner) {
+        boolean hasEnemyPresence = false;
+
+        for (Fleet fleet : fleets) {
+            if (fleet.getOwner() != owner) {
+                hasEnemyPresence = true;
+                break;
+            }
+        }
+
+        if (hasEnemyPresence) return false;
+
+        if (hasBattleStation() && battleStation.getOwner() != owner) {
+            return false;
+        }
+
+        return true;
     }
 
     public int getTotalCreditsBonus() {
