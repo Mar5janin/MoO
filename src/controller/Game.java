@@ -74,34 +74,10 @@ public class Game {
                     }
                 }
             }
-
-            for (Fleet fleet : system.getFleets()) {
-                fleet.processTurn();
-
-                if (fleet.getOwner() != null && !fleet.isMoving()) {
-                    if (enemyController != null) {
-                        enemyController.colonizePlanet(fleet, system);
-                    }
-                }
-            }
-        }
-
-        for (StarSystem system : galaxy.getSystems()) {
-            ResearchManager enemyRM = enemyController != null ?
-                    enemyController.getResearchManager() : new ResearchManager();
-
-            CombatResolver.CombatResult result = CombatResolver.resolveBattle(system, researchManager, enemyRM);
-
-            if (result != null) {
-                combatReports.add(result.report);
-            }
-
-            CombatResolver.resolveSystemControl(system);
         }
 
         totalCredits += creditsThisTurn;
         totalResearch += researchThisTurn;
-
         researchManager.addResearchPoints(researchThisTurn);
 
         if (enemyController != null) {
@@ -119,6 +95,31 @@ public class Game {
             }
 
             enemyController.getResearchManager().addResearchPoints(aiResearch);
+        }
+
+        for (StarSystem system : galaxy.getSystems()) {
+            ResearchManager enemyRM = enemyController != null ?
+                    enemyController.getResearchManager() : new ResearchManager();
+
+            CombatResolver.CombatResult result = CombatResolver.resolveBattle(system, researchManager, enemyRM);
+
+            if (result != null) {
+                combatReports.add(result.report);
+            }
+
+            CombatResolver.resolveSystemControl(system);
+        }
+
+        for (StarSystem system : galaxy.getSystems()) {
+            for (Fleet fleet : new ArrayList<>(system.getFleets())) {
+                fleet.processTurn();
+
+                if (fleet.getOwner() != null && !fleet.isMoving()) {
+                    if (enemyController != null) {
+                        enemyController.colonizePlanet(fleet, system);
+                    }
+                }
+            }
         }
 
         fogOfWar.updateVisibility();

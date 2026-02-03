@@ -75,7 +75,7 @@ public class SystemInfoPanel extends JPanel {
         }
 
         add(Box.createVerticalStrut(5));
-        add(new FleetInfoPanel(system, game));
+        add(new FleetInfoPanel(system, game, mainWindow));
     }
 
     private JComponent createOrbitComponent(

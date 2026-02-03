@@ -42,14 +42,19 @@ public class CombatResolver {
         int enemyAttack = 0;
         int enemyDefense = 0;
 
+        int playerShipsBeforeBattle = 0;
+        int enemyShipsBeforeBattle = 0;
+
         for (Fleet fleet : playerFleets) {
             playerAttack += fleet.getTotalAttack(playerRM);
             playerDefense += fleet.getTotalDefense(playerRM);
+            playerShipsBeforeBattle += fleet.getShipCount();
         }
 
         for (Fleet fleet : enemyFleets) {
             enemyAttack += fleet.getTotalAttack(enemyRM);
             enemyDefense += fleet.getTotalDefense(enemyRM);
+            enemyShipsBeforeBattle += fleet.getShipCount();
         }
 
         if (system.hasBattleStation()) {
@@ -80,28 +85,19 @@ public class CombatResolver {
 
         StringBuilder report = new StringBuilder();
         report.append("=== WALKA W SYSTEMIE ").append(system.getName()).append(" ===\n");
-        report.append("Siły gracza: Atak ").append(playerAttack).append(", Obrona ").append(playerDefense).append("\n");
-        report.append("Siły wroga: Atak ").append(enemyAttack).append(", Obrona ").append(enemyDefense).append("\n");
+        report.append("Siły gracza: ").append(playerShipsBeforeBattle).append(" statków | Atak ").append(playerAttack).append(", Obrona ").append(playerDefense).append("\n");
+        report.append("Siły wroga: ").append(enemyShipsBeforeBattle).append(" statków | Atak ").append(enemyAttack).append(", Obrona ").append(enemyDefense).append("\n\n");
 
         if (playerWon) {
             winner = playerFleets.get(0);
             loser = enemyFleets.get(0);
 
             for (Fleet enemyFleet : enemyFleets) {
-                int shipsBeforeDestroyed = enemyFleet.getShipCount();
                 applyDamageToFleet(enemyFleet, playerAttack, enemyRM);
-                int shipsAfter = enemyFleet.getShipCount();
-                report.append("Zniszczono ").append(shipsBeforeDestroyed - shipsAfter).append(" wrogich statków\n");
             }
 
             for (Fleet playerFleet : playerFleets) {
-                int shipsBeforeDestroyed = playerFleet.getShipCount();
                 applyDamageToFleet(playerFleet, enemyAttack * 0.3, playerRM);
-                int shipsAfter = playerFleet.getShipCount();
-                int lost = shipsBeforeDestroyed - shipsAfter;
-                if (lost > 0) {
-                    report.append("Stracono ").append(lost).append(" własnych statków\n");
-                }
             }
 
             if (system.hasBattleStation() && system.getBattleStation().getOwner() != null) {
@@ -112,26 +108,28 @@ public class CombatResolver {
                 }
             }
 
+            int playerShipsAfter = playerFleets.stream().mapToInt(Fleet::getShipCount).sum();
+            int enemyShipsAfter = enemyFleets.stream().mapToInt(Fleet::getShipCount).sum();
+
+            int playerLosses = playerShipsBeforeBattle - playerShipsAfter;
+            int enemyLosses = enemyShipsBeforeBattle - enemyShipsAfter;
+
+            report.append("Zniszczono ").append(enemyLosses).append(" wrogich statków (pozostało: ").append(enemyShipsAfter).append(")\n");
+            if (playerLosses > 0) {
+                report.append("Stracono ").append(playerLosses).append(" własnych statków (pozostało: ").append(playerShipsAfter).append(")\n");
+            }
+
             report.append("\nZWYCIĘZCA: Gracz\n");
         } else {
             winner = enemyFleets.get(0);
             loser = playerFleets.get(0);
 
             for (Fleet playerFleet : playerFleets) {
-                int shipsBeforeDestroyed = playerFleet.getShipCount();
                 applyDamageToFleet(playerFleet, enemyAttack, playerRM);
-                int shipsAfter = playerFleet.getShipCount();
-                report.append("Zniszczono ").append(shipsBeforeDestroyed - shipsAfter).append(" twoich statków\n");
             }
 
             for (Fleet enemyFleet : enemyFleets) {
-                int shipsBeforeDestroyed = enemyFleet.getShipCount();
                 applyDamageToFleet(enemyFleet, playerAttack * 0.3, enemyRM);
-                int shipsAfter = enemyFleet.getShipCount();
-                int lost = shipsBeforeDestroyed - shipsAfter;
-                if (lost > 0) {
-                    report.append("Wróg stracił ").append(lost).append(" statków\n");
-                }
             }
 
             if (system.hasBattleStation() && system.getBattleStation().getOwner() == null) {
@@ -142,12 +140,20 @@ public class CombatResolver {
                 }
             }
 
+            int playerShipsAfter = playerFleets.stream().mapToInt(Fleet::getShipCount).sum();
+            int enemyShipsAfter = enemyFleets.stream().mapToInt(Fleet::getShipCount).sum();
+
+            int playerLosses = playerShipsBeforeBattle - playerShipsAfter;
+            int enemyLosses = enemyShipsBeforeBattle - enemyShipsAfter;
+
+            report.append("Zniszczono ").append(playerLosses).append(" twoich statków (pozostało: ").append(playerShipsAfter).append(")\n");
+            if (enemyLosses > 0) {
+                report.append("Wróg stracił ").append(enemyLosses).append(" statków (pozostało: ").append(enemyShipsAfter).append(")\n");
+            }
+
             report.append("\nZWYCIĘZCA: Przeciwnik\n");
         }
 
-        for (Fleet fleet : system.getFleets()) {
-            fleet.getShips().removeIf(Ship::isDestroyed);
-        }
         system.getFleets().removeIf(Fleet::isEmpty);
 
         return new CombatResult(winner, loser, isClose, report.toString());
@@ -161,7 +167,9 @@ public class CombatResolver {
 
         for (Ship ship : ships) {
             int effectiveDefense = ship.getDefense(rm);
-            int actualDamage = (int)(damagePerShip * (100.0 / (100.0 + effectiveDefense)));
+            double damageReduction = 100.0 / (100.0 + effectiveDefense);
+            int actualDamage = (int)(damagePerShip * damageReduction);
+
             ship.takeDamage(actualDamage);
         }
 
