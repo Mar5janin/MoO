@@ -124,21 +124,6 @@ public class Fleet {
     }
 
     public void processTurn() {
-        if (isMoving() && route != null && currentRouteIndex < route.size()) {
-            StarSystem nextSystem = route.get(currentRouteIndex);
-
-            location.removeFleet(this);
-            nextSystem.addFleet(this);
-            location = nextSystem;
-
-            currentRouteIndex++;
-
-            if (currentRouteIndex >= route.size()) {
-                route = null;
-                currentRouteIndex = 0;
-            }
-        }
-
         if (currentProject != null && !isMoving()) {
             int production = 0;
             for (Ship ship : ships) {
@@ -163,6 +148,21 @@ public class Fleet {
                 }
 
                 currentProject = null;
+            }
+        }
+
+        if (isMoving()) {
+            StarSystem nextSystem = route.get(currentRouteIndex);
+
+            location.removeFleet(this);
+            nextSystem.addFleet(this);
+            location = nextSystem;
+
+            currentRouteIndex++;
+
+            if (currentRouteIndex >= route.size()) {
+                route = null;
+                currentRouteIndex = 0;
             }
         }
 
