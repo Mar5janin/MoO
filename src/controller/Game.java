@@ -111,12 +111,14 @@ public class Game {
         }
 
         for (StarSystem system : galaxy.getSystems()) {
-            for (Fleet fleet : new ArrayList<>(system.getFleets())) {
+            List<Fleet> fleets = new ArrayList<>(system.getFleets());
+
+            for (Fleet fleet : fleets) {
                 fleet.processTurn();
 
                 if (fleet.getOwner() != null && !fleet.isMoving()) {
                     if (enemyController != null) {
-                        enemyController.colonizePlanet(fleet, system);
+                        enemyController.colonizePlanet(fleet, fleet.getLocation());
                     }
                 }
             }
