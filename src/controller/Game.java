@@ -12,10 +12,17 @@ public class Game {
 
     private final ResearchManager researchManager = new ResearchManager();
     private final FogOfWar fogOfWar;
+    private EnemyController enemyController;
 
     public Game(Galaxy galaxy) {
         this.galaxy = galaxy;
         this.fogOfWar = new FogOfWar(galaxy);
+
+        Enemy enemy = galaxy.getEnemy();
+        if (enemy != null) {
+            this.enemyController = new EnemyController(enemy, galaxy);
+        }
+
         this.fogOfWar.updateVisibility();
     }
 
@@ -32,13 +39,28 @@ public class Game {
             for (OrbitSlot orbit : system.getOrbits()) {
                 if (orbit.getObject() instanceof Planet planet) {
                     if (planet.isColonized()) {
-                        creditsThisTurn += planet.getCredits();
-                        researchThisTurn += planet.getResearch();
+                        if (planet.getOwner() == null) {
+                            creditsThisTurn += planet.getCredits();
+                            researchThisTurn += planet.getResearch();
+                        }
 
                         Ship newShip = planet.processTurn(system);
                         if (newShip != null) {
-                            Fleet fleet = system.getOrCreatePlayerFleet();
-                            fleet.addShip(newShip);
+                            if (planet.getOwner() == null) {
+                                Fleet fleet = system.getOrCreatePlayerFleet();
+                                fleet.addShip(newShip);
+                            } else {
+                                Fleet aiFleet = system.getFleets().stream()
+                                        .filter(f -> f.getOwner() == planet.getOwner())
+                                        .findFirst()
+                                        .orElse(null);
+
+                                if (aiFleet == null) {
+                                    aiFleet = new Fleet(system, planet.getOwner());
+                                    system.addFleet(aiFleet);
+                                }
+                                aiFleet.addShip(newShip);
+                            }
                         }
                     }
                 }
@@ -46,6 +68,12 @@ public class Game {
 
             for (Fleet fleet : system.getFleets()) {
                 fleet.processTurn();
+
+                if (fleet.getOwner() != null && !fleet.isMoving()) {
+                    if (enemyController != null) {
+                        enemyController.colonizePlanet(fleet, system);
+                    }
+                }
             }
         }
 
@@ -53,6 +81,23 @@ public class Game {
         totalResearch += researchThisTurn;
 
         researchManager.addResearchPoints(researchThisTurn);
+
+        if (enemyController != null) {
+            enemyController.processTurn();
+
+            int aiResearch = 0;
+            for (StarSystem system : galaxy.getSystems()) {
+                for (OrbitSlot orbit : system.getOrbits()) {
+                    if (orbit.getObject() instanceof Planet planet) {
+                        if (planet.isColonized() && planet.getOwner() != null) {
+                            aiResearch += planet.getResearch();
+                        }
+                    }
+                }
+            }
+
+            enemyController.getResearchManager().addResearchPoints(aiResearch);
+        }
 
         fogOfWar.updateVisibility();
     }

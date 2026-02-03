@@ -130,9 +130,9 @@ public class Planet implements OrbitObject {
         populationOnResearch = 1;
     }
 
-    public void colonizeHomePlanetForAI(Enemy ai) {
+    public void colonizeHomePlanetForAI(Enemy enemy) {
         colonized = true;
-        owner = ai;
+        owner = enemy;
         totalPopulation = 5;
         maxPopulation = calculateMaxPopulation();
         populationOnFood = 2;
