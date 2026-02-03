@@ -33,21 +33,6 @@ public class FogOfWar {
                 }
             }
         }
-
-        for (StarSystem system : galaxy.getSystems()) {
-            for (Fleet fleet : system.getFleets()) {
-                if (fleet.getOwner() == null && fleet.isMoving()) {
-                    StarSystem currentPosition = fleet.getLocation();
-                    visibleSystems.add(currentPosition);
-
-                    if (hasScout(fleet)) {
-                        addNeighbors(currentPosition, 2);
-                    } else {
-                        addNeighbors(currentPosition, 1);
-                    }
-                }
-            }
-        }
     }
 
     private boolean hasPlayerColony(StarSystem system) {
@@ -75,11 +60,20 @@ public class FogOfWar {
     private void addNeighbors(StarSystem center, int depth) {
         if (depth <= 0) return;
 
-        for (StarSystem neighbor : center.getNeighbors()) {
-            if (!visibleSystems.contains(neighbor)) {
-                visibleSystems.add(neighbor);
-                addNeighbors(neighbor, depth - 1);
+        Set<StarSystem> toVisit = new HashSet<>();
+        toVisit.add(center);
+
+        for (int currentDepth = 0; currentDepth < depth; currentDepth++) {
+            Set<StarSystem> nextLevel = new HashSet<>();
+
+            for (StarSystem current : toVisit) {
+                for (StarSystem neighbor : current.getNeighbors()) {
+                    visibleSystems.add(neighbor);
+                    nextLevel.add(neighbor);
+                }
             }
+
+            toVisit = nextLevel;
         }
     }
 
