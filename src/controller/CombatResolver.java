@@ -92,13 +92,10 @@ public class CombatResolver {
             winner = playerFleets.get(0);
             loser = enemyFleets.get(0);
 
-            for (Fleet enemyFleet : enemyFleets) {
-                applyDamageToFleet(enemyFleet, playerAttack, enemyRM);
-            }
+            applyDamageToFleet(enemyFleets, playerAttack, enemyRM, true);
 
-            for (Fleet playerFleet : playerFleets) {
-                applyDamageToFleet(playerFleet, enemyAttack * 0.3, playerRM);
-            }
+            double loserDamageRatio = calculateDamageRatio(playerPower, enemyPower);
+            applyDamageToFleet(playerFleets, (int)(enemyAttack * loserDamageRatio), playerRM, false);
 
             if (system.hasBattleStation() && system.getBattleStation().getOwner() != null) {
                 system.getBattleStation().takeDamage(playerAttack);
@@ -124,13 +121,10 @@ public class CombatResolver {
             winner = enemyFleets.get(0);
             loser = playerFleets.get(0);
 
-            for (Fleet playerFleet : playerFleets) {
-                applyDamageToFleet(playerFleet, enemyAttack, playerRM);
-            }
+            applyDamageToFleet(playerFleets, enemyAttack, playerRM, true);
 
-            for (Fleet enemyFleet : enemyFleets) {
-                applyDamageToFleet(enemyFleet, playerAttack * 0.3, enemyRM);
-            }
+            double loserDamageRatio = calculateDamageRatio(enemyPower, playerPower);
+            applyDamageToFleet(enemyFleets, (int)(playerAttack * loserDamageRatio), enemyRM, false);
 
             if (system.hasBattleStation() && system.getBattleStation().getOwner() == null) {
                 system.getBattleStation().takeDamage(enemyAttack);
@@ -159,21 +153,49 @@ public class CombatResolver {
         return new CombatResult(winner, loser, isClose, report.toString());
     }
 
-    private static void applyDamageToFleet(Fleet fleet, double totalDamage, ResearchManager rm) {
-        List<Ship> ships = new ArrayList<>(fleet.getShips());
-        if (ships.isEmpty()) return;
+    private static double calculateDamageRatio(int winnerPower, int loserPower) {
+        if (loserPower <= 0) return 0.1;
 
-        double damagePerShip = totalDamage / ships.size();
+        double powerRatio = (double) loserPower / winnerPower;
 
-        for (Ship ship : ships) {
+        if (powerRatio >= 0.9) {
+            return 0.8;
+        } else if (powerRatio >= 0.7) {
+            return 0.6;
+        } else if (powerRatio >= 0.5) {
+            return 0.4;
+        } else if (powerRatio >= 0.3) {
+            return 0.25;
+        } else {
+            return 0.15;
+        }
+    }
+
+    private static void applyDamageToFleet(List<Fleet> fleets, double totalDamage, ResearchManager rm, boolean isLoser) {
+        List<Ship> allShips = new ArrayList<>();
+        for (Fleet fleet : fleets) {
+            allShips.addAll(fleet.getShips());
+        }
+
+        if (allShips.isEmpty()) return;
+
+        double damagePerShip = totalDamage / allShips.size();
+
+        for (Ship ship : allShips) {
             int effectiveDefense = ship.getDefense(rm);
             double damageReduction = 100.0 / (100.0 + effectiveDefense);
             int actualDamage = (int)(damagePerShip * damageReduction);
 
+            if (isLoser) {
+                actualDamage = (int)(actualDamage * 1.5);
+            }
+
             ship.takeDamage(actualDamage);
         }
 
-        fleet.getShips().removeIf(Ship::isDestroyed);
+        for (Fleet fleet : fleets) {
+            fleet.getShips().removeIf(Ship::isDestroyed);
+        }
     }
 
     public static void resolveSystemControl(StarSystem system) {

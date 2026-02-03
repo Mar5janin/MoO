@@ -124,7 +124,7 @@ public class Fleet {
     }
 
     public void processTurn() {
-        if (isMoving()) {
+        if (isMoving() && route != null && currentRouteIndex < route.size()) {
             StarSystem nextSystem = route.get(currentRouteIndex);
 
             location.removeFleet(this);
