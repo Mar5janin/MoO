@@ -394,15 +394,16 @@ public class GalaxyGenerator {
         startingFleet.addShip(new Ship(ShipType.SCOUT));
         home.addFleet(startingFleet);
 
-        setupAIPlayer(galaxy, home);
+        Enemy enemy = setupAIPlayer(galaxy, home);
+        galaxy.setEnemy(enemy);
     }
 
-    private static void setupAIPlayer(Galaxy galaxy, StarSystem playerHome) {
+    private static Enemy setupAIPlayer(Galaxy galaxy, StarSystem playerHome) {
         Enemy ai = new Enemy("Imperium Galaktyczne", java.awt.Color.RED);
 
         List<StarSystem> candidateSystems = findDistantSystems(galaxy, playerHome);
 
-        if (candidateSystems.isEmpty()) return;
+        if (candidateSystems.isEmpty()) return ai;
 
         StarSystem aiHome = candidateSystems.get(new java.util.Random().nextInt(candidateSystems.size()));
         ai.setHomeSystem(aiHome);
@@ -426,6 +427,8 @@ public class GalaxyGenerator {
         aiFleet.addShip(new Ship(ShipType.SCOUT, ai));
         aiFleet.addShip(new Ship(ShipType.SCOUT, ai));
         aiHome.addFleet(aiFleet);
+
+        return ai;
     }
 
     private static List<StarSystem> findDistantSystems(Galaxy galaxy, StarSystem playerHome) {

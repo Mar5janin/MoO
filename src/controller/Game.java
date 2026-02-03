@@ -164,7 +164,7 @@ public class Game {
         for (StarSystem system : galaxy.getSystems()) {
             for (OrbitSlot orbit : system.getOrbits()) {
                 if (orbit.getObject() instanceof Planet planet) {
-                    if (planet.isColonized()) {
+                    if (planet.isColonized() && planet.getOwner() == null) {
                         if (planet.getBuildQueue().isEmpty()) {
                             return false;
                         }
@@ -187,7 +187,7 @@ public class Game {
         for (StarSystem system : galaxy.getSystems()) {
             for (OrbitSlot orbit : system.getOrbits()) {
                 if (orbit.getObject() instanceof Planet planet) {
-                    if (planet.isColonized()) {
+                    if (planet.isColonized() && planet.getOwner() == null) {
                         if (planet.getBuildQueue().isEmpty()) {
                             return "Planeta w systemie " + system.getName() + " nie ma kolejki budowy!";
                         }
