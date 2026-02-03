@@ -110,16 +110,17 @@ public class Game {
             CombatResolver.resolveSystemControl(system);
         }
 
+        List<Fleet> allFleets = new ArrayList<>();
         for (StarSystem system : galaxy.getSystems()) {
-            List<Fleet> fleets = new ArrayList<>(system.getFleets());
+            allFleets.addAll(system.getFleets());
+        }
 
-            for (Fleet fleet : fleets) {
-                fleet.processTurn();
+        for (Fleet fleet : allFleets) {
+            fleet.processTurn();
 
-                if (fleet.getOwner() != null && !fleet.isMoving()) {
-                    if (enemyController != null) {
-                        enemyController.colonizePlanet(fleet, fleet.getLocation());
-                    }
+            if (fleet.getOwner() != null && !fleet.isMoving()) {
+                if (enemyController != null) {
+                    enemyController.colonizePlanet(fleet, fleet.getLocation());
                 }
             }
         }
