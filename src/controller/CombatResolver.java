@@ -88,11 +88,20 @@ public class CombatResolver {
             loser = enemyFleets.get(0);
 
             for (Fleet enemyFleet : enemyFleets) {
+                int shipsBeforeDestroyed = enemyFleet.getShipCount();
                 applyDamageToFleet(enemyFleet, playerAttack, enemyRM);
+                int shipsAfter = enemyFleet.getShipCount();
+                report.append("Zniszczono ").append(shipsBeforeDestroyed - shipsAfter).append(" wrogich statków\n");
             }
 
             for (Fleet playerFleet : playerFleets) {
+                int shipsBeforeDestroyed = playerFleet.getShipCount();
                 applyDamageToFleet(playerFleet, enemyAttack * 0.3, playerRM);
+                int shipsAfter = playerFleet.getShipCount();
+                int lost = shipsBeforeDestroyed - shipsAfter;
+                if (lost > 0) {
+                    report.append("Stracono ").append(lost).append(" własnych statków\n");
+                }
             }
 
             if (system.hasBattleStation() && system.getBattleStation().getOwner() != null) {
@@ -109,11 +118,20 @@ public class CombatResolver {
             loser = playerFleets.get(0);
 
             for (Fleet playerFleet : playerFleets) {
+                int shipsBeforeDestroyed = playerFleet.getShipCount();
                 applyDamageToFleet(playerFleet, enemyAttack, playerRM);
+                int shipsAfter = playerFleet.getShipCount();
+                report.append("Zniszczono ").append(shipsBeforeDestroyed - shipsAfter).append(" twoich statków\n");
             }
 
             for (Fleet enemyFleet : enemyFleets) {
+                int shipsBeforeDestroyed = enemyFleet.getShipCount();
                 applyDamageToFleet(enemyFleet, playerAttack * 0.3, enemyRM);
+                int shipsAfter = enemyFleet.getShipCount();
+                int lost = shipsBeforeDestroyed - shipsAfter;
+                if (lost > 0) {
+                    report.append("Wróg stracił ").append(lost).append(" statków\n");
+                }
             }
 
             if (system.hasBattleStation() && system.getBattleStation().getOwner() == null) {
@@ -146,6 +164,8 @@ public class CombatResolver {
             int actualDamage = (int)(damagePerShip * (100.0 / (100.0 + effectiveDefense)));
             ship.takeDamage(actualDamage);
         }
+
+        fleet.getShips().removeIf(Ship::isDestroyed);
     }
 
     public static void resolveSystemControl(StarSystem system) {

@@ -11,7 +11,6 @@ public class Fleet {
     private Enemy owner;
     private List<StarSystem> route = null;
     private int currentRouteIndex = 0;
-    private int turnsToNextSystem = 0;
     private InstallationOrder currentProject = null;
 
     public Fleet(StarSystem location) {
@@ -62,14 +61,10 @@ public class Fleet {
     }
 
     public int getTurnsToDestination() {
-        if (route == null) {
+        if (route == null || currentRouteIndex >= route.size()) {
             return 0;
         }
-        int remaining = turnsToNextSystem;
-        if (currentRouteIndex < route.size()) {
-            remaining += (route.size() - currentRouteIndex - 1);
-        }
-        return remaining;
+        return route.size() - currentRouteIndex;
     }
 
     public boolean isMoving() {
@@ -80,7 +75,6 @@ public class Fleet {
         if (destination == null || destination == location) {
             this.route = null;
             this.currentRouteIndex = 0;
-            this.turnsToNextSystem = 0;
             return false;
         }
 
@@ -92,7 +86,6 @@ public class Fleet {
 
         this.route = new ArrayList<>(path.subList(1, path.size()));
         this.currentRouteIndex = 0;
-        this.turnsToNextSystem = 1;
 
         return true;
     }
@@ -132,24 +125,17 @@ public class Fleet {
 
     public void processTurn() {
         if (isMoving()) {
-            turnsToNextSystem--;
+            StarSystem nextSystem = route.get(currentRouteIndex);
 
-            if (turnsToNextSystem <= 0) {
-                StarSystem nextSystem = route.get(currentRouteIndex);
+            location.removeFleet(this);
+            nextSystem.addFleet(this);
+            location = nextSystem;
 
-                location.removeFleet(this);
-                nextSystem.addFleet(this);
-                location = nextSystem;
+            currentRouteIndex++;
 
-                currentRouteIndex++;
-
-                if (currentRouteIndex >= route.size()) {
-                    route = null;
-                    currentRouteIndex = 0;
-                    turnsToNextSystem = 0;
-                } else {
-                    turnsToNextSystem = 1;
-                }
+            if (currentRouteIndex >= route.size()) {
+                route = null;
+                currentRouteIndex = 0;
             }
         }
 

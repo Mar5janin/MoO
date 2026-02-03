@@ -96,6 +96,31 @@ public class MainWindow extends JFrame {
         endTurnButton.addActionListener(e -> {
             if (game == null) return;
 
+            if (game.isGameOver()) {
+                String message = game.hasPlayerWon() ?
+                        "WYGRANA!\n\nPokonałeś przeciwnika!\nGra zakończona w turze " + game.getTurn() :
+                        "PRZEGRANA!\n\nPrzeciwnik cię pokonał!\nGra zakończona w turze " + game.getTurn();
+
+                int result = JOptionPane.showOptionDialog(
+                        this,
+                        message,
+                        game.hasPlayerWon() ? "Wygrana!" : "Przegrana!",
+                        JOptionPane.DEFAULT_OPTION,
+                        game.hasPlayerWon() ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.WARNING_MESSAGE,
+                        null,
+                        new String[]{"Nowa gra", "Wyjdź"},
+                        "Nowa gra"
+                );
+
+                if (result == 0) {
+                    dispose();
+                    SwingUtilities.invokeLater(() -> new MainWindow());
+                } else {
+                    System.exit(0);
+                }
+                return;
+            }
+
             if (!game.canEndTurn()) {
                 String reason = game.getEndTurnBlockReason();
 
@@ -159,6 +184,31 @@ public class MainWindow extends JFrame {
                         "Raporty z walk",
                         JOptionPane.INFORMATION_MESSAGE
                 );
+            }
+
+            if (game.isGameOver()) {
+                String message = game.hasPlayerWon() ?
+                        "WYGRANA!\n\nPokonałeś przeciwnika!\nGra zakończona w turze " + game.getTurn() :
+                        "PRZEGRANA!\n\nPrzeciwnik cię pokonał!\nGra zakończona w turze " + game.getTurn();
+
+                int result = JOptionPane.showOptionDialog(
+                        this,
+                        message,
+                        game.hasPlayerWon() ? "Wygrana!" : "Przegrana!",
+                        JOptionPane.DEFAULT_OPTION,
+                        game.hasPlayerWon() ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.WARNING_MESSAGE,
+                        null,
+                        new String[]{"Nowa gra", "Wyjdź"},
+                        "Nowa gra"
+                );
+
+                if (result == 0) {
+                    dispose();
+                    SwingUtilities.invokeLater(() -> new MainWindow());
+                } else {
+                    System.exit(0);
+                }
+                return;
             }
 
             updateResourceDisplay();

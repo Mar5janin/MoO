@@ -17,6 +17,9 @@ public class Game {
 
     private final List<String> combatReports = new ArrayList<>();
 
+    private boolean gameOver = false;
+    private boolean playerWon = false;
+
     public Game(Galaxy galaxy) {
         this.galaxy = galaxy;
         this.fogOfWar = new FogOfWar(galaxy);
@@ -30,6 +33,8 @@ public class Game {
     }
 
     public void nextTurn() {
+        if (gameOver) return;
+
         turn++;
         combatReports.clear();
 
@@ -117,6 +122,63 @@ public class Game {
         }
 
         fogOfWar.updateVisibility();
+
+        checkGameOver();
+    }
+
+    private void checkGameOver() {
+        boolean playerHasAnything = false;
+        boolean enemyHasAnything = false;
+
+        for (StarSystem system : galaxy.getSystems()) {
+            for (Fleet fleet : system.getFleets()) {
+                if (fleet.getOwner() == null) {
+                    playerHasAnything = true;
+                } else {
+                    enemyHasAnything = true;
+                }
+            }
+
+            for (OrbitSlot orbit : system.getOrbits()) {
+                if (orbit.getObject() instanceof Planet planet) {
+                    if (planet.isColonized()) {
+                        if (planet.getOwner() == null) {
+                            playerHasAnything = true;
+                        } else {
+                            enemyHasAnything = true;
+                        }
+                    }
+                }
+            }
+
+            if (system.hasBattleStation()) {
+                if (system.getBattleStation().getOwner() == null) {
+                    playerHasAnything = true;
+                } else {
+                    enemyHasAnything = true;
+                }
+            }
+        }
+
+        if (!playerHasAnything && !enemyHasAnything) {
+            return;
+        }
+
+        if (!playerHasAnything) {
+            gameOver = true;
+            playerWon = false;
+        } else if (!enemyHasAnything) {
+            gameOver = true;
+            playerWon = true;
+        }
+    }
+
+    public boolean isGameOver() {
+        return gameOver;
+    }
+
+    public boolean hasPlayerWon() {
+        return playerWon;
     }
 
     public List<String> getCombatReports() {
@@ -189,6 +251,8 @@ public class Game {
     }
 
     public boolean canEndTurn() {
+        if (gameOver) return false;
+
         for (StarSystem system : galaxy.getSystems()) {
             for (OrbitSlot orbit : system.getOrbits()) {
                 if (orbit.getObject() instanceof Planet planet) {
@@ -212,6 +276,10 @@ public class Game {
     }
 
     public String getEndTurnBlockReason() {
+        if (gameOver) {
+            return playerWon ? "Gra zakończona - WYGRANA!" : "Gra zakończona - PRZEGRANA!";
+        }
+
         for (StarSystem system : galaxy.getSystems()) {
             for (OrbitSlot orbit : system.getOrbits()) {
                 if (orbit.getObject() instanceof Planet planet) {
