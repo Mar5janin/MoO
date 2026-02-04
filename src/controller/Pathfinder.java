@@ -53,11 +53,4 @@ public class Pathfinder {
         Collections.reverse(path);
         return path;
     }
-
-    public static int calculatePathLength(List<StarSystem> path) {
-        if (path == null || path.size() <= 1) {
-            return 0;
-        }
-        return path.size() - 1;
-    }
 }

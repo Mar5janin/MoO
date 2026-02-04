@@ -132,7 +132,7 @@ public class GalaxyPanel extends JPanel {
             mainWindow.onSystemSelected(null);
             JOptionPane.showMessageDialog(
                     this,
-                    "System " + selectedSystem.getName() + " jest poza zasięgiem twoich czujników.\nWyślij zwiadowcę aby go rozpoznać.",
+                    "System " + selectedSystem.getName() + " jest poza zasięgiem twoich czujników.\nWyślij zwiadowcę aby go zobaczyć.",
                     "Brak informacji",
                     JOptionPane.INFORMATION_MESSAGE
             );

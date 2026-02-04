@@ -29,14 +29,14 @@ public class StarSystem {
         orbits.add(orbit);
     }
 
-    public Planet getColonizedPlanet() {
-        for (OrbitSlot orbit : orbits) {
-            if (orbit.getObject() instanceof Planet planet && planet.isColonized()) {
-                return planet;
-            }
-        }
-        return null;
-    }
+//    public Planet getColonizedPlanet() {
+//        for (OrbitSlot orbit : orbits) {
+//            if (orbit.getObject() instanceof Planet planet && planet.isColonized()) {
+//                return planet;
+//            }
+//        }
+//        return null;
+//    }
 
 
     public void addNeighbor(StarSystem system) {
@@ -104,7 +104,7 @@ public class StarSystem {
     }
 
     public boolean hasBattleStation() {
-        return battleStation != null && !battleStation.isDestroyed();
+        return battleStation != null;
     }
 
     public boolean canBuildBattleStation(Fleet fleet, ResearchManager researchManager) {

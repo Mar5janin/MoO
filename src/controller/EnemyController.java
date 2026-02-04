@@ -12,7 +12,6 @@ public class EnemyController {
 
     private static final double FOOD_RATIO = 0.35;
     private static final double PRODUCTION_RATIO = 0.40;
-    private static final double RESEARCH_RATIO = 0.25;
 
     private static final Map<Technology, Integer> TECH_PRIORITIES = Map.ofEntries(
             Map.entry(Technology.BASIC_WEAPONS, 100),

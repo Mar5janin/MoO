@@ -413,7 +413,7 @@ public enum BuildingType {
         }
 
         if (maintenanceCost > 0) {
-            sb.append("Utrzymanie -").append(maintenanceCost).append("💰 | ");
+            sb.append("Utrzymanie -").append(maintenanceCost).append(" | ");
         }
 
         if (sb.length() > 0) {

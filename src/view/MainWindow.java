@@ -61,12 +61,12 @@ public class MainWindow extends JFrame {
 
         topPanel.add(createSeparator());
 
-        creditsLabel = new JLabel("💰 Kredyty: 500");
+        creditsLabel = new JLabel("Kredyty: 500");
         creditsLabel.setForeground(new Color(255, 215, 0));
         creditsLabel.setFont(creditsLabel.getFont().deriveFont(Font.BOLD, 14f));
         topPanel.add(creditsLabel);
 
-        researchLabel = new JLabel("🔬 Badania: 0");
+        researchLabel = new JLabel("Badania: 0");
         researchLabel.setForeground(new Color(100, 200, 255));
         researchLabel.setFont(researchLabel.getFont().deriveFont(Font.BOLD, 14f));
         topPanel.add(researchLabel);
@@ -208,11 +208,11 @@ public class MainWindow extends JFrame {
 
             int netCredits = game.getNextTurnNetCredits();
             String creditsSign = netCredits >= 0 ? "+" : "";
-            creditsLabel.setText("💰 Kredyty: " + game.getTotalCredits() +
+            creditsLabel.setText("Kredyty: " + game.getTotalCredits() +
                     " (" + creditsSign + netCredits + ")");
 
             int nextResearch = game.getNextTurnResearch();
-            researchLabel.setText("🔬 Badania: +" + nextResearch);
+            researchLabel.setText("Badania: +" + nextResearch);
         }
     }
 

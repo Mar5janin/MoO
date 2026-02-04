@@ -14,10 +14,7 @@ public class ResearchManager {
 
     private int shipAttackBonus = 0;
     private int shipDefenseBonus = 0;
-    private int productionBonusPercent = 0;
     private int researchBonusPercent = 0;
-    private int creditsBonusPercent = 0;
-    private int populationBonusPercent = 0;
 
     public void setCurrentResearch(Technology tech) {
         if (currentResearch != null && currentProgress > 0) {
@@ -70,10 +67,7 @@ public class ResearchManager {
             switch (effect.getType()) {
                 case SHIP_ATTACK_BONUS -> shipAttackBonus += effect.getValue();
                 case SHIP_DEFENSE_BONUS -> shipDefenseBonus += effect.getValue();
-                case PRODUCTION_BONUS -> productionBonusPercent += effect.getValue();
                 case RESEARCH_BONUS -> researchBonusPercent += effect.getValue();
-                case CREDITS_BONUS -> creditsBonusPercent += effect.getValue();
-                case POPULATION_BONUS -> populationBonusPercent += effect.getValue();
             }
         }
     }
@@ -122,8 +116,5 @@ public class ResearchManager {
 
     public int getShipAttackBonus() { return shipAttackBonus; }
     public int getShipDefenseBonus() { return shipDefenseBonus; }
-    public int getProductionBonusPercent() { return productionBonusPercent; }
     public int getResearchBonusPercent() { return researchBonusPercent; }
-    public int getCreditsBonusPercent() { return creditsBonusPercent; }
-    public int getPopulationBonusPercent() { return populationBonusPercent; }
 }

@@ -18,7 +18,7 @@ public enum SpaceInstallationType {
     ),
 
     GAS_MINE(
-            "Kopalnia Gazowa",
+            "Kopalnia Gazu",
             "Wydobywa gaz z gazowego giganta",
             60,
             8,

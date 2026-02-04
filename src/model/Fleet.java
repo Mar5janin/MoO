@@ -162,8 +162,6 @@ public class Fleet {
                 currentRouteIndex = 0;
             }
         }
-
-        ships.removeIf(Ship::isDestroyed);
     }
 
     public boolean isEmpty() {

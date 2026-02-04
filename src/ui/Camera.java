@@ -62,11 +62,6 @@ public class Camera {
         clamp();
     }
 
-    public void zoom(double amount) {
-        zoom += amount;
-        zoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, zoom));
-    }
-
     public int worldToScreenX(double worldX) {
         return (int) ((worldX - x) * zoom);
     }

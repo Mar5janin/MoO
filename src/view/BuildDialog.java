@@ -19,7 +19,7 @@ public class BuildDialog extends JDialog {
         boolean anyBuildings = false;
         boolean anyShips = false;
 
-        JLabel buildingsHeader = new JLabel("━━━ BUDYNKI ━━━");
+        JLabel buildingsHeader = new JLabel(" BUDYNKI ");
         buildingsHeader.setFont(buildingsHeader.getFont().deriveFont(Font.BOLD, 12f));
         buildingsHeader.setAlignmentX(Component.CENTER_ALIGNMENT);
         add(Box.createVerticalStrut(5));
@@ -88,7 +88,7 @@ public class BuildDialog extends JDialog {
         }
 
         add(Box.createVerticalStrut(15));
-        JLabel shipsHeader = new JLabel("━━━ STATKI ━━━");
+        JLabel shipsHeader = new JLabel(" STATKI ");
         shipsHeader.setFont(shipsHeader.getFont().deriveFont(Font.BOLD, 12f));
         shipsHeader.setAlignmentX(Component.CENTER_ALIGNMENT);
         add(shipsHeader);
@@ -108,7 +108,7 @@ public class BuildDialog extends JDialog {
                     type.getEffectiveDefense(researchManager) + ")";
 
             if (type == ShipType.COLONY_SHIP) {
-                shipInfo += " ⚠ Zabiera 1 pop.";
+                shipInfo += " Zabiera 1 pop.";
             }
 
             JButton btn = new JButton(shipInfo);

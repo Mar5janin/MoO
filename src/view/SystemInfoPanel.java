@@ -52,7 +52,7 @@ public class SystemInfoPanel extends JPanel {
             boolean isPlayerStation = station.getOwner() == null;
 
             String stationOwner = isPlayerStation ? "Twój Posterunek Bojowy" : "Posterunek Bojowy przeciwnika";
-            JLabel stationLabel = new JLabel("⚔️ " + stationOwner);
+            JLabel stationLabel = new JLabel(stationOwner);
             stationLabel.setFont(stationLabel.getFont().deriveFont(Font.BOLD, 12f));
             stationLabel.setForeground(isPlayerStation ? new Color(100, 200, 100) : new Color(255, 100, 100));
             add(stationLabel);
@@ -136,7 +136,7 @@ public class SystemInfoPanel extends JPanel {
                     InstallationOrder project = fleet.getCurrentProject();
 
                     if (project != null && project.getTarget() == asteroid) {
-                        JLabel buildingLabel = new JLabel("🔨 Budowa: " + project.getDisplayName() +
+                        JLabel buildingLabel = new JLabel("Budowa: " + project.getDisplayName() +
                                 " (" + project.getRemainingCost() + "/" + project.getOriginalCost() + ")");
                         buildingLabel.setForeground(new Color(255, 200, 100));
                         buildingLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -206,7 +206,7 @@ public class SystemInfoPanel extends JPanel {
                     InstallationOrder project = fleet.getCurrentProject();
 
                     if (project != null && project.getTarget() == giant) {
-                        JLabel buildingLabel = new JLabel("🔨 Budowa: " + project.getDisplayName() +
+                        JLabel buildingLabel = new JLabel("Budowa: " + project.getDisplayName() +
                                 " (" + project.getRemainingCost() + "/" + project.getOriginalCost() + ")");
                         buildingLabel.setForeground(new Color(255, 200, 100));
                         buildingLabel.setAlignmentX(Component.LEFT_ALIGNMENT);

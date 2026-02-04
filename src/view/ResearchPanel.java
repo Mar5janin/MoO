@@ -68,7 +68,6 @@ public class ResearchPanel extends JDialog {
 
     private void refreshTechList() {
         techListPanel.removeAll();
-        ResearchManager rm = game.getResearchManager();
 
         addCategorySection("Przemysł i produkcja",
                 Technology.IMPROVED_PRODUCTION, Technology.IMPROVED_FARMING,

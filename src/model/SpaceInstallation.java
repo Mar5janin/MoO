@@ -25,28 +25,12 @@ public class SpaceInstallation {
         return owner;
     }
 
-    public void setOwner(Enemy owner) {
-        this.owner = owner;
-    }
-
     public int getCurrentHP() {
         return currentHP;
     }
 
     public int getMaxHP() {
         return maxHP;
-    }
-
-    public void takeDamage(int damage) {
-        currentHP = Math.max(0, currentHP - damage);
-    }
-
-    public void repair(int amount) {
-        currentHP = Math.min(maxHP, currentHP + amount);
-    }
-
-    public boolean isDestroyed() {
-        return currentHP <= 0;
     }
 
     public int getDefense() {

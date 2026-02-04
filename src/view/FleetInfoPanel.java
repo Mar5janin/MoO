@@ -97,7 +97,7 @@ public class FleetInfoPanel extends JPanel {
             StarSystem dest = fleet.getDestination();
             StarSystem next = fleet.getNextSystem();
 
-            JLabel moving = new JLabel("→ W drodze do: " + dest.getName());
+            JLabel moving = new JLabel("W drodze do: " + dest.getName());
             moving.setForeground(new Color(100, 150, 255));
             moving.setFont(moving.getFont().deriveFont(Font.BOLD));
             moving.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -144,7 +144,7 @@ public class FleetInfoPanel extends JPanel {
 
             boolean hasEnemyFleet = system.getFleets().stream().anyMatch(f -> f.getOwner() != null);
 
-            JButton attackBtn = new JButton("⚔️ Atak!");
+            JButton attackBtn = new JButton("Atak!");
             attackBtn.setFocusPainted(false);
 
             if (hasEnemyFleet) {

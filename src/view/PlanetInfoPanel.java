@@ -17,7 +17,6 @@ public class PlanetInfoPanel extends JPanel {
     private final Game game;
     private JPanel queuePanel;
 
-    private static final int QUEUE_WIDTH = 550;
     private static final int ROW_HEIGHT = 32;
     private static final int BUTTON_WIDTH = 42;
     private static final int BUTTON_COUNT = 3;
@@ -147,7 +146,7 @@ public class PlanetInfoPanel extends JPanel {
         add(Box.createVerticalStrut(2));
 
         double netFood = planet.getNetFoodProduction();
-        String foodText = String.format("🌾 Żywność: %+.1f", netFood);
+        String foodText = String.format("Żywność: %+.1f", netFood);
         JLabel foodLabel = new JLabel(foodText);
         foodLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
         if (netFood < 0) {
@@ -158,15 +157,15 @@ public class PlanetInfoPanel extends JPanel {
         }
         add(foodLabel);
 
-        JLabel prodLabel = new JLabel("🏭 Produkcja: " + planet.getProduction());
+        JLabel prodLabel = new JLabel("Produkcja: " + planet.getProduction());
         prodLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
         add(prodLabel);
 
-        JLabel researchLabel = new JLabel("🔬 Badania: " + planet.getResearch());
+        JLabel researchLabel = new JLabel("Badania: " + planet.getResearch());
         researchLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
         add(researchLabel);
 
-        JLabel creditsLabel = new JLabel("💰 Kredyty: " + planet.getCredits());
+        JLabel creditsLabel = new JLabel("Kredyty: " + planet.getCredits());
         creditsLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
         add(creditsLabel);
 
@@ -184,7 +183,7 @@ public class PlanetInfoPanel extends JPanel {
         popManagement.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         popManagement.add(createPopulationControl(
-                "🌾 Żywność",
+                "Żywność",
                 planet.getPopulationOnFood(),
                 planet.getTotalPopulation(),
                 planet::setPopulationOnFood
@@ -193,7 +192,7 @@ public class PlanetInfoPanel extends JPanel {
         popManagement.add(Box.createVerticalStrut(4));
 
         popManagement.add(createPopulationControl(
-                "🏭 Budowa",
+                "Budowa",
                 planet.getPopulationOnProduction(),
                 planet.getTotalPopulation(),
                 planet::setPopulationOnProduction
@@ -202,7 +201,7 @@ public class PlanetInfoPanel extends JPanel {
         popManagement.add(Box.createVerticalStrut(4));
 
         popManagement.add(createPopulationControl(
-                "🔬 Badania",
+                "Badania",
                 planet.getPopulationOnResearch(),
                 planet.getTotalPopulation(),
                 planet::setPopulationOnResearch
@@ -397,7 +396,7 @@ public class PlanetInfoPanel extends JPanel {
 
                 if (i == 0) {
                     int rushCost = planet.getRushBuyCost();
-                    JButton rushButton = new JButton("Rush: " + rushCost + "💰");
+                    JButton rushButton = new JButton("Rush: " + rushCost);
                     rushButton.setPreferredSize(new Dimension(rushBuyButtonWidth, 24));
                     rushButton.setToolTipText("Natychmiast zakończ produkcję za " + rushCost + " kredytów");
 

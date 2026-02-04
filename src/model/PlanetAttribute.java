@@ -38,14 +38,14 @@ public enum PlanetAttribute {
         if (this == NONE) return "";
 
         StringBuilder desc = new StringBuilder();
-        if (creditsBonus > 0) desc.append("+" + creditsBonus + " 💰");
+        if (creditsBonus > 0) desc.append("+" + creditsBonus);
         if (researchBonus > 0) {
             if (desc.length() > 0) desc.append(", ");
-            desc.append("+" + researchBonus + " 🔬");
+            desc.append("+" + researchBonus);
         }
         if (foodBonus > 0) {
             if (desc.length() > 0) desc.append(", ");
-            desc.append("+" + foodBonus + " 🌾");
+            desc.append("+" + foodBonus);
         }
         return desc.toString();
     }

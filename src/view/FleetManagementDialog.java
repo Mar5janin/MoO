@@ -85,7 +85,7 @@ public class FleetManagementDialog extends JDialog {
         centerPanel.add(Box.createVerticalStrut(10));
 
         if (!fleet.isMoving()) {
-            JButton moveButton = new JButton("🚀 Przenieś flotę do wybranego systemu");
+            JButton moveButton = new JButton("Przenieś flotę do wybranego systemu");
             moveButton.setFocusPainted(false);
             moveButton.addActionListener(e -> showMoveDialog());
             centerPanel.add(moveButton);
@@ -103,7 +103,7 @@ public class FleetManagementDialog extends JDialog {
             centerPanel.add(movingLabel);
             centerPanel.add(Box.createVerticalStrut(5));
 
-            JButton cancelButton = new JButton("❌ Anuluj podróż");
+            JButton cancelButton = new JButton("Anuluj podróż");
             cancelButton.setFocusPainted(false);
             cancelButton.addActionListener(e -> {
                 fleet.setDestination(null);
@@ -115,7 +115,7 @@ public class FleetManagementDialog extends JDialog {
         }
 
         if (fleet.getShipCount() > 1 && !fleet.isMoving()) {
-            JButton splitButton = new JButton("✂️ Oddziel statki (utwórz nową flotę)");
+            JButton splitButton = new JButton("Oddziel statki (utwórz nową flotę)");
             splitButton.setFocusPainted(false);
             splitButton.addActionListener(e -> showSplitDialog());
             centerPanel.add(splitButton);

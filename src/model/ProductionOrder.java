@@ -7,7 +7,6 @@ public class ProductionOrder {
     private final ShipType shipType;
     private int remainingCost;
 
-    // Konstruktor dla budynków
     public ProductionOrder(BuildingType buildingType) {
         this.productionType = ProductionType.BUILDING;
         this.buildingType = buildingType;
@@ -15,7 +14,6 @@ public class ProductionOrder {
         this.remainingCost = buildingType.getCost();
     }
 
-    // Konstruktor dla statków
     public ProductionOrder(ShipType shipType) {
         this.productionType = ProductionType.SHIP;
         this.buildingType = null;

@@ -109,7 +109,7 @@ public class AllFleetsPanel extends JDialog {
         JPanel infoPanel = new JPanel();
         infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
 
-        JLabel locationLabel = new JLabel("📍 " + location.getName());
+        JLabel locationLabel = new JLabel(location.getName());
         locationLabel.setFont(locationLabel.getFont().deriveFont(Font.BOLD, 13f));
 
         ResearchManager rm = game.getResearchManager();
