@@ -228,8 +228,14 @@ public class MainWindow extends JFrame {
     public void updateResourceDisplay() {
         if (game != null && turnLabel != null) {
             turnLabel.setText("Tura: " + game.getTurn());
-            creditsLabel.setText("💰 Kredyty: " + game.getTotalCredits());
-            researchLabel.setText("🔬 Badania: " + game.getTotalResearch());
+
+            int netCredits = game.getNextTurnNetCredits();
+            String creditsSign = netCredits >= 0 ? "+" : "";
+            creditsLabel.setText("💰 Kredyty: " + game.getTotalCredits() +
+                    " (" + creditsSign + netCredits + ")");
+
+            int nextResearch = game.getNextTurnResearch();
+            researchLabel.setText("🔬 Badania: +" + nextResearch);
         }
     }
 
@@ -275,5 +281,6 @@ public class MainWindow extends JFrame {
         this.game = game;
         updateResourceDisplay();
     }
+
 
 }

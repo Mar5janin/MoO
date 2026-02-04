@@ -38,7 +38,7 @@ public class GalaxyPanel extends JPanel {
                 getHeight()
         );
 
-        galaxy = GalaxyGenerator.generate(MapSize.MEDIUM);
+        galaxy = GalaxyGenerator.generate(MapSize.LARGE);
         this.game = new Game(galaxy);
         mainWindow.setGame(game);
 

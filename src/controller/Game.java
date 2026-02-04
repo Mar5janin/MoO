@@ -143,6 +143,70 @@ public class Game {
         checkGameOver();
     }
 
+    public int getNextTurnCreditsIncome() {
+        int income = 0;
+
+        for (StarSystem system : galaxy.getSystems()) {
+            income += system.getTotalCreditsBonus();
+
+            for (OrbitSlot orbit : system.getOrbits()) {
+                if (orbit.getObject() instanceof Planet planet) {
+                    if (planet.isColonized() && planet.getOwner() == null) {
+                        income += planet.getCredits();
+                    }
+                }
+            }
+        }
+
+        return income;
+    }
+
+    public int getNextTurnMaintenanceCosts() {
+        int costs = 0;
+
+        for (StarSystem system : galaxy.getSystems()) {
+            for (OrbitSlot orbit : system.getOrbits()) {
+                if (orbit.getObject() instanceof Planet planet) {
+                    if (planet.isColonized() && planet.getOwner() == null) {
+                        costs += planet.getMaintenanceCost();
+                    }
+                }
+            }
+
+            for (Fleet fleet : system.getFleets()) {
+                if (fleet.getOwner() == null) {
+                    for (Ship ship : fleet.getShips()) {
+                        costs += ship.getType().getMaintenanceCost();
+                    }
+                }
+            }
+        }
+
+        return costs;
+    }
+
+    public int getNextTurnNetCredits() {
+        return getNextTurnCreditsIncome() - getNextTurnMaintenanceCosts();
+    }
+
+    public int getNextTurnResearch() {
+        int research = 0;
+
+        for (StarSystem system : galaxy.getSystems()) {
+            research += system.getTotalResearchBonus();
+
+            for (OrbitSlot orbit : system.getOrbits()) {
+                if (orbit.getObject() instanceof Planet planet) {
+                    if (planet.isColonized() && planet.getOwner() == null) {
+                        research += planet.getResearch();
+                    }
+                }
+            }
+        }
+
+        return research;
+    }
+
     private void checkGameOver() {
         boolean playerHasAnything = false;
         boolean enemyHasAnything = false;
