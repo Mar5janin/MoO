@@ -110,11 +110,7 @@ public class ResearchManager {
         return currentProgress;
     }
 
-    public Set<Technology> getResearchedTechs() {
-        return researchedTechs;
-    }
 
     public int getShipAttackBonus() { return shipAttackBonus; }
     public int getShipDefenseBonus() { return shipDefenseBonus; }
-    public int getResearchBonusPercent() { return researchBonusPercent; }
 }

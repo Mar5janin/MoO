@@ -29,15 +29,6 @@ public class StarSystem {
         orbits.add(orbit);
     }
 
-//    public Planet getColonizedPlanet() {
-//        for (OrbitSlot orbit : orbits) {
-//            if (orbit.getObject() instanceof Planet planet && planet.isColonized()) {
-//                return planet;
-//            }
-//        }
-//        return null;
-//    }
-
 
     public void addNeighbor(StarSystem system) {
         if (system == null || system == this) return;
