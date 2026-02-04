@@ -40,6 +40,7 @@ public class Game {
 
         int creditsThisTurn = 0;
         int researchThisTurn = 0;
+        int maintenanceCosts = 0;
 
         for (StarSystem system : galaxy.getSystems()) {
             creditsThisTurn += system.getTotalCreditsBonus();
@@ -51,6 +52,7 @@ public class Game {
                         if (planet.getOwner() == null) {
                             creditsThisTurn += planet.getCredits();
                             researchThisTurn += planet.getResearch();
+                            maintenanceCosts += planet.getMaintenanceCost();
                         }
 
                         Ship newShip = planet.processTurn(system);
@@ -76,7 +78,18 @@ public class Game {
             }
         }
 
+        for (StarSystem system : galaxy.getSystems()) {
+            for (Fleet fleet : system.getFleets()) {
+                if (fleet.getOwner() == null) {
+                    for (Ship ship : fleet.getShips()) {
+                        maintenanceCosts += ship.getType().getMaintenanceCost();
+                    }
+                }
+            }
+        }
+
         totalCredits += creditsThisTurn;
+        totalCredits -= maintenanceCosts;
         totalResearch += researchThisTurn;
         researchManager.addResearchPoints(researchThisTurn);
 

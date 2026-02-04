@@ -14,7 +14,8 @@ public enum BuildingType {
             1,
             0, 0,
             0, 0,
-            0, 0
+            0, 0,
+            1
     ),
 
     FABRYKA(
@@ -29,7 +30,8 @@ public enum BuildingType {
             1,
             1,
             0, 0,
-            0, 0
+            0, 0,
+            2
     ),
 
     LABORATORIUM(
@@ -44,7 +46,8 @@ public enum BuildingType {
             0, 0,
             1,
             1,
-            0, 0
+            0, 0,
+            2
     ),
 
     OSADA_GORNICZA(
@@ -59,7 +62,8 @@ public enum BuildingType {
             1,
             1,
             0, 0,
-            0, 0
+            0, 0,
+            1
     ),
 
     CENTRUM_ADMINISTRACYJNE(
@@ -74,6 +78,7 @@ public enum BuildingType {
             0, 0,
             0, 0,
             2,
+            1,
             1
     ),
 
@@ -89,7 +94,8 @@ public enum BuildingType {
             0, 0,
             1,
             0,
-            0, 0
+            0, 0,
+            1
     ),
 
     TARG_KOLONIALNY(
@@ -104,7 +110,8 @@ public enum BuildingType {
             0, 0,
             0, 0,
             1,
-            2
+            2,
+            1
     ),
 
     KOPALNIA_KSIĘŻYCOWA(
@@ -120,7 +127,8 @@ public enum BuildingType {
             1,
             0, 0,
             3,
-            0
+            0,
+            2
     ),
 
     ZAAWANSOWANA_FARMA(
@@ -135,7 +143,8 @@ public enum BuildingType {
             2,
             0, 0,
             0, 0,
-            0, 0
+            0, 0,
+            2
     ),
 
     CENTRUM_BADAWCZE(
@@ -150,7 +159,8 @@ public enum BuildingType {
             0, 0,
             3,
             2,
-            0, 0
+            0, 0,
+            3
     ),
 
     FABRYKA_KOSMICZNA(
@@ -165,7 +175,8 @@ public enum BuildingType {
             3,
             2,
             0, 0,
-            0, 0
+            0, 0,
+            4
     ),
 
     POSTERUNEK_BOJOWY(
@@ -179,7 +190,8 @@ public enum BuildingType {
             0, 0,
             0, 0,
             0, 0,
-            0, 0
+            0, 0,
+            3
     ),
 
     BANK_GALAKTYCZNY(
@@ -194,7 +206,8 @@ public enum BuildingType {
             0, 0,
             0, 0,
             5,
-            1
+            1,
+            2
     ),
 
     AKADEMIA_KOLONIALNA(
@@ -209,7 +222,8 @@ public enum BuildingType {
             0, 0,
             2,
             1,
-            0, 0
+            0, 0,
+            3
     ),
 
     HUTA_PLANETARNA(
@@ -224,7 +238,8 @@ public enum BuildingType {
             4,
             1,
             0, 0,
-            0, 0
+            0, 0,
+            3
     ),
 
     CENTRUM_LOGISTYCZNE(
@@ -240,7 +255,8 @@ public enum BuildingType {
             0,
             0, 0,
             3,
-            0
+            0,
+            2
     ),
 
     MEGAMIASTO(
@@ -255,7 +271,8 @@ public enum BuildingType {
             0, 0,
             0, 0,
             2,
-            1
+            1,
+            4
     ),
 
     OSIEDLE(
@@ -269,7 +286,8 @@ public enum BuildingType {
             0, 0,
             0, 0,
             0, 0,
-            0, 0
+            0, 0,
+            1
     );
 
     private final String displayName;
@@ -293,6 +311,8 @@ public enum BuildingType {
     private final int creditsBonus;
     private final int creditsPerTotalPopulation;
 
+    private final int maintenanceCost;
+
     BuildingType(
             String displayName,
             int cost,
@@ -308,7 +328,8 @@ public enum BuildingType {
             int researchBonus,
             int researchPerCapita,
             int creditsBonus,
-            int creditsPerTotalPopulation
+            int creditsPerTotalPopulation,
+            int maintenanceCost
     ) {
         this.displayName = displayName;
         this.cost = cost;
@@ -325,6 +346,7 @@ public enum BuildingType {
         this.researchPerCapita = researchPerCapita;
         this.creditsBonus = creditsBonus;
         this.creditsPerTotalPopulation = creditsPerTotalPopulation;
+        this.maintenanceCost = maintenanceCost;
     }
 
     public String getDisplayName() { return displayName; }
@@ -347,6 +369,8 @@ public enum BuildingType {
 
     public int getCreditsBonus() { return creditsBonus; }
     public int getCreditsPerTotalPopulation() { return creditsPerTotalPopulation; }
+
+    public int getMaintenanceCost() { return maintenanceCost; }
 
     public boolean isAvailable(ResearchManager researchManager) {
         if (techRequirement == null) return true;
@@ -386,6 +410,10 @@ public enum BuildingType {
         }
         if (creditsPerTotalPopulation > 0) {
             sb.append("Kredyty +").append(creditsPerTotalPopulation).append("/osoba | ");
+        }
+
+        if (maintenanceCost > 0) {
+            sb.append("Utrzymanie -").append(maintenanceCost).append("💰 | ");
         }
 
         if (sb.length() > 0) {

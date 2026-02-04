@@ -552,4 +552,20 @@ public class Planet implements OrbitObject {
     public boolean isPopulationFullyAssigned() {
         return getUnassignedPopulation() == 0;
     }
+
+    public int getMaintenanceCost() {
+        int cost = 0;
+
+        for (Building building : buildings) {
+            cost += building.getType().getMaintenanceCost();
+        }
+
+        if (originalOwner == null) {
+            return cost;
+        }
+
+        cost += 3;
+
+        return cost;
+    }
 }

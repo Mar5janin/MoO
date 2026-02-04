@@ -8,7 +8,8 @@ public enum ShipType {
             5,
             3,
             null,
-            0
+            0,
+            1
     ),
 
     FIGHTER(
@@ -18,7 +19,8 @@ public enum ShipType {
             15,
             10,
             "Myśliwiec",
-            0
+            0,
+            2
     ),
 
     DESTROYER(
@@ -28,7 +30,8 @@ public enum ShipType {
             25,
             20,
             "Niszczyciel",
-            0
+            0,
+            3
     ),
 
     CRUISER(
@@ -38,7 +41,8 @@ public enum ShipType {
             40,
             35,
             "Krążownik",
-            0
+            0,
+            5
     ),
 
     BATTLESHIP(
@@ -48,7 +52,8 @@ public enum ShipType {
             70,
             60,
             "Pancernik",
-            0
+            0,
+            8
     ),
 
     CARRIER(
@@ -58,7 +63,8 @@ public enum ShipType {
             35,
             70,
             "Lotniskowiec",
-            0
+            0,
+            7
     ),
 
     COLONY_SHIP(
@@ -68,7 +74,8 @@ public enum ShipType {
             0,
             5,
             null,
-            0
+            0,
+            3
     ),
 
     SPACE_FACTORY(
@@ -78,7 +85,8 @@ public enum ShipType {
             0,
             10,
             "Fabryka Kosmiczna",
-            10
+            10,
+            4
     );
 
     private final String displayName;
@@ -88,9 +96,10 @@ public enum ShipType {
     private final int defense;
     private final String requiredTech;
     private final int productionPerTurn;
+    private final int maintenanceCost;
 
     ShipType(String displayName, String description, int cost,
-             int attack, int defense, String requiredTech, int productionPerTurn) {
+             int attack, int defense, String requiredTech, int productionPerTurn, int maintenanceCost) {
         this.displayName = displayName;
         this.description = description;
         this.cost = cost;
@@ -98,6 +107,7 @@ public enum ShipType {
         this.defense = defense;
         this.requiredTech = requiredTech;
         this.productionPerTurn = productionPerTurn;
+        this.maintenanceCost = maintenanceCost;
     }
 
     public String getDisplayName() {
@@ -126,6 +136,10 @@ public enum ShipType {
 
     public int getProductionPerTurn() {
         return productionPerTurn;
+    }
+
+    public int getMaintenanceCost() {
+        return maintenanceCost;
     }
 
     public boolean isAvailable(ResearchManager researchManager) {
