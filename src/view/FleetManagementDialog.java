@@ -37,7 +37,6 @@ public class FleetManagementDialog extends JDialog {
     }
 
     private void buildUI() {
-        // Górny panel - info o flocie
         JPanel topPanel = new JPanel();
         topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
         topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -61,12 +60,10 @@ public class FleetManagementDialog extends JDialog {
 
         add(topPanel, BorderLayout.NORTH);
 
-        // Środkowy panel - opcje
         JPanel centerPanel = new JPanel();
         centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
         centerPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        // Skład floty
         JLabel compositionLabel = new JLabel("Skład floty:");
         compositionLabel.setFont(compositionLabel.getFont().deriveFont(Font.BOLD, 12f));
         centerPanel.add(compositionLabel);
@@ -82,13 +79,11 @@ public class FleetManagementDialog extends JDialog {
 
         centerPanel.add(Box.createVerticalStrut(20));
 
-        // Akcje
         JLabel actionsLabel = new JLabel("Akcje:");
         actionsLabel.setFont(actionsLabel.getFont().deriveFont(Font.BOLD, 12f));
         centerPanel.add(actionsLabel);
         centerPanel.add(Box.createVerticalStrut(10));
 
-        // Przycisk ruchu
         if (!fleet.isMoving()) {
             JButton moveButton = new JButton("🚀 Przenieś flotę do wybranego systemu");
             moveButton.setFocusPainted(false);
@@ -108,7 +103,6 @@ public class FleetManagementDialog extends JDialog {
             centerPanel.add(movingLabel);
             centerPanel.add(Box.createVerticalStrut(5));
 
-            // Przycisk anulowania podróży
             JButton cancelButton = new JButton("❌ Anuluj podróż");
             cancelButton.setFocusPainted(false);
             cancelButton.addActionListener(e -> {
@@ -120,7 +114,6 @@ public class FleetManagementDialog extends JDialog {
             centerPanel.add(Box.createVerticalStrut(5));
         }
 
-        // Przycisk oddzielenia statków
         if (fleet.getShipCount() > 1 && !fleet.isMoving()) {
             JButton splitButton = new JButton("✂️ Oddziel statki (utwórz nową flotę)");
             splitButton.setFocusPainted(false);
@@ -130,7 +123,6 @@ public class FleetManagementDialog extends JDialog {
 
         add(centerPanel, BorderLayout.CENTER);
 
-        // Dolny panel - zamknij
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         JButton closeButton = new JButton("Zamknij");
         closeButton.addActionListener(e -> dispose());
@@ -139,10 +131,8 @@ public class FleetManagementDialog extends JDialog {
     }
 
     private void showMoveDialog() {
-        // Pobierz wszystkie systemy z galaktyki
         List<StarSystem> allSystems = game.getGalaxy().getSystems();
 
-        // Usuń obecny system z listy
         List<StarSystem> availableSystems = allSystems.stream()
                 .filter(s -> s != location)
                 .sorted(Comparator.comparingDouble(location::distanceTo))
@@ -158,7 +148,6 @@ public class FleetManagementDialog extends JDialog {
             return;
         }
 
-        // Stwórz opcje z informacją o dystansie
         String[] options = availableSystems.stream()
                 .map(s -> {
                     List<StarSystem> path = Pathfinder.findPath(location, s);
@@ -185,7 +174,6 @@ public class FleetManagementDialog extends JDialog {
         );
 
         if (selected != null) {
-            // Wyciągnij nazwę systemu (przed nawiasem)
             String systemName = selected.split(" \\(")[0];
 
             StarSystem destination = availableSystems.stream()
@@ -253,7 +241,6 @@ public class FleetManagementDialog extends JDialog {
 
                 JLabel label = new JLabel(type.getDisplayName() + " (dostępnych: " + count + ")");
 
-                // Można oddzielić wszystkie statki danego typu (max = count)
                 SpinnerNumberModel model = new SpinnerNumberModel(0, 0, count, 1);
                 JSpinner spinner = new JSpinner(model);
                 spinner.setPreferredSize(new Dimension(80, 25));
@@ -275,7 +262,6 @@ public class FleetManagementDialog extends JDialog {
 
         JButton confirmButton = new JButton("Potwierdź");
         confirmButton.addActionListener(e -> {
-            // Zbierz statki do oddzielenia
             List<Ship> shipsToMove = new ArrayList<>();
 
             for (ShipType type : ShipType.values()) {
@@ -285,7 +271,6 @@ public class FleetManagementDialog extends JDialog {
                     if (toMove > 0) {
                         int moved = 0;
 
-                        // Skopiuj listę, żeby uniknąć ConcurrentModificationException
                         List<Ship> fleetShips = new ArrayList<>(fleet.getShips());
 
                         for (Ship ship : fleetShips) {
@@ -310,7 +295,6 @@ public class FleetManagementDialog extends JDialog {
                 return;
             }
 
-            // Sprawdź czy nie próbujemy przenieść WSZYSTKICH statków
             if (shipsToMove.size() >= fleet.getShipCount()) {
                 JOptionPane.showMessageDialog(
                         splitDialog,
@@ -321,7 +305,6 @@ public class FleetManagementDialog extends JDialog {
                 return;
             }
 
-            // Utwórz nową flotę
             Fleet newFleet = new Fleet(location);
 
             for (Ship ship : shipsToMove) {

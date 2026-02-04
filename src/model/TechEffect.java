@@ -2,17 +2,15 @@ package model;
 
 public class TechEffect {
     private final TechEffectType type;
-    private final int value;           // Wartość bonusu (np. +5 do ataku)
-    private final String stringValue;  // Dla efektów typu UNLOCK_BUILDING lub UNLOCK_SHIP
+    private final int value;
+    private final String stringValue;
 
-    // Konstruktor dla bonusów numerycznych
     public TechEffect(TechEffectType type, int value) {
         this.type = type;
         this.value = value;
         this.stringValue = null;
     }
 
-    // Konstruktor dla odblokowań
     public TechEffect(TechEffectType type, String stringValue) {
         this.type = type;
         this.value = 0;

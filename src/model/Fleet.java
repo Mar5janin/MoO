@@ -95,11 +95,8 @@ public class Fleet {
     }
 
     public boolean canStartProject(SpaceInstallationType type, OrbitObject target) {
-        if (currentProject != null) return false;
-        if (isMoving()) return false;
-
-        int factoryCount = countShipType(ShipType.SPACE_FACTORY);
-        if (factoryCount == 0) return false;
+        if (currentProject != null || isMoving()) return false;
+        if (countShipType(ShipType.SPACE_FACTORY) == 0) return false;
 
         if (type == SpaceInstallationType.BATTLE_STATION) {
             return !location.hasBattleStation() && location.hasFullControl(owner);

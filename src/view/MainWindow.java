@@ -97,65 +97,12 @@ public class MainWindow extends JFrame {
             if (game == null) return;
 
             if (game.isGameOver()) {
-                String message = game.hasPlayerWon() ?
-                        "WYGRANA!\n\nPokonałeś przeciwnika!\nGra zakończona w turze " + game.getTurn() :
-                        "PRZEGRANA!\n\nPrzeciwnik cię pokonał!\nGra zakończona w turze " + game.getTurn();
-
-                int result = JOptionPane.showOptionDialog(
-                        this,
-                        message,
-                        game.hasPlayerWon() ? "Wygrana!" : "Przegrana!",
-                        JOptionPane.DEFAULT_OPTION,
-                        game.hasPlayerWon() ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.WARNING_MESSAGE,
-                        null,
-                        new String[]{"Nowa gra", "Wyjdź"},
-                        "Nowa gra"
-                );
-
-                if (result == 0) {
-                    dispose();
-                    SwingUtilities.invokeLater(() -> new MainWindow());
-                } else {
-                    System.exit(0);
-                }
+                showGameOverDialog();
                 return;
             }
 
             if (!game.canEndTurn()) {
-                String reason = game.getEndTurnBlockReason();
-
-                int result = JOptionPane.showOptionDialog(
-                        this,
-                        reason,
-                        "Nie można zakończyć tury",
-                        JOptionPane.YES_NO_OPTION,
-                        JOptionPane.WARNING_MESSAGE,
-                        null,
-                        new String[]{"Przejdź", "Anuluj"},
-                        "Przejdź"
-                );
-
-                if (result == JOptionPane.YES_OPTION) {
-                    if (reason.contains("nie ma kolejki budowy") || reason.contains("nieprzypisanych")) {
-                        for (StarSystem system : game.getGalaxy().getSystems()) {
-                            for (OrbitSlot orbit : system.getOrbits()) {
-                                if (orbit.getObject() instanceof Planet planet) {
-                                    if (planet.isColonized()) {
-                                        if (planet.getBuildQueue().isEmpty() || !planet.isPopulationFullyAssigned()) {
-                                            onSystemSelected(system);
-                                            showPlanet(planet, system);
-                                            return;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    } else if (reason.contains("projektu badawczego")) {
-                        ResearchPanel researchPanel = new ResearchPanel(this, game);
-                        researchPanel.setVisible(true);
-                    }
-                }
-
+                handleCannotEndTurn();
                 return;
             }
 
@@ -164,58 +111,88 @@ public class MainWindow extends JFrame {
 
             game.nextTurn();
 
-            List<String> combatReports = game.getCombatReports();
-            if (!combatReports.isEmpty()) {
-                StringBuilder allReports = new StringBuilder();
-                for (String report : combatReports) {
-                    allReports.append(report).append("\n\n");
-                }
-
-                JTextArea textArea = new JTextArea(allReports.toString());
-                textArea.setEditable(false);
-                textArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
-
-                JScrollPane scrollPane = new JScrollPane(textArea);
-                scrollPane.setPreferredSize(new Dimension(600, 400));
-
-                JOptionPane.showMessageDialog(
-                        this,
-                        scrollPane,
-                        "Raporty z walk",
-                        JOptionPane.INFORMATION_MESSAGE
-                );
-            }
+            showCombatReports();
 
             if (game.isGameOver()) {
-                String message = game.hasPlayerWon() ?
-                        "WYGRANA!\n\nPokonałeś przeciwnika!\nGra zakończona w turze " + game.getTurn() :
-                        "PRZEGRANA!\n\nPrzeciwnik cię pokonał!\nGra zakończona w turze " + game.getTurn();
-
-                int result = JOptionPane.showOptionDialog(
-                        this,
-                        message,
-                        game.hasPlayerWon() ? "Wygrana!" : "Przegrana!",
-                        JOptionPane.DEFAULT_OPTION,
-                        game.hasPlayerWon() ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.WARNING_MESSAGE,
-                        null,
-                        new String[]{"Nowa gra", "Wyjdź"},
-                        "Nowa gra"
-                );
-
-                if (result == 0) {
-                    dispose();
-                    SwingUtilities.invokeLater(() -> new MainWindow());
-                } else {
-                    System.exit(0);
-                }
+                showGameOverDialog();
                 return;
             }
 
             updateResourceDisplay();
-
             repaint();
         });
         topPanel.add(endTurnButton);
+    }
+
+    private void showGameOverDialog() {
+        String message = game.hasPlayerWon() ?
+                "WYGRANA!\n\nPokonałeś przeciwnika!\nGra zakończona w turze " + game.getTurn() :
+                "PRZEGRANA!\n\nPrzeciwnik cię pokonał!\nGra zakończona w turze " + game.getTurn();
+
+        int result = JOptionPane.showOptionDialog(
+                this, message,
+                game.hasPlayerWon() ? "Wygrana!" : "Przegrana!",
+                JOptionPane.DEFAULT_OPTION,
+                game.hasPlayerWon() ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.WARNING_MESSAGE,
+                null, new String[]{"Nowa gra", "Wyjdź"}, "Nowa gra"
+        );
+
+        if (result == 0) {
+            dispose();
+            SwingUtilities.invokeLater(() -> new MainWindow());
+        } else {
+            System.exit(0);
+        }
+    }
+
+    private void handleCannotEndTurn() {
+        String reason = game.getEndTurnBlockReason();
+        int result = JOptionPane.showOptionDialog(
+                this, reason, "Nie można zakończyć tury",
+                JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE,
+                null, new String[]{"Przejdź", "Anuluj"}, "Przejdź"
+        );
+
+        if (result != JOptionPane.YES_OPTION) return;
+
+        if (reason.contains("nie ma kolejki budowy") || reason.contains("nieprzypisanych")) {
+            navigateToFirstProblemPlanet();
+        } else if (reason.contains("projektu badawczego")) {
+            new ResearchPanel(this, game).setVisible(true);
+        }
+    }
+
+    private void navigateToFirstProblemPlanet() {
+        for (StarSystem system : game.getGalaxy().getSystems()) {
+            for (OrbitSlot orbit : system.getOrbits()) {
+                if (orbit.getObject() instanceof Planet planet && planet.isColonized()) {
+                    if (planet.getBuildQueue().isEmpty() || !planet.isPopulationFullyAssigned()) {
+                        onSystemSelected(system);
+                        showPlanet(planet, system);
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
+    private void showCombatReports() {
+        List<String> combatReports = game.getCombatReports();
+        if (combatReports.isEmpty()) return;
+
+        StringBuilder allReports = new StringBuilder();
+        for (String report : combatReports) {
+            allReports.append(report).append("\n\n");
+        }
+
+        JTextArea textArea = new JTextArea(allReports.toString());
+        textArea.setEditable(false);
+        textArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+
+        JScrollPane scrollPane = new JScrollPane(textArea);
+        scrollPane.setPreferredSize(new Dimension(600, 400));
+
+        JOptionPane.showMessageDialog(this, scrollPane, "Raporty z walk", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private JPanel createSeparator() {

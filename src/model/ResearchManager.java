@@ -10,10 +10,8 @@ public class ResearchManager {
     private Technology currentResearch = null;
     private int currentProgress = 0;
 
-    // Mapa pamiętająca postęp w poszczególnych badaniach
     private final Map<Technology, Integer> savedProgress = new HashMap<>();
 
-    // Bonusy z technologii
     private int shipAttackBonus = 0;
     private int shipDefenseBonus = 0;
     private int productionBonusPercent = 0;
@@ -22,7 +20,6 @@ public class ResearchManager {
     private int populationBonusPercent = 0;
 
     public void setCurrentResearch(Technology tech) {
-        // Zapisz postęp obecnego badania przed zmianą
         if (currentResearch != null && currentProgress > 0) {
             savedProgress.put(currentResearch, currentProgress);
         }
@@ -38,14 +35,12 @@ public class ResearchManager {
         }
 
         this.currentResearch = tech;
-        // Przywróć zapisany postęp jeśli istnieje
         this.currentProgress = savedProgress.getOrDefault(tech, 0);
     }
 
     public void addResearchPoints(int points) {
         if (currentResearch == null) return;
 
-        // Uwzględnij bonus do badań
         int effectivePoints = points;
         if (researchBonusPercent > 0) {
             effectivePoints = points + (points * researchBonusPercent / 100);
@@ -64,7 +59,6 @@ public class ResearchManager {
         researchedTechs.add(currentResearch);
         applyTechEffects(currentResearch);
 
-        // Usuń zapisany postęp po ukończeniu
         savedProgress.remove(currentResearch);
 
         currentResearch = null;
@@ -80,7 +74,6 @@ public class ResearchManager {
                 case RESEARCH_BONUS -> researchBonusPercent += effect.getValue();
                 case CREDITS_BONUS -> creditsBonusPercent += effect.getValue();
                 case POPULATION_BONUS -> populationBonusPercent += effect.getValue();
-                // UNLOCK_BUILDING i UNLOCK_SHIP będą sprawdzane przez isUnlocked()
             }
         }
     }
@@ -89,7 +82,6 @@ public class ResearchManager {
         if (isResearched(tech)) return false;
         if (currentResearch == tech) return false;
 
-        // Sprawdź czy wszystkie prerequisity są zbadane
         for (Technology prereq : tech.getPrerequisites()) {
             if (!isResearched(prereq)) {
                 return false;
@@ -128,18 +120,10 @@ public class ResearchManager {
         return researchedTechs;
     }
 
-    // Gettery dla bonusów
     public int getShipAttackBonus() { return shipAttackBonus; }
     public int getShipDefenseBonus() { return shipDefenseBonus; }
     public int getProductionBonusPercent() { return productionBonusPercent; }
     public int getResearchBonusPercent() { return researchBonusPercent; }
     public int getCreditsBonusPercent() { return creditsBonusPercent; }
     public int getPopulationBonusPercent() { return populationBonusPercent; }
-
-    public int getTurnsRemaining() {
-        if (currentResearch == null) return 0;
-        // To będzie obliczane w oparciu o aktualne punkty badań per tura
-        // Na razie zwracamy 0
-        return 0;
-    }
 }

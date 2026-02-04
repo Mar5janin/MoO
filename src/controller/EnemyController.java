@@ -14,6 +14,27 @@ public class EnemyController {
     private static final double PRODUCTION_RATIO = 0.40;
     private static final double RESEARCH_RATIO = 0.25;
 
+    private static final Map<Technology, Integer> TECH_PRIORITIES = Map.ofEntries(
+            Map.entry(Technology.BASIC_WEAPONS, 100),
+            Map.entry(Technology.IMPROVED_FARMING, 90),
+            Map.entry(Technology.ADVANCED_MINING, 85),
+            Map.entry(Technology.IMPROVED_PRODUCTION, 80),
+            Map.entry(Technology.ADVANCED_RESEARCH, 75),
+            Map.entry(Technology.DESTROYER_TECH, 70),
+            Map.entry(Technology.IMPROVED_WEAPONS, 65),
+            Map.entry(Technology.IMPROVED_ARMOR, 65),
+            Map.entry(Technology.HEAVY_SHIPS, 60),
+            Map.entry(Technology.SPACE_CONSTRUCTION, 55),
+            Map.entry(Technology.TRADE_NETWORKS, 50),
+            Map.entry(Technology.POPULATION_GROWTH, 45),
+            Map.entry(Technology.DEFENSIVE_PLATFORMS, 40),
+            Map.entry(Technology.CAPITAL_SHIPS, 35),
+            Map.entry(Technology.ADVANCED_FLEET_DOCTRINE, 30),
+            Map.entry(Technology.URBANIZATION, 25),
+            Map.entry(Technology.ADVANCED_ECONOMICS, 20),
+            Map.entry(Technology.COLONIAL_ADMINISTRATION, 15)
+    );
+
     public EnemyController(Enemy enemy, Galaxy galaxy) {
         this.enemy = enemy;
         this.galaxy = galaxy;
@@ -54,37 +75,8 @@ public class EnemyController {
     }
 
     private Technology selectBestTechnology(List<Technology> available) {
-        Map<Technology, Integer> priorities = new HashMap<>();
-
-        for (Technology tech : available) {
-            int priority = 0;
-
-            switch (tech) {
-                case BASIC_WEAPONS -> priority = 100;
-                case IMPROVED_FARMING -> priority = 90;
-                case ADVANCED_MINING -> priority = 85;
-                case IMPROVED_PRODUCTION -> priority = 80;
-                case ADVANCED_RESEARCH -> priority = 75;
-                case DESTROYER_TECH -> priority = 70;
-                case IMPROVED_WEAPONS -> priority = 65;
-                case IMPROVED_ARMOR -> priority = 65;
-                case HEAVY_SHIPS -> priority = 60;
-                case SPACE_CONSTRUCTION -> priority = 55;
-                case TRADE_NETWORKS -> priority = 50;
-                case POPULATION_GROWTH -> priority = 45;
-                case DEFENSIVE_PLATFORMS -> priority = 40;
-                case CAPITAL_SHIPS -> priority = 35;
-                case ADVANCED_FLEET_DOCTRINE -> priority = 30;
-                case URBANIZATION -> priority = 25;
-                case ADVANCED_ECONOMICS -> priority = 20;
-                case COLONIAL_ADMINISTRATION -> priority = 15;
-            }
-
-            priorities.put(tech, priority);
-        }
-
         return available.stream()
-                .max(Comparator.comparingInt(priorities::get))
+                .max(Comparator.comparingInt(tech -> TECH_PRIORITIES.getOrDefault(tech, 0)))
                 .orElse(null);
     }
 

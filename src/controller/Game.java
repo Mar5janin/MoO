@@ -9,7 +9,6 @@ public class Game {
     private final Galaxy galaxy;
 
     private int totalCredits = 500;
-    private int totalResearch = 0;
 
     private final ResearchManager researchManager = new ResearchManager();
     private final FogOfWar fogOfWar;
@@ -90,7 +89,6 @@ public class Game {
 
         totalCredits += creditsThisTurn;
         totalCredits -= maintenanceCosts;
-        totalResearch += researchThisTurn;
         researchManager.addResearchPoints(researchThisTurn);
 
         if (enemyController != null) {
@@ -272,10 +270,6 @@ public class Game {
 
     public int getTotalCredits() {
         return totalCredits;
-    }
-
-    public int getTotalResearch() {
-        return totalResearch;
     }
 
     public Galaxy getGalaxy() {
