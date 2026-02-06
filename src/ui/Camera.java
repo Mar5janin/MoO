@@ -13,6 +13,8 @@ public class Camera {
     private double worldHeight;
     private int viewportWidth;
     private int viewportHeight;
+
+    // Margines pozwalający na "wyciągnięcie" kamery poza krawędzie mapy
     private static final double CAMERA_MARGIN = 600;
 
 
@@ -38,9 +40,11 @@ public class Camera {
     private void clamp() {
         if (viewportWidth <= 0 || viewportHeight <= 0) return;
 
+        // Oblicz rozmiar widocznego obszaru w jednostkach świata
         double viewW = viewportWidth / zoom;
         double viewH = viewportHeight / zoom;
 
+        // Pozwól kamerze wyjść poza granice o CAMERA_MARGIN
         double minX = -CAMERA_MARGIN;
         double minY = -CAMERA_MARGIN;
 
@@ -71,12 +75,14 @@ public class Camera {
     }
 
     public void zoomAt(double amount, int mouseX, int mouseY) {
+        // Punkt kursora w świecie przed zoomem
         double worldXBefore = x + mouseX / zoom;
         double worldYBefore = y + mouseY / zoom;
 
         zoom += amount;
         zoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, zoom));
 
+        // Przesuń kamerę do kursora
         x = worldXBefore - mouseX / zoom;
         y = worldYBefore - mouseY / zoom;
 

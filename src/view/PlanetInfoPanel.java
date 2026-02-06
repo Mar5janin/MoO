@@ -1,7 +1,14 @@
 package view;
 
 import controller.Game;
-import model.*;
+import model.buildings.Building;
+import model.buildings.BuildingType;
+import model.galaxy.StarSystem;
+import model.orbits.planets.Planet;
+import model.orbits.planets.PlanetAttribute;
+import model.production.ProductionOrder;
+import model.ships.Fleet;
+import model.ships.ShipType;
 
 import javax.swing.*;
 import java.awt.*;
@@ -125,7 +132,7 @@ public class PlanetInfoPanel extends JPanel {
         add(Box.createVerticalStrut(2));
 
         double foodAcc = planet.getFoodAccumulated();
-        double foodNeeded = planet.getFoodNeededForGrowth();
+        double foodNeeded = planet.getFoodForGrowth();
         JProgressBar growthBar = new JProgressBar(0, (int)foodNeeded);
         growthBar.setValue(Math.max(0, (int)foodAcc));
         growthBar.setString("Wzrost: " + String.format("%.1f", foodAcc) + "/" + String.format("%.0f", foodNeeded));

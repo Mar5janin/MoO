@@ -1,6 +1,13 @@
 package controller;
 
 import model.*;
+import model.buildings.SpaceInstallation;
+import model.galaxy.StarSystem;
+import model.orbits.OrbitSlot;
+import model.orbits.planets.Planet;
+import model.ships.Fleet;
+import model.tech.ResearchManager;
+
 import java.util.*;
 
 public class CombatResolver {
@@ -41,18 +48,21 @@ public class CombatResolver {
         int playerShipsBeforeBattle = 0;
         int enemyShipsBeforeBattle = 0;
 
+        // Sumowanie statystyk wszystkich flot gracza
         for (Fleet fleet : playerFleets) {
             playerAttack += fleet.getTotalAttack(playerRM);
             playerDefense += fleet.getTotalDefense(playerRM);
             playerShipsBeforeBattle += fleet.getShipCount();
         }
 
+        // Sumowanie statystyk wszystkich flot wroga
         for (Fleet fleet : enemyFleets) {
             enemyAttack += fleet.getTotalAttack(enemyRM);
             enemyDefense += fleet.getTotalDefense(enemyRM);
             enemyShipsBeforeBattle += fleet.getShipCount();
         }
 
+        // Posterunki bojowe dodają moc do swojej strony
         if (system.hasBattleStation()) {
             SpaceInstallation station = system.getBattleStation();
             if (station.getOwner() == null) {
@@ -72,18 +82,21 @@ public class CombatResolver {
         boolean playerWon = playerPower > enemyPower;
 
         StringBuilder report = new StringBuilder();
-        report.append("=== WALKA W SYSTEMIE ").append(system.getName()).append(" ===\n");
+        report.append(" WALKA W SYSTEMIE ").append(system.getName()).append(" \n");
         report.append("Siły gracza: ").append(playerShipsBeforeBattle).append(" statków | Atak ").append(playerAttack).append(", Obrona ").append(playerDefense).append(" (MOC: ").append(playerPower).append(")\n");
         report.append("Siły wroga: ").append(enemyShipsBeforeBattle).append(" statków | Atak ").append(enemyAttack).append(", Obrona ").append(enemyDefense).append(" (MOC: ").append(enemyPower).append(")\n\n");
 
+//        przegrany traci wszystkie statki i ewentualny posterunek z systemu
         if (playerWon) {
             winner = playerFleets.get(0);
             loser = enemyFleets.get(0);
 
+            // Zniszczenie wszystkich wrogich statków
             for (Fleet fleet : enemyFleets) {
                 fleet.getShips().clear();
             }
 
+            // Zniszczenie wrogiego posterunku
             if (system.hasBattleStation() && system.getBattleStation().getOwner() != null) {
                 system.setBattleStation(null);
                 report.append("Posterunek bojowy wroga został zniszczony!\n");
@@ -108,11 +121,13 @@ public class CombatResolver {
             report.append("\nZWYCIĘZCA: Przeciwnik\n");
         }
 
+        // Usunięcie pustych flot
         system.getFleets().removeIf(Fleet::isEmpty);
 
         return new CombatResult(winner, loser, report.toString());
     }
 
+//    Określa kto kontroluje system żeby wiedzieć do kogo mają należeć ewentualne kolonie w systemie
     public static void resolveSystemControl(StarSystem system) {
         boolean hasPlayerFleet = system.getFleets().stream().anyMatch(f -> f.getOwner() == null);
         boolean hasEnemyFleet = system.getFleets().stream().anyMatch(f -> f.getOwner() != null);
@@ -123,8 +138,9 @@ public class CombatResolver {
         boolean playerControls = hasPlayerFleet || hasPlayerStation;
         boolean enemyControls = hasEnemyFleet || hasEnemyStation;
 
+        // Określenie kontroli systemu
         if (playerControls && !enemyControls) {
-            systemOwner = null;
+            systemOwner = null;  // Gracz (null = gracz)
         } else if (enemyControls && !playerControls) {
             for (Fleet fleet : system.getFleets()) {
                 if (fleet.getOwner() != null) {
@@ -136,9 +152,11 @@ public class CombatResolver {
                 systemOwner = system.getBattleStation().getOwner();
             }
         } else if (playerControls && enemyControls) {
+            // obie strony obecne, nie zmieniaj kontroli planet
             return;
         }
 
+        // Aktualizacja właściciela planet zgodnie z kontrolą systemu
         for (OrbitSlot orbit : system.getOrbits()) {
             if (orbit.getObject() instanceof Planet planet) {
                 if (planet.isColonized()) {

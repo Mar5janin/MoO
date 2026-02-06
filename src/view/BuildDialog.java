@@ -1,7 +1,11 @@
 package view;
 
 import controller.Game;
-import model.*;
+import model.buildings.BuildingType;
+import model.orbits.planets.Planet;
+import model.production.ProductionType;
+import model.ships.ShipType;
+import model.tech.ResearchManager;
 
 import javax.swing.*;
 import java.awt.*;

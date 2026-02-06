@@ -1,6 +1,6 @@
 package controller;
 
-import model.StarSystem;
+import model.galaxy.StarSystem;
 import java.util.*;
 
 public class Pathfinder {

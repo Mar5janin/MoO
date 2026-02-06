@@ -1,5 +1,7 @@
 package model;
 
+import model.galaxy.StarSystem;
+
 import java.awt.*;
 
 public class Enemy {

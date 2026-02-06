@@ -1,6 +1,19 @@
 package controller;
 
 import model.*;
+import model.buildings.Building;
+import model.buildings.BuildingType;
+import model.galaxy.*;
+import model.orbits.AsteroidField;
+import model.orbits.GasGiant;
+import model.orbits.OrbitObject;
+import model.orbits.OrbitSlot;
+import model.orbits.planets.Planet;
+import model.orbits.planets.PlanetType;
+import model.ships.Fleet;
+import model.ships.Ship;
+import model.ships.ShipType;
+
 import java.util.*;
 
 public class GalaxyGenerator {
@@ -35,6 +48,7 @@ public class GalaxyGenerator {
         };
 
         calculateGalaxySize(size);
+
         StarSystem sol = generateMaskedStar("Sol", galaxy, random);
 
         galaxy.getSystems().add(sol);
@@ -51,12 +65,14 @@ public class GalaxyGenerator {
 
         int attempts = 0;
 
+        // Główna pętla umieszczania gwiazd
         while (galaxy.getSystems().size() < targetStars && attempts < 10_000) {
             attempts++;
             if (names.isEmpty()) break;
 
+            // kąt i promień, żeby chociaż trochę przypominało spiralę
             double angle = random.nextDouble() * 2 * Math.PI;
-            double radius = Math.sqrt(random.nextDouble());
+            double radius = Math.sqrt(random.nextDouble()); // sqrt daje równomierny rozkład w kole
 
             double maxRadiusX = galaxyWidth * 0.45;
             double maxRadiusY = galaxyHeight * 0.30;
@@ -67,7 +83,7 @@ public class GalaxyGenerator {
             int x = (int) (centerX + Math.cos(angle) * radius * maxRadiusX);
             int y = (int) (centerY + Math.sin(angle) * radius * maxRadiusY);
 
-            if (!MASK.isAllowedWeighted(x, y, galaxyWidth, galaxyHeight, densityMultiplier)) {
+            if (!MASK.isAllowed(x, y, galaxyWidth, galaxyHeight, densityMultiplier)) {
                 continue;
             }
 
@@ -77,19 +93,18 @@ public class GalaxyGenerator {
             galaxy.getSystems().add(new StarSystem(name, x, y));
         }
 
+        // łączenie systemów
         generateConnections(galaxy);
-        ensureMinConnections(galaxy, 3);
         forceSolConnections(galaxy);
         ensureMinConnections(galaxy, 4);
         ensureConnectivity(galaxy);
         centerGalaxy(galaxy);
 
+        // Generowanie planet, asteroid i gazowych gigantów
         for (StarSystem s : galaxy.getSystems()) {
             generateOrbits(s, random);
         }
-
         setupHomeSystem(galaxy);
-
         return galaxy;
     }
 
@@ -165,7 +180,6 @@ public class GalaxyGenerator {
     }
 
     private static void forceSolConnections(Galaxy galaxy) {
-
         StarSystem sol = galaxy.getSystems().stream()
                 .filter(s -> s.getName().equals("Sol"))
                 .findFirst().orElse(null);
@@ -184,12 +198,15 @@ public class GalaxyGenerator {
         return Math.hypot(x1 - x2, y1 - y2);
     }
 
+//    Zapewnia że cała mapa jest połączona i nie ma odizolowanych fragmentów
     private static void ensureConnectivity(Galaxy galaxy) {
         List<StarSystem> systems = galaxy.getSystems();
         Set<StarSystem> visited = new HashSet<>();
 
+        // DFS od pierwszego systemu
         dfs(systems.get(0), visited);
 
+        // Dopóki są nieodwiedzone systemy (odizolowane komponenty)
         while (visited.size() < systems.size()) {
 
             StarSystem a = null;
@@ -197,6 +214,7 @@ public class GalaxyGenerator {
 
             double best = Double.MAX_VALUE;
 
+            // Znajdź najkrótszy most między odwiedzonymi a nieodwiedzonymi
             for (StarSystem s1 : visited) {
 
                 for (StarSystem s2 : systems) {
@@ -213,6 +231,7 @@ public class GalaxyGenerator {
                 }
             }
 
+            // Połącz komponenty
             if (a != null && b != null) {
                 a.addNeighbor(b);
                 b.addNeighbor(a);
@@ -221,6 +240,7 @@ public class GalaxyGenerator {
         }
     }
 
+//     Depth-First Search - oznacza wszystkie osiągalne systemy jako odwiedzone
     private static void dfs(StarSystem system, Set<StarSystem> visited) {
         if (!visited.add(system)) return;
 
@@ -235,7 +255,7 @@ public class GalaxyGenerator {
             int x = random.nextInt(galaxyWidth);
             int y = random.nextInt(galaxyHeight);
 
-            if (!MASK.isAllowedWeighted(x, y, galaxyWidth, galaxyHeight, 1.2)) continue;
+            if (!MASK.isAllowed(x, y, galaxyWidth, galaxyHeight, 1.2)) continue;
 
             if (!isFarEnough(x, y, galaxy)) continue;
 
@@ -256,7 +276,7 @@ public class GalaxyGenerator {
 
             if (x < 0 || y < 0 || x >= galaxyWidth || y >= galaxyHeight) continue;
 
-            if (!MASK.isAllowedWeighted(x, y, galaxyWidth, galaxyHeight, 1.0)) continue;
+            if (!MASK.isAllowed(x, y, galaxyWidth, galaxyHeight, 1.0)) continue;
 
             if (!isFarEnough(x, y, galaxy)) continue;
 
@@ -294,6 +314,7 @@ public class GalaxyGenerator {
         int minY = Integer.MAX_VALUE;
         int maxY = Integer.MIN_VALUE;
 
+        // Znajduje bounding box wszystkich systemów
         for (StarSystem s : galaxy.getSystems()) {
 
             minX = Math.min(minX, s.getX());
@@ -312,6 +333,7 @@ public class GalaxyGenerator {
         int offsetX = galaxyCenterX - systemsCenterX;
         int offsetY = galaxyCenterY - systemsCenterY;
 
+        // Przesuwa wszystkie systemy o obliczone przesunięcie
         for (StarSystem s : galaxy.getSystems()) {
             s.setX(s.getX() + offsetX);
             s.setY(s.getY() + offsetY);
@@ -322,6 +344,7 @@ public class GalaxyGenerator {
 
         int orbitCount;
 
+        // Losowa liczba orbit (0-4) z większym prawdopodobieństwem dla 3-4 orbit
         double roll = random.nextDouble();
         if (roll < 0.02) orbitCount = 0;
         else if (roll < 0.10) orbitCount = 1;
@@ -348,7 +371,7 @@ public class GalaxyGenerator {
 
     private static PlanetType randomPlanetType(Random random) {
 
-        PlanetType[] values = PlanetType.values();
+//        PlanetType[] values = PlanetType.values();
 
         if (random.nextDouble() < 0.45) {
             PlanetType[] bad = {
@@ -398,6 +421,7 @@ public class GalaxyGenerator {
         galaxy.setEnemy(enemy);
     }
 
+//    Ustawia system i inne elementy przeciwnika
     private static Enemy setupAIPlayer(Galaxy galaxy, StarSystem playerHome) {
         Enemy ai = new Enemy("Imperium Galaktyczne", java.awt.Color.RED);
 
@@ -441,7 +465,7 @@ public class GalaxyGenerator {
 
             List<StarSystem> path = Pathfinder.findPath(playerHome, system);
             if (path != null) {
-                int distance = path.size() - 1;
+                int distance = path.size() - 1;  // Liczba skoków
                 distances.put(system, distance);
             }
         }

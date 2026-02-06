@@ -1,6 +1,11 @@
 package controller;
 
-import model.*;
+import model.galaxy.Galaxy;
+import model.galaxy.StarSystem;
+import model.orbits.OrbitSlot;
+import model.orbits.planets.Planet;
+import model.ships.Fleet;
+import model.ships.ShipType;
 
 import java.util.*;
 

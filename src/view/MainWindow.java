@@ -1,9 +1,11 @@
 package view;
 
 import controller.Game;
-import model.OrbitSlot;
-import model.Planet;
-import model.StarSystem;
+import model.orbits.OrbitSlot;
+import model.orbits.planets.Planet;
+import model.galaxy.StarSystem;
+import view.fleets.AllFleetsPanel;
+import view.galaxy.GalaxyPanel;
 
 import javax.swing.*;
 import java.awt.*;

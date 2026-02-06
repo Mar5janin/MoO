@@ -1,6 +1,17 @@
 package controller;
 
 import model.*;
+import model.galaxy.Galaxy;
+import model.galaxy.StarSystem;
+import model.orbits.OrbitSlot;
+import model.orbits.planets.Planet;
+import model.production.ProductionOrder;
+import model.production.ProductionType;
+import model.ships.Fleet;
+import model.ships.Ship;
+import model.ships.ShipType;
+import model.tech.ResearchManager;
+
 import java.util.*;
 
 public class Game {

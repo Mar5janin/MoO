@@ -1,0 +1,12 @@
+package model.tech;
+
+public enum TechEffectType {
+    UNLOCK_BUILDING,
+    SHIP_ATTACK_BONUS,
+    SHIP_DEFENSE_BONUS,
+    PRODUCTION_BONUS,
+    RESEARCH_BONUS,
+    CREDITS_BONUS,
+    POPULATION_BONUS,
+    UNLOCK_SHIP
+}

@@ -1,6 +1,16 @@
 package controller;
 
 import model.*;
+import model.buildings.BuildingType;
+import model.galaxy.Galaxy;
+import model.galaxy.StarSystem;
+import model.orbits.OrbitSlot;
+import model.orbits.planets.Planet;
+import model.production.ProductionType;
+import model.ships.Fleet;
+import model.ships.ShipType;
+import model.tech.ResearchManager;
+import model.tech.Technology;
 
 import java.util.*;
 
@@ -10,9 +20,11 @@ public class EnemyController {
     private final Galaxy galaxy;
     private final ResearchManager researchManager;
 
+    // Proporcje przydziału populacji AI
     private static final double FOOD_RATIO = 0.35;
     private static final double PRODUCTION_RATIO = 0.40;
 
+//    Priorytety dla technologii przeciwnika, większy priorytet wojskowe i ekonomiczne
     private static final Map<Technology, Integer> TECH_PRIORITIES = Map.ofEntries(
             Map.entry(Technology.BASIC_WEAPONS, 100),
             Map.entry(Technology.IMPROVED_FARMING, 90),
@@ -50,6 +62,7 @@ public class EnemyController {
         manageFleets();
     }
 
+//    Wybiera co następnie badać, chyba że coś już się bada
     private void manageResearch() {
         if (researchManager.getCurrentResearch() != null) {
             return;
@@ -105,12 +118,14 @@ public class EnemyController {
         int onProduction = (int) Math.ceil(total * PRODUCTION_RATIO);
         int onResearch = total - onFood - onProduction;
 
+        // Reakcja na głód - zwiększ produkcję jedzenia
         double netFood = planet.getNetFoodProduction();
         if (netFood < 0) {
             onFood = Math.min(total, onFood + 2);
             onProduction = Math.max(0, total - onFood - onResearch);
         }
 
+        // Gdy populacja na max, zmniejsza jedzenie na rzecz produkcji
         if (planet.getTotalPopulation() >= planet.getMaxPopulation()) {
             onFood = Math.max(1, (int)(total * 0.2));
             int remaining = total - onFood;
@@ -142,6 +157,7 @@ public class EnemyController {
         int factoryCount = planet.countBuilding(BuildingType.FABRYKA);
         int labCount = planet.countBuilding(BuildingType.LABORATORIUM);
 
+        // Podstawowe budynki
         if (farmCount == 0 && planet.canBuild(BuildingType.FARMA, researchManager)) {
             planet.addBuildingToQueue(BuildingType.FARMA, researchManager);
             return;
@@ -164,14 +180,17 @@ public class EnemyController {
 
         int scoutCount = fleet != null ? fleet.countShipType(ShipType.SCOUT) : 0;
 
+        // Zwiadowcy
         if (scoutCount < 4 && planet.canBuildShip(ShipType.SCOUT, researchManager)) {
             planet.addShipToQueue(ShipType.SCOUT, researchManager);
             return;
         }
 
+        // Statki kolonizacyjne
         if (planet.canBuildShip(ShipType.COLONY_SHIP, researchManager) &&
                 planet.getTotalPopulation() >= 3) {
 
+            // Tylko jeden statek kolonizacyjny w kolejce na raz
             long colonyShipsInQueue = planet.getBuildQueue().stream()
                     .filter(o -> o.getProductionType() == ProductionType.SHIP)
                     .filter(o -> o.getShipType() == ShipType.COLONY_SHIP)
@@ -183,11 +202,13 @@ public class EnemyController {
             }
         }
 
+        // Statki bojowe
         if (planet.canBuildShip(ShipType.FIGHTER, researchManager)) {
             planet.addShipToQueue(ShipType.FIGHTER, researchManager);
             return;
         }
 
+        // Zaawansowane budynki
         if (planet.canBuild(BuildingType.ZAAWANSOWANA_FARMA, researchManager)) {
             planet.addBuildingToQueue(BuildingType.ZAAWANSOWANA_FARMA, researchManager);
             return;
@@ -224,6 +245,7 @@ public class EnemyController {
     private void manageFleet(Fleet fleet, StarSystem currentSystem) {
         int colonyShips = fleet.countShipType(ShipType.COLONY_SHIP);
 
+        // Priorytet 1: Kolonizacja
         if (colonyShips > 0) {
             StarSystem targetColony = findBestColonizationTarget(currentSystem);
             if (targetColony != null) {
@@ -232,6 +254,7 @@ public class EnemyController {
             }
         }
 
+        // Priorytet 2: Eksploracja małymi flotami
         int scouts = fleet.countShipType(ShipType.SCOUT);
         if (scouts > 0 && fleet.getShipCount() <= 3) {
             StarSystem unexplored = findUnexploredSystem(currentSystem);
@@ -240,6 +263,8 @@ public class EnemyController {
                 return;
             }
         }
+
+        // Duże floty pozostają w miejscu jako obrona
     }
 
     private StarSystem findBestColonizationTarget(StarSystem from) {

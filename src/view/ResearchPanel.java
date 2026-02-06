@@ -1,7 +1,8 @@
 package view;
 
 import controller.Game;
-import model.*;
+import model.tech.ResearchManager;
+import model.tech.Technology;
 
 import javax.swing.*;
 import java.awt.*;

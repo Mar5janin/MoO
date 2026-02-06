@@ -1,7 +1,16 @@
 package view;
 
 import controller.Game;
-import model.*;
+import model.orbits.AsteroidField;
+import model.orbits.GasGiant;
+import model.orbits.OrbitSlot;
+import model.orbits.planets.Planet;
+import model.production.InstallationOrder;
+import model.buildings.SpaceInstallation;
+import model.buildings.SpaceInstallationType;
+import model.galaxy.StarSystem;
+import model.ships.Fleet;
+import view.fleets.FleetInfoPanel;
 
 import javax.swing.*;
 import java.awt.*;
